@@ -70,7 +70,6 @@ fridrich_strba|Fridrich Štrba|fridrich_strba@openoffice.org
 fs|Frank Schönheit|fs@openoffice.org
 fst|Frank Stecher|fst@openoffice.org
 ganaya|Gene Anaya|ganaya@openoffice.org
-Gao Peng|Peng Gao|Gao Peng@openoffice.org
 gaozemin|Zemin Gao|gaozemin@openoffice.org
 georgez|George Zahopoulos|georgez@openoffice.org
 gh|Gregor Hartmann|gh@openoffice.org
@@ -138,7 +137,6 @@ liangweike|Weike Liang|liangweike@openoffice.org
 lijian|Jian Li|lijian@openoffice.org
 liujl|Jianli Liu|liujl@openoffice.org
 liutao| LiuTao|liutao@openoffice.org
-Liu YiSong|Liu YiSong|Liu YiSong@openoffice.org
 liuyuhua|Yuhua Liu|liuyuhua@openoffice.org
 lixxing|Xing Li|lixxing@openoffice.org
 liyuan|Yuan  Li|liyuan@openoffice.org
@@ -146,7 +144,6 @@ lkovacs|Laszlo Kovacs|lkovacs@openoffice.org
 lla|Lars Langhans|lla@openoffice.org
 lo|Lars Oppermann|lo@openoffice.org
 louis|Louis Suárez-Potts|louis@openoffice.org
-Luo Jingrong|Jingrong Luo|Luo Jingrong@openoffice.org
 lvxg|Xugang Lv|lvxg@openoffice.org
 lvyue|Yue Lv|lvyue@openoffice.org
 maho|Nakata Maho|maho@openoffice.org
