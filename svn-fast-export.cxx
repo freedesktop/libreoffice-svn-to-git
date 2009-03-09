@@ -14,6 +14,8 @@
 #include <stdio.h>
 #include <time.h>
 
+#include "committers.hxx"
+
 #ifndef PATH_MAX
 #define PATH_MAX 4096
 #endif
@@ -33,13 +35,14 @@
 
 #define TRUNK "/trunk/"
 
+Committers committers;
+
 time_t get_epoch(char *svn_date)
 {
     struct tm tm = {0};
-    char *date = malloc(strlen(svn_date) * sizeof(char *));
+    char date[(strlen(svn_date) * sizeof(char *))];
     strncpy(date, svn_date, strlen(svn_date) - 8);
     strptime(date, "%Y-%m-%dT%H:%M:%S", &tm);
-    free(date);
     return mktime(&tm);
 }
 
@@ -116,14 +119,17 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
         return 0;
     }
 
-    author = apr_hash_get(props, "svn:author", APR_HASH_KEY_STRING);
+    author = static_cast<svn_string_t*>( apr_hash_get(props, "svn:author", APR_HASH_KEY_STRING) );
     if (svn_string_isempty(author))
         author = svn_string_create("nobody", pool);
-    svndate = apr_hash_get(props, "svn:date", APR_HASH_KEY_STRING);
-    svnlog = apr_hash_get(props, "svn:log", APR_HASH_KEY_STRING);
+    svndate = static_cast<svn_string_t*>( apr_hash_get(props, "svn:date", APR_HASH_KEY_STRING) );
+    svnlog = static_cast<svn_string_t*>( apr_hash_get(props, "svn:log", APR_HASH_KEY_STRING) );
 
     fprintf(stdout, "commit refs/heads/master\n");
-    fprintf(stdout, "committer %s <%s@localhost> %ld -0000\n", author->data, author->data, get_epoch((char *)svndate->data));
+
+    const Committer& committer_data = committers.getAuthor( author->data );
+    fprintf(stdout, "committer %s <%s> %ld -0000\n", committer_data.name.c_str(), committer_data.email.c_str(), get_epoch((char *)svndate->data));
+
     fprintf(stdout, "data %d\n", svnlog->len);
     fputs(svnlog->data, stdout);
     fprintf(stdout, "\n");
@@ -169,8 +175,8 @@ int crawl_revisions(char *repos_path)
 
 int main(int argc, char *argv[])
 {
-    if (argc != 2) {
-        fprintf(stderr, "usage: %s REPOS_PATH\n", argv[0]);
+    if (argc != 3) {
+        fprintf(stderr, "usage: %s REPOS_PATH committers.txt\n", argv[0]);
         return -1;
     }
 
@@ -179,7 +185,9 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    crawl_revisions(argv[1]);
+    committers.load( argv[2] );
+
+    crawl_revisions( argv[1] );
 
     apr_terminate();
 
