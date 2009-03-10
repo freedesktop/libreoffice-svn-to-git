@@ -5,9 +5,17 @@
 
 using namespace std;
 
-Committers::Committers()
+struct ltstr
 {
-}
+    bool operator()( const char* s1, const char* s2 ) const
+    {
+        return strcmp( s1, s2 ) < 0;
+    }
+};
+
+typedef std::map< const char*, Committer, ltstr > CommittersMap;
+
+static CommittersMap committers;
 
 void Committers::load( const char *fname )
 {

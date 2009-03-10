@@ -35,8 +35,6 @@
 
 #define TRUNK "/trunk/"
 
-Committers committers;
-
 time_t get_epoch(char *svn_date)
 {
     struct tm tm = {0};
@@ -127,7 +125,7 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
 
     fprintf(stdout, "commit refs/heads/master\n");
 
-    const Committer& committer_data = committers.getAuthor( author->data );
+    const Committer& committer_data = Committers::getAuthor( author->data );
     fprintf(stdout, "committer %s <%s> %ld -0000\n", committer_data.name.c_str(), committer_data.email.c_str(), get_epoch((char *)svndate->data));
 
     fprintf(stdout, "data %d\n", svnlog->len);
@@ -185,7 +183,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    committers.load( argv[2] );
+    Committers::load( argv[2] );
 
     crawl_revisions( argv[1] );
 
