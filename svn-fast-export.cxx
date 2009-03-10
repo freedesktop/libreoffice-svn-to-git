@@ -115,7 +115,7 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
             
             SVN_ERR(svn_fs_node_prop(&propvalue, fs_root, (char *)path, "svn:special", pool));
             if (propvalue)
-                fprintf(stderr, "ERROR: Got a symlink; we cannot handle symlinks now.");
+                fprintf(stderr, "ERROR: Got a symlink; we cannot handle symlinks now.\n");
 
             apr_sane_push(file_changes, (char *)svn_string_createf(pool, "M %s :%u %s", mode, mark, path + strlen(TRUNK))->data);
             fprintf(stdout, "blob\nmark :%u\n", mark++);

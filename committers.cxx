@@ -33,11 +33,17 @@ void Committers::load( const char *fname )
         // find the separators
         size_t delim1 = line.find( "|" );
         if ( delim1 == string::npos )
+        {
+            fprintf( stderr, "ERROR: Wrong committer '%s'\n", line.c_str() );
             continue;
+        }
         
         size_t delim2 = line.find( "|", delim1 + 1 );
         if ( delim2 == string::npos )
+        {
+            fprintf( stderr, "ERROR: Wrong committer '%s'\n", line.c_str() );
             continue;
+        }
 
         // store the data
         const char* login = strdup( line.substr( 0, delim1 ).c_str() );
@@ -52,7 +58,7 @@ const Committer& Committers::getAuthor( const char* name )
 
     if ( it == committers.end() )
     {
-        fprintf( stderr, "ERROR: Author '%s' is missing, adding as '%s@openoffice.org'.", name, name );
+        fprintf( stderr, "ERROR: Author '%s' is missing, adding as '%s@openoffice.org'.\n", name, name );
 
         return ( committers[ strdup( name ) ] = Committer( string( name ), string( name ) + "@openoffice.org" ) );
     }
