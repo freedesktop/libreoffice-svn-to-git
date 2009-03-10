@@ -9,29 +9,31 @@ Filter::Filter( const char* fname_, unsigned int mark_ )
       tabs_to_spaces( true ),
       type( NO_FILTER )
 {
-    string fname( fname_ );
+    data.reserve( 16384 );
 
-    size_t last_dot = fname.find_last_of( '.' );
-    if ( last_dot != string::npos )
+    char* suffix = strrchr( fname_, '.' );
+    if ( suffix != NULL )
     {
-        string suffix( fname.substr( last_dot + 1 ) );
-        if ( suffix == "c"   ||
-             suffix == "cpp" ||
-             suffix == "cxx" ||
-             suffix == "h"   ||
-             suffix == "hxx" ||
-             suffix == "idl" ||
-             suffix == "mk"  ||
-             suffix == "pmk" ||
-             suffix == "pl"  ||
-             suffix == "pm"  ||
-             suffix == "sh"  ||
-             suffix == "src" ||
-             suffix == "xcu" ||
-             suffix == "xml" )
+        ++suffix;
+#define IS_SUFFIX( suf ) strcmp( suf, suffix ) == 0
+        if ( IS_SUFFIX( "c"   ) ||
+             IS_SUFFIX( "cpp" ) ||
+             IS_SUFFIX( "cxx" ) ||
+             IS_SUFFIX( "h"   ) ||
+             IS_SUFFIX( "hxx" ) ||
+             IS_SUFFIX( "idl" ) ||
+             IS_SUFFIX( "mk"  ) ||
+             IS_SUFFIX( "pmk" ) ||
+             IS_SUFFIX( "pl"  ) ||
+             IS_SUFFIX( "pm"  ) ||
+             IS_SUFFIX( "sh"  ) ||
+             IS_SUFFIX( "src" ) ||
+             IS_SUFFIX( "xcu" ) ||
+             IS_SUFFIX( "xml" ) )
         {
             type = FILTER_TABS;
         }
+#undef IS_SUFFIX
     }
 }
 
@@ -51,33 +53,29 @@ void Filter::addDataNoFilter( const char* data_, size_t len_ )
 
 void Filter::addDataFilterTabs( const char* data_, size_t len_ )
 {
-    string tmp;
+    char tmp[4*len_];
+    char *dest = tmp;
 
+    // convert the leading tabs to 4 spaces
     for ( const char* it = data_; it < data_ + len_; ++it )
     {
-        switch ( *it )
+        if ( *it == '\t' && tabs_to_spaces )
         {
-            case '\t':
-                if ( tabs_to_spaces )
-                    tmp += "    ";
-                else
-                    tmp += *it;
-                break;
-
-            case '\n':
-                tabs_to_spaces = true;
-                // no break
-            case ' ':
-                tmp += *it;
-                break;
-
-            default:
-                tabs_to_spaces = false;
-                tmp += *it;
+            *dest++ = ' ';
+            *dest++ = ' ';
+            *dest++ = ' ';
+            *dest++ = ' ';
+            continue;
         }
+        else if ( *it == '\n' )
+            tabs_to_spaces = true;
+        else if ( *it != ' ' )
+            tabs_to_spaces = false;
+
+        *dest++ = *it;
     }
 
-    data.append( tmp );
+    data.append( tmp, dest - tmp );
 }
 
 void Filter::write( std::ostream& out_ )
