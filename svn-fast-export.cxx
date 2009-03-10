@@ -15,6 +15,7 @@
 #include <time.h>
 
 #include "committers.hxx"
+#include "filter.hxx"
 
 #ifndef PATH_MAX
 #define PATH_MAX 4096
@@ -46,21 +47,22 @@ time_t get_epoch(char *svn_date)
 
 int dump_blob(svn_fs_root_t *root, char *full_path, apr_pool_t *pool)
 {
-    apr_size_t     len;
-    svn_stream_t   *stream, *outstream;
-    svn_filesize_t stream_length;
+    svn_stream_t   *stream;
 
-    SVN_ERR(svn_fs_file_length(&stream_length, root, full_path, pool));
     SVN_ERR(svn_fs_file_contents(&stream, root, full_path, pool));
 
-    fprintf(stdout, "data %lu\n", stream_length);
-    fflush(stdout);
+    const size_t buffer_size = 8192;
+    char buffer[buffer_size];
 
-    SVN_ERR(svn_stream_for_stdout(&outstream, pool));
-    SVN_ERR(svn_stream_copy(stream, outstream, pool));
+    Filter filter( full_path );
+    apr_size_t len;
+    do {
+        len = buffer_size;
+        SVN_ERR( svn_stream_read( stream, buffer, &len ) );
+        filter.addData( buffer, len );
+    } while ( len > 0 );
 
-    fprintf(stdout, "\n");
-    fflush(stdout);
+    filter.write();
 
     return 0;
 }
@@ -105,7 +107,17 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
         if (change->change_kind == svn_fs_path_change_delete) {
             apr_sane_push(file_changes, (char *)svn_string_createf(pool, "D %s", path + strlen(TRUNK))->data);
         } else {
-            apr_sane_push(file_changes, (char *)svn_string_createf(pool, "M 644 :%u %s", mark, path + strlen(TRUNK))->data);
+            svn_string_t *propvalue;
+            SVN_ERR(svn_fs_node_prop(&propvalue, fs_root, (char *)path, "svn:executable", pool));
+            const char* mode = "644";
+            if (propvalue)
+                mode = "755";
+            
+            SVN_ERR(svn_fs_node_prop(&propvalue, fs_root, (char *)path, "svn:special", pool));
+            if (propvalue)
+                fprintf(stderr, "ERROR: Got a symlink; we cannot handle symlinks now.");
+
+            apr_sane_push(file_changes, (char *)svn_string_createf(pool, "M %s :%u %s", mode, mark, path + strlen(TRUNK))->data);
             fprintf(stdout, "blob\nmark :%u\n", mark++);
             dump_blob(fs_root, (char *)path, revpool);
         }
