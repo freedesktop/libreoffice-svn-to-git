@@ -5,6 +5,8 @@
 
 class Filter
 {
+    unsigned int mark;
+
     std::string data;
 
     /// Should we convert?
@@ -17,7 +19,7 @@ class Filter
     FilterType type;
 
 public:
-    Filter( const char* fname_ );
+    Filter( const char* fname_, unsigned int mark_ );
 
     void addData( const char* data_, size_t len_ );
 

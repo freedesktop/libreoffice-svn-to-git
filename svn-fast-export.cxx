@@ -45,7 +45,7 @@ time_t get_epoch(char *svn_date)
     return mktime(&tm);
 }
 
-int dump_blob(svn_fs_root_t *root, char *full_path, apr_pool_t *pool)
+int dump_blob(svn_fs_root_t *root, char *full_path, apr_pool_t *pool, unsigned int mark)
 {
     svn_stream_t   *stream;
 
@@ -54,7 +54,7 @@ int dump_blob(svn_fs_root_t *root, char *full_path, apr_pool_t *pool)
     const size_t buffer_size = 8192;
     char buffer[buffer_size];
 
-    Filter filter( full_path );
+    Filter filter( full_path, mark );
     apr_size_t len;
     do {
         len = buffer_size;
@@ -118,8 +118,7 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
                 fprintf(stderr, "ERROR: Got a symlink; we cannot handle symlinks now.\n");
 
             apr_sane_push(file_changes, (char *)svn_string_createf(pool, "M %s :%u %s", mode, mark, path + strlen(TRUNK))->data);
-            fprintf(stdout, "blob\nmark :%u\n", mark++);
-            dump_blob(fs_root, (char *)path, revpool);
+            dump_blob(fs_root, (char *)path, revpool, mark++);
         }
     }
 

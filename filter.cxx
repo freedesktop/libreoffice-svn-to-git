@@ -4,8 +4,9 @@
 
 using namespace std;
 
-Filter::Filter( const char* fname_ )
-    : tabs_to_spaces( true ),
+Filter::Filter( const char* fname_, unsigned int mark_ )
+    : mark( mark_ ),
+      tabs_to_spaces( true ),
       type( NO_FILTER )
 {
     string fname( fname_ );
@@ -81,6 +82,8 @@ void Filter::addDataFilterTabs( const char* data_, size_t len_ )
 
 void Filter::write()
 {
-    cout << "data " << data.size() << endl
+    cout << "blob" << endl
+         << "mark :" << mark << endl
+         << "data " << data.size() << endl
          << data << endl;
 }
