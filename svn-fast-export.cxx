@@ -14,8 +14,11 @@
 #include <stdio.h>
 #include <time.h>
 
+#include <ostream>
+
 #include "committers.hxx"
 #include "filter.hxx"
+#include "repository.hxx"
 
 #ifndef PATH_MAX
 #define PATH_MAX 4096
@@ -36,6 +39,8 @@
 
 #define TRUNK "/trunk/"
 
+using namespace std;
+
 time_t get_epoch(char *svn_date)
 {
     struct tm tm = {0};
@@ -45,7 +50,7 @@ time_t get_epoch(char *svn_date)
     return mktime(&tm);
 }
 
-int dump_blob(svn_fs_root_t *root, char *full_path, apr_pool_t *pool, unsigned int mark)
+int dump_blob(svn_fs_root_t *root, char *full_path, apr_pool_t *pool, unsigned int mark, ostream& out)
 {
     svn_stream_t   *stream;
 
@@ -62,7 +67,7 @@ int dump_blob(svn_fs_root_t *root, char *full_path, apr_pool_t *pool, unsigned i
         filter.addData( buffer, len );
     } while ( len > 0 );
 
-    filter.write();
+    filter.write( out );
 
     return 0;
 }
@@ -76,7 +81,6 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
     apr_pool_t           *revpool;
     apr_hash_t           *changes, *props;
     apr_hash_index_t     *i;
-    apr_array_header_t   *file_changes;
     svn_string_t         *author, *committer, *svndate, *svnlog;
     svn_boolean_t        is_dir;
     svn_fs_root_t        *fs_root;
@@ -90,8 +94,8 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
 
     revpool = svn_pool_create(pool);
 
-    file_changes = apr_array_make(pool, apr_hash_count(changes), sizeof(char *));
     mark = 1;
+    bool any_changes = false;
     for (i = apr_hash_first(pool, changes); i; i = apr_hash_next(i)) {
         svn_pool_clear(revpool);
         apr_hash_this(i, &key, NULL, &val);
@@ -104,8 +108,10 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
             continue;
         }
 
+        Repository& repo = Repository::get( path + strlen(TRUNK) );
+
         if (change->change_kind == svn_fs_path_change_delete) {
-            apr_sane_push(file_changes, (char *)svn_string_createf(pool, "D %s", path + strlen(TRUNK))->data);
+            repo.deleteFile( path + strlen(TRUNK) );
         } else {
             svn_string_t *propvalue;
             SVN_ERR(svn_fs_node_prop(&propvalue, fs_root, (char *)path, "svn:executable", pool));
@@ -117,14 +123,18 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
             if (propvalue)
                 fprintf(stderr, "ERROR: Got a symlink; we cannot handle symlinks now.\n");
 
-            apr_sane_push(file_changes, (char *)svn_string_createf(pool, "M %s :%u %s", mode, mark, path + strlen(TRUNK))->data);
-            dump_blob(fs_root, (char *)path, revpool, mark++);
+            ostream& out = repo.modifyFile( path + strlen(TRUNK), mode, mark );
+
+            dump_blob(fs_root, (char *)path, revpool, mark++, out);
         }
+
+        any_changes = true;
     }
 
-    if (file_changes->nelts == 0) {
-        fprintf(stderr, "skipping.\n");
-        svn_pool_destroy(revpool);
+    if ( !any_changes )
+    {
+        fprintf( stderr, "skipping.\n" );
+        svn_pool_destroy( revpool );
         return 0;
     }
 
@@ -134,17 +144,8 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
     svndate = static_cast<svn_string_t*>( apr_hash_get(props, "svn:date", APR_HASH_KEY_STRING) );
     svnlog = static_cast<svn_string_t*>( apr_hash_get(props, "svn:log", APR_HASH_KEY_STRING) );
 
-    fprintf(stdout, "commit refs/heads/master\n");
-
-    const Committer& committer_data = Committers::getAuthor( author->data );
-    fprintf(stdout, "committer %s <%s> %ld -0000\n", committer_data.name.c_str(), committer_data.email.c_str(), get_epoch((char *)svndate->data));
-
-    fprintf(stdout, "data %d\n", svnlog->len);
-    fputs(svnlog->data, stdout);
-    fprintf(stdout, "\n");
-    fputs(apr_array_pstrcat(pool, file_changes, '\n'), stdout);
-    fprintf(stdout, "\n\n");
-    fflush(stdout);
+    Repository::commit( Committers::getAuthor( author->data ), get_epoch((char *)svndate->data),
+            svnlog->data, svnlog->len );
 
     svn_pool_destroy(revpool);
 

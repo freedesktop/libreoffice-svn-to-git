@@ -2,6 +2,7 @@
 #define _FILTER_HXX_
 
 #include <string>
+#include <ostream>
 
 class Filter
 {
@@ -23,7 +24,7 @@ public:
 
     void addData( const char* data_, size_t len_ );
 
-    void write();
+    void write( std::ostream& out_ );
 
 private:
     void addDataNoFilter( const char* data_, size_t len_ );

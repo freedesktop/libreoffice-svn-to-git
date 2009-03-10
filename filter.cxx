@@ -80,9 +80,9 @@ void Filter::addDataFilterTabs( const char* data_, size_t len_ )
     data.append( tmp );
 }
 
-void Filter::write()
+void Filter::write( std::ostream& out_ )
 {
-    cout << "blob" << endl
+    out_ << "blob" << endl
          << "mark :" << mark << endl
          << "data " << data.size() << endl
          << data << endl;
