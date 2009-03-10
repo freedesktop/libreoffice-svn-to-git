@@ -50,7 +50,7 @@ void Repository::commit( const Committer& committer_, time_t time_, const char* 
          << "data " << log_len_ << "\n"
          << log_ << "\n"
          << Repository::get( NULL ).getChanges() // FIXME, here as well :-)
-         << endl << endl;
+         << endl;
 
     Repository::get( NULL ).reset(); // FIXME, here as well :-)
 }
