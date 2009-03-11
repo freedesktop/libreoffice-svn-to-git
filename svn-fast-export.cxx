@@ -41,7 +41,7 @@
 
 using namespace std;
 
-time_t get_epoch(char *svn_date)
+static time_t get_epoch( const char *svn_date )
 {
     struct tm tm = {0};
     char date[(strlen(svn_date) * sizeof(char *))];
@@ -50,16 +50,16 @@ time_t get_epoch(char *svn_date)
     return mktime(&tm);
 }
 
-int dump_blob(svn_fs_root_t *root, char *full_path, apr_pool_t *pool, unsigned int mark, ostream& out)
+int dump_blob(svn_fs_root_t *root, char *full_path, apr_pool_t *pool, ostream& out)
 {
     svn_stream_t   *stream;
 
-    SVN_ERR(svn_fs_file_contents(&stream, root, full_path, pool));
+    SVN_ERR( svn_fs_file_contents( &stream, root, full_path, pool ) );
 
     const size_t buffer_size = 8192;
     char buffer[buffer_size];
 
-    Filter filter( full_path, mark );
+    Filter filter( full_path );
     apr_size_t len;
     do {
         len = buffer_size;
@@ -74,7 +74,6 @@ int dump_blob(svn_fs_root_t *root, char *full_path, apr_pool_t *pool, unsigned i
 
 int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
 {
-    unsigned int         mark;
     const void           *key;
     void                 *val;
     char                 *path, *file_change;
@@ -94,7 +93,6 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
 
     revpool = svn_pool_create(pool);
 
-    mark = 1;
     bool any_changes = false;
     for (i = apr_hash_first(pool, changes); i; i = apr_hash_next(i)) {
         svn_pool_clear(revpool);
@@ -123,9 +121,9 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
             if (propvalue)
                 fprintf(stderr, "ERROR: Got a symlink; we cannot handle symlinks now.\n");
 
-            ostream& out = repo.modifyFile( path + strlen(TRUNK), mode, mark );
+            ostream& out = repo.modifyFile( path + strlen(TRUNK), mode );
 
-            dump_blob(fs_root, (char *)path, revpool, mark++, out);
+            dump_blob(fs_root, (char *)path, revpool, out);
         }
 
         any_changes = true;
@@ -144,7 +142,8 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
     svndate = static_cast<svn_string_t*>( apr_hash_get(props, "svn:date", APR_HASH_KEY_STRING) );
     svnlog = static_cast<svn_string_t*>( apr_hash_get(props, "svn:log", APR_HASH_KEY_STRING) );
 
-    Repository::commit( Committers::getAuthor( author->data ), get_epoch((char *)svndate->data),
+    Repository::commit( Committers::getAuthor( author->data ),
+            get_epoch( static_cast<const char *>( svndate->data ) ),
             svnlog->data, svnlog->len );
 
     svn_pool_destroy(revpool);

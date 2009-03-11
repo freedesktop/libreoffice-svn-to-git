@@ -7,6 +7,7 @@
 using namespace std;
 
 Repository::Repository()
+    : mark( 1 )
 {
 }
 
@@ -17,20 +18,29 @@ void Repository::deleteFile( const char* fname_ )
     file_changes.append( "\n" );
 }
 
-ostream& Repository::modifyFile( const char* fname_, const char* mode_, unsigned int mark_ )
+ostream& Repository::modifyFile( const char* fname_, const char* mode_ )
 {
     ostringstream sstr;
 
-    sstr << "M " << mode_ << " :" << mark_ << " " << fname_ << "\n";
+    sstr << "M " << mode_ << " :" << mark << " " << fname_ << "\n";
     
     file_changes.append( sstr.str() );
 
-    return cout; // FIXME, obviously :-)
+    // FIXME the right stream for output of the file here
+    ostream& out = cout;
+
+    out << "blob" << endl
+        << "mark :" << mark << endl;
+
+    ++mark;
+
+    return out;
 }
 
 void Repository::reset()
 {
     file_changes.clear();
+    mark = 1;
 }
 
 static Repository repo;
