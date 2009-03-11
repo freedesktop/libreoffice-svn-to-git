@@ -4,31 +4,50 @@
 #include <string>
 #include <ostream>
 
+#include <regex.h>
+
 class Committer;
 
 class Repository
 {
-    // remember what files we changed and how (deletes/modifications)
+    /// Remember what files we changed and how (deletes/modifications).
     std::string file_changes;
 
-    // counter for the files
+    /// Counter for the files.
     unsigned int mark;
 
-public:
-    Repository();
+    /// Regex for matching the fnames.
+    regex_t regex_rule;
 
+public:
+    /// The regex_ is here to decide if the file belongs to this repository.
+    Repository( const char* regex_ );
+
+    ~Repository();
+
+    /// Does the file belong to this repository (based on the regex we got?)
+    bool matches( const char* fname_ ) const;
+
+    /// The file should be marked for deletion.
     void deleteFile( const char* fname_ );
 
+    /// The file should be marked for addition/modification.
     std::ostream& modifyFile( const char* fname_, const char* mode_ );
 
-    const std::string& getChanges() const { return file_changes; }
-
-    void reset();
-
-public:
-    static Repository& get( const char* fname_ );
-
-    static void commit( const Committer& committer_, time_t time_, const char* log_, size_t log_len_ );
+    /// Commit all the changes we did.
+    void commit( const Committer& committer_, time_t time_, const char* log_, size_t log_len_ );
 };
+
+namespace Repositories
+{
+    /// Load the repositories layout from the config file.
+    bool load( const char* fname_ );
+
+    /// Get the right repository according to the filename.
+    Repository& get( const char* fname_ );
+
+    /// Commit to the all repositories that have some changes.
+    void commit( const Committer& committer_, time_t time_, const char* log_, size_t log_len_ );
+}
 
 #endif // _REPOSITORY_HXX_

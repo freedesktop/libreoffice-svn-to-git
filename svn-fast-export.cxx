@@ -106,7 +106,7 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
             continue;
         }
 
-        Repository& repo = Repository::get( path + strlen(TRUNK) );
+        Repository& repo = Repositories::get( path + strlen(TRUNK) );
 
         if (change->change_kind == svn_fs_path_change_delete) {
             repo.deleteFile( path + strlen(TRUNK) );
@@ -142,7 +142,7 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
     svndate = static_cast<svn_string_t*>( apr_hash_get(props, "svn:date", APR_HASH_KEY_STRING) );
     svnlog = static_cast<svn_string_t*>( apr_hash_get(props, "svn:log", APR_HASH_KEY_STRING) );
 
-    Repository::commit( Committers::getAuthor( author->data ),
+    Repositories::commit( Committers::getAuthor( author->data ),
             get_epoch( static_cast<const char *>( svndate->data ) ),
             svnlog->data, svnlog->len );
 
@@ -184,8 +184,8 @@ int crawl_revisions(char *repos_path)
 
 int main(int argc, char *argv[])
 {
-    if (argc != 3) {
-        fprintf(stderr, "usage: %s REPOS_PATH committers.txt\n", argv[0]);
+    if (argc != 4) {
+        fprintf(stderr, "usage: %s REPOS_PATH committers.txt reposlayout.txt\n", argv[0]);
         return -1;
     }
 
@@ -195,6 +195,12 @@ int main(int argc, char *argv[])
     }
 
     Committers::load( argv[2] );
+
+    if ( !Repositories::load( argv[3] ) )
+    {
+        fprintf( stderr, "ERROR: Must have at least one valid repository definition.\n" );
+        return 1;
+    }
 
     crawl_revisions( argv[1] );
 

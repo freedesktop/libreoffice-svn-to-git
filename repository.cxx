@@ -3,12 +3,26 @@
 
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 using namespace std;
 
-Repository::Repository()
+Repository::Repository( const char* regex_ )
     : mark( 1 )
 {
+    int status = regcomp( &regex_rule, regex_, REG_EXTENDED | REG_NOSUB );
+    if ( status != 0 )
+        fprintf( stderr, "ERROR: Cannot create regex '%s'.\n", regex_ );
+}
+
+Repository::~Repository()
+{
+    regfree( &regex_rule );
+}
+
+bool Repository::matches( const char* fname_ ) const
+{
+    return ( regexec( &regex_rule, fname_, 0, NULL, 0 ) == 0 );
 }
 
 void Repository::deleteFile( const char* fname_ )
@@ -37,30 +51,49 @@ ostream& Repository::modifyFile( const char* fname_, const char* mode_ )
     return out;
 }
 
-void Repository::reset()
+void Repository::commit( const Committer& committer_, time_t time_, const char* log_, size_t log_len_ )
 {
+    if ( file_changes.length() != 0 )
+    {
+        cout << "commit refs/heads/master\n"
+             << "committer " << committer_.name << " <" << committer_.email << "> " << time_ << " -0000\n"
+             << "data " << log_len_ << "\n"
+             << log_ << "\n"
+             << file_changes
+             << endl;
+    }
+
     file_changes.clear();
     mark = 1;
 }
 
-static Repository repo;
+typedef vector< Repository* > Repos;
 
-Repository& Repository::get( const char* fname_ )
+static Repos repos;
+
+bool Repositories::load( const char* fname_ )
 {
-    return repo; // FIXME, too :-)
+    repos.push_back( new Repository( ".*" ) );
+
+    return true;
 }
 
-void Repository::commit( const Committer& committer_, time_t time_, const char* log_, size_t log_len_ )
+Repository& Repositories::get( const char* fname_ )
 {
-    if ( Repository::get( NULL ).getChanges().length() == 0 ) // FIXME, here as well :-)
-        return; // skip this one
+    Repository* repo = repos.front();
+    for ( Repos::const_iterator it = repos.begin(); it != repos.end(); ++it )
+    {
+        repo = (*it);
+        if ( repo->matches( fname_ ) )
+            break;
+    }
 
-    cout << "commit refs/heads/master\n"
-         << "committer " << committer_.name << " <" << committer_.email << "> " << time_ << " -0000\n"
-         << "data " << log_len_ << "\n"
-         << log_ << "\n"
-         << Repository::get( NULL ).getChanges() // FIXME, here as well :-)
-         << endl;
+    // the last one is the fallback
+    return *repo;
+}
 
-    Repository::get( NULL ).reset(); // FIXME, here as well :-)
+void Repositories::commit( const Committer& committer_, time_t time_, const char* log_, size_t log_len_ )
+{
+    for ( Repos::iterator it = repos.begin(); it != repos.end(); ++it )
+        (*it)->commit( committer_, time_, log_, log_len_ );
 }
