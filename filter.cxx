@@ -14,19 +14,25 @@ Filter::Filter( const char* fname_ )
     if ( suffix != NULL )
     {
         ++suffix;
-#define IS_SUFFIX( suf ) strcmp( suf, suffix ) == 0
+#define IS_SUFFIX( suf ) strcasecmp( suf, suffix ) == 0
         if ( IS_SUFFIX( "c"   ) ||
              IS_SUFFIX( "cpp" ) ||
              IS_SUFFIX( "cxx" ) ||
              IS_SUFFIX( "h"   ) ||
+             IS_SUFFIX( "hrc" ) ||
              IS_SUFFIX( "hxx" ) ||
              IS_SUFFIX( "idl" ) ||
+             IS_SUFFIX( "inl" ) ||
+             IS_SUFFIX( "java") ||
+             IS_SUFFIX( "map" ) ||
              IS_SUFFIX( "mk"  ) ||
              IS_SUFFIX( "pmk" ) ||
              IS_SUFFIX( "pl"  ) ||
              IS_SUFFIX( "pm"  ) ||
+             IS_SUFFIX( "sdi" ) ||
              IS_SUFFIX( "sh"  ) ||
              IS_SUFFIX( "src" ) ||
+             IS_SUFFIX( "tab" ) ||
              IS_SUFFIX( "xcu" ) ||
              IS_SUFFIX( "xml" ) )
         {
