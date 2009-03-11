@@ -7,12 +7,12 @@
 
 using namespace std;
 
-Repository::Repository( const char* regex_ )
-    : mark( 1 )
+Repository::Repository( const std::string& reponame_, const string& regex_ )
+    : mark( 1 ), out( ( reponame_ + ".dump" ).c_str() )
 {
-    int status = regcomp( &regex_rule, regex_, REG_EXTENDED | REG_NOSUB );
+    int status = regcomp( &regex_rule, regex_.c_str(), REG_EXTENDED | REG_NOSUB );
     if ( status != 0 )
-        fprintf( stderr, "ERROR: Cannot create regex '%s'.\n", regex_ );
+        fprintf( stderr, "ERROR: Cannot create regex '%s'.\n", regex_.c_str() );
 }
 
 Repository::~Repository()
@@ -40,9 +40,7 @@ ostream& Repository::modifyFile( const char* fname_, const char* mode_ )
     
     file_changes.append( sstr.str() );
 
-    // FIXME the right stream for output of the file here
-    ostream& out = cout;
-
+    // write the file header
     out << "blob" << endl
         << "mark :" << mark << endl;
 
@@ -55,12 +53,12 @@ void Repository::commit( const Committer& committer_, time_t time_, const char* 
 {
     if ( file_changes.length() != 0 )
     {
-        cout << "commit refs/heads/master\n"
-             << "committer " << committer_.name << " <" << committer_.email << "> " << time_ << " -0000\n"
-             << "data " << log_len_ << "\n"
-             << log_ << "\n"
-             << file_changes
-             << endl;
+        out << "commit refs/heads/master\n"
+            << "committer " << committer_.name << " <" << committer_.email << "> " << time_ << " -0000\n"
+            << "data " << log_len_ << "\n"
+            << log_ << "\n"
+            << file_changes
+            << endl;
     }
 
     file_changes.clear();
@@ -73,9 +71,32 @@ static Repos repos;
 
 bool Repositories::load( const char* fname_ )
 {
-    repos.push_back( new Repository( ".*" ) );
+    ifstream input( fname_, ifstream::in );
+    string line;
+    bool result = false;
 
-    return true;
+    while ( !input.eof() )
+    {
+        getline( input, line );
+
+        // comments
+        if ( line.length() == 0 || line[0] == '#' )
+            continue;
+
+        // find the separators
+        size_t delim = line.find( "=" );
+        if ( delim == string::npos )
+        {
+            fprintf( stderr, "ERROR: Wrong repository description '%s'\n", line.c_str() );
+            continue;
+        }
+
+        repos.push_back( new Repository( line.substr( 0, delim ), line.substr( delim + 1 ) ) );
+
+        result = true;
+    }
+
+    return result;
 }
 
 Repository& Repositories::get( const char* fname_ )

@@ -2,7 +2,7 @@
 #define _REPOSITORY_HXX_
 
 #include <string>
-#include <ostream>
+#include <fstream>
 
 #include <regex.h>
 
@@ -19,9 +19,12 @@ class Repository
     /// Regex for matching the fnames.
     regex_t regex_rule;
 
+    /// FIXME for the testing reasons let's store to files.
+    std::ofstream out;
+
 public:
     /// The regex_ is here to decide if the file belongs to this repository.
-    Repository( const char* regex_ );
+    Repository( const std::string& reponame_, const std::string& regex_ );
 
     ~Repository();
 
