@@ -99,6 +99,15 @@ bool Repositories::load( const char* fname_ )
     return result;
 }
 
+void Repositories::close()
+{
+    while ( !repos.empty() )
+    {
+        delete repos.back();
+        repos.pop_back();
+    }
+}
+
 Repository& Repositories::get( const char* fname_ )
 {
     Repository* repo = repos.front();

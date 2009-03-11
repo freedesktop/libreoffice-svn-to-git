@@ -46,6 +46,9 @@ namespace Repositories
     /// Load the repositories layout from the config file.
     bool load( const char* fname_ );
 
+    /// Close all the repositories.
+    void close();
+
     /// Get the right repository according to the filename.
     Repository& get( const char* fname_ );
 

@@ -206,5 +206,7 @@ int main(int argc, char *argv[])
 
     apr_terminate();
 
+    Repositories::close();
+
     return 0;
 }
