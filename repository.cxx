@@ -49,12 +49,16 @@ ostream& Repository::modifyFile( const char* fname_, const char* mode_ )
     return out;
 }
 
-void Repository::commit( const Committer& committer_, time_t time_, const char* log_, size_t log_len_ )
+void Repository::commit( const Committer& committer_, unsigned int commit_id_, time_t time_, const char* log_, size_t log_len_ )
 {
     if ( file_changes.length() != 0 )
     {
-        out << "commit refs/heads/master\n"
-            << "committer " << committer_.name << " <" << committer_.email << "> " << time_ << " -0000\n"
+        out << "commit refs/heads/master\n";
+
+        if ( commit_id_ )
+            out << "mark :" << commit_id_ << "\n";
+
+        out << "committer " << committer_.name << " <" << committer_.email << "> " << time_ << " -0000\n"
             << "data " << log_len_ << "\n"
             << log_ << "\n"
             << file_changes
@@ -122,8 +126,8 @@ Repository& Repositories::get( const char* fname_ )
     return *repo;
 }
 
-void Repositories::commit( const Committer& committer_, time_t time_, const char* log_, size_t log_len_ )
+void Repositories::commit( const Committer& committer_, unsigned int commit_id_, time_t time_, const char* log_, size_t log_len_ )
 {
     for ( Repos::iterator it = repos.begin(); it != repos.end(); ++it )
-        (*it)->commit( committer_, time_, log_, log_len_ );
+        (*it)->commit( committer_, commit_id_, time_, log_, log_len_ );
 }

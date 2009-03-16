@@ -19,7 +19,10 @@ class Repository
     /// Regex for matching the fnames.
     regex_t regex_rule;
 
-    /// FIXME for the testing reasons let's store to files.
+    /// Let's store to files.
+    ///
+    /// There can be a wrapping script that sets them up as named pipes that
+    /// can feed the git fast-import(s).
     std::ofstream out;
 
 public:
@@ -38,7 +41,7 @@ public:
     std::ostream& modifyFile( const char* fname_, const char* mode_ );
 
     /// Commit all the changes we did.
-    void commit( const Committer& committer_, time_t time_, const char* log_, size_t log_len_ );
+    void commit( const Committer& committer_, unsigned int commit_id_, time_t time_, const char* log_, size_t log_len_ );
 };
 
 namespace Repositories
@@ -53,7 +56,7 @@ namespace Repositories
     Repository& get( const char* fname_ );
 
     /// Commit to the all repositories that have some changes.
-    void commit( const Committer& committer_, time_t time_, const char* log_, size_t log_len_ );
+    void commit( const Committer& committer_, unsigned int commit_id_, time_t time_, const char* log_, size_t log_len_ );
 }
 
 #endif // _REPOSITORY_HXX_

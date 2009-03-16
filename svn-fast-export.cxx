@@ -143,6 +143,7 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
     svnlog = static_cast<svn_string_t*>( apr_hash_get(props, "svn:log", APR_HASH_KEY_STRING) );
 
     Repositories::commit( Committers::getAuthor( author->data ),
+            rev,
             get_epoch( static_cast<const char *>( svndate->data ) ),
             svnlog->data, svnlog->len );
 
