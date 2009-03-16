@@ -17,6 +17,8 @@ typedef std::map< const char*, Committer, ltstr > CommittersMap;
 
 static CommittersMap committers;
 
+static string default_address( "@localhost" );
+
 void Committers::load( const char *fname )
 {
     ifstream input( fname, ifstream::in );
@@ -29,6 +31,13 @@ void Committers::load( const char *fname )
         // comments
         if ( line.length() == 0 || line[0] == '#' )
             continue;
+
+        // default committer address
+        if ( line[0] == '@' )
+        {
+            default_address = line;
+            continue;
+        }
 
         // find the separators
         size_t delim1 = line.find( "|" );
@@ -58,9 +67,9 @@ const Committer& Committers::getAuthor( const char* name )
 
     if ( it == committers.end() )
     {
-        fprintf( stderr, "ERROR: Author '%s' is missing, adding as '%s@openoffice.org'.\n", name, name );
+        fprintf( stderr, "ERROR: Author '%s' is missing, adding as '%s%s'.\n", name, name, default_address.c_str() );
 
-        return ( committers[ strdup( name ) ] = Committer( string( name ), string( name ) + "@openoffice.org" ) );
+        return ( committers[ strdup( name ) ] = Committer( string( name ), string( name ) + default_address ) );
     }
 
     return it->second;

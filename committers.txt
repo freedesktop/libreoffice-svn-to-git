@@ -1,3 +1,9 @@
+# The committers to the OOo repository
+# source: http://wiki.services.openoffice.org/wiki/DomainDeveloper
+
+# default address when the committer is not known
+@openoffice.org
+
 ab|Andreas Bregas|ab@openoffice.org
 abi|Andreas Bille|abi@openoffice.org
 ace_dent|Andrew Dent|ace_dent@openoffice.org
