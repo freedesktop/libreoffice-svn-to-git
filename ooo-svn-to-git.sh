@@ -35,3 +35,9 @@ for I in `sed 's/=.*//' "$LAYOUT"` ; do
 done
 
 ./svn-fast-export "$SOURCE" "$COMMITTERS" "$LAYOUT"
+
+for I in `sed 's/=.*//' "$LAYOUT"` ; do
+    if [ "$I" != "did-not-fit-anywhere" ] ; then
+        rm $I.dump
+    fi
+done
