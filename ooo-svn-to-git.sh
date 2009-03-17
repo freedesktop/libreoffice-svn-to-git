@@ -24,20 +24,14 @@ fi
 mkdir -p "$TARGET"
 rm *.dump
 
-for I in `sed 's/=.*//' "$LAYOUT"` ; do
-    if [ "$I" != "did-not-fit-anywhere" ] ; then
-        mkdir "$TARGET/$I"
-
-        mkfifo $I.dump
-
-        ( cd "$TARGET/$I" ; git init ; git fast-import < "$WD"/$I.dump ) &
-    fi
+for I in `sed -e 's/^[#:].*//' -e 's/^did-not-fit-anywhere.*//' -e 's/=.*//' "$LAYOUT" | grep -v '^$'` ; do
+    mkdir "$TARGET/$I"
+    mkfifo $I.dump
+    ( cd "$TARGET/$I" ; git init ; git fast-import < "$WD"/$I.dump ) &
 done
 
 ./svn-fast-export "$SOURCE" "$COMMITTERS" "$LAYOUT"
 
-for I in `sed 's/=.*//' "$LAYOUT"` ; do
-    if [ "$I" != "did-not-fit-anywhere" ] ; then
-        rm $I.dump
-    fi
+for I in `sed -e 's/^[#:].*//' -e 's/^did-not-fit-anywhere.*//' -e 's/=.*//' "$LAYOUT" | grep -v '^$'` ; do
+    rm $I.dump
 done
