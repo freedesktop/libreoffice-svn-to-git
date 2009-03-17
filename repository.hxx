@@ -44,10 +44,10 @@ public:
     void commit( const Committer& committer_, const std::string& branch_, unsigned int commit_id_, time_t time_, const char* log_, size_t log_len_ );
 
     /// Create a branch.
-    void createBranch( const std::string& branch_, unsigned int from_ );
+    void createBranch( const std::string& branch_, unsigned int from_, const std::string& from_branch_ );
 
     /// Create a tag.
-    void createTag( const Committer& committer_, const std::string& name_, unsigned int from_, time_t time_, const char* log_, size_t log_len_ );
+    void createTag( const Committer& committer_, const std::string& name_, unsigned int from_, const std::string& from_branch_, time_t time_, const char* log_, size_t log_len_ );
 };
 
 namespace Repositories
@@ -65,10 +65,16 @@ namespace Repositories
     void commit( const Committer& committer_, const std::string& branch_, unsigned int commit_id_, time_t time_, const char* log_, size_t log_len_ );
 
     /// Create a branch in all the repositories.
-    void createBranch( const std::string& branch_, unsigned int from_ );
+    void createBranch( const std::string& branch_, unsigned int from_, const std::string& from_branch_ );
 
     /// Create a tag in all the repositories.
-    void createTag( const Committer& committer_, const std::string& name_, unsigned int from_, time_t time_, const char* log_, size_t log_len_ );
+    void createTag( const Committer& committer_, const std::string& name_, unsigned int from_, const std::string& from_branch_, time_t time_, const char* log_, size_t log_len_ );
+
+    /// Should the revision with this number be ignored?
+    bool ignoreRevision( unsigned int commit_id_ );
+
+    /// Should the tag with this name be ignored?
+    bool ignoreTag( const std::string& name_ );
 }
 
 #endif // _REPOSITORY_HXX_

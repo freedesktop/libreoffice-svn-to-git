@@ -87,7 +87,13 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
     svn_fs_root_t        *fs_root;
     svn_fs_path_change_t *change;
 
-    fprintf(stderr, "Exporting revision %ld... ", rev);
+    fprintf( stderr, "Exporting revision %ld... ", rev );
+    
+    if ( Repositories::ignoreRevision( rev ) )
+    {
+        fprintf( stderr, "ignored.\n" );
+        return 0;
+    }
 
     SVN_ERR(svn_fs_revision_root(&fs_root, fs, rev, pool));
     SVN_ERR(svn_fs_paths_changed(&changes, fs_root, pool));
@@ -105,11 +111,18 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
 
     string branch;
     bool no_changes = true;
+    bool debug_once = true;
     for (i = apr_hash_first(pool, changes); i; i = apr_hash_next(i)) {
         svn_pool_clear(revpool);
         apr_hash_this(i, &key, NULL, &val);
         path = (char *)key;
         change = (svn_fs_path_change_t *)val;
+
+        if ( debug_once )
+        {
+            fprintf( stderr, "path: %s... ", path );
+            debug_once = false;
+        }
 
         SVN_ERR(svn_fs_is_dir(&is_dir, fs_root, path, revpool));
 
@@ -124,17 +137,31 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
                 if ( tmp.find( '/' ) != string::npos )
                     continue;
 
+                if ( !is_branch && Repositories::ignoreTag( tmp ) )
+                    continue;
+
                 // is it a new branch/tag
                 svn_revnum_t rev_from;
                 const char* path_from;
                 SVN_ERR( svn_fs_copied_from( &rev_from, &path_from, fs_root, path, revpool ) );
                 if ( path_from != NULL )
                 {
+                    string from_branch( "master" );
+                    if ( strncmp( BRANCHES, path_from, strlen( BRANCHES ) ) == 0 )
+                        from_branch = path_from + strlen( BRANCHES );
+                    else if ( strncmp( TAGS, path_from, strlen( TAGS ) ) == 0 )
+                        from_branch = path_from + strlen( TAGS );
+
+                    if ( from_branch.find( '/' ) != string::npos )
+                        continue;
+                    
                     if ( is_branch )
-                        Repositories::createBranch( tmp, rev_from );
+                        Repositories::createBranch( tmp, rev_from, from_branch );
                     else
                         Repositories::createTag( Committers::getAuthor( author->data ),
-                                tmp, rev_from, epoch,
+                                tmp,
+                                rev_from, from_branch,
+                                epoch,
                                 svnlog->data, svnlog->len );
                 }
             }
@@ -174,7 +201,15 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
         }
         else if ( strncmp( TAGS, path, strlen( TAGS ) ) == 0 )
         {
-            fprintf( stderr, "ERROR: Attempting to commit to a tag '%s'.\n", path + strlen( TAGS ) );
+            string tag( path + strlen( TAGS ) );
+            size_t slash = tag.find( '/' );
+            if ( ( slash == string::npos && Repositories::ignoreTag( tag ) ) ||
+                 ( slash != string::npos && Repositories::ignoreTag( tag.substr( 0, slash ) ) ) )
+            {
+                continue;
+            }
+
+            fprintf( stderr, "ERROR: Attempting to commit to a tag (%s).\n", path + strlen( TAGS ) );
             continue;
         }
         else

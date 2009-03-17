@@ -1,8 +1,17 @@
 # rewrite tabs to spaces
 :set tabs_to_spaces=4,\.(c|cpp|cxx|h|hrc|hxx|idl|inl|java|map|mk|MK|pmk|pl|pm|sdi|sh|src|tab|xcu|xml)$
 
-# change some revevisions (for tags and branches)
-:revision 261917=261912
+# change some revisions (base of a tag/branch)
+:revision from:261917=261912
+
+# ignore some revisions/tags completely (broken ones)
+#:revision ignore:XYZ
+:tag ignore:DEV300_m99
+:tag ignore:DEV300_m34
+:tag ignore:DEV300_m35
+:tag ignore:DEV300_m36
+:tag ignore:DEV300_m37
+:tag ignore:DEV300_m39
 
 # the actual layout of the repository
 l10n=[Ll][Oo][Cc][Aa][Ll][Ii][Zz][Ee]\.[Ss][Dd][Ff]$

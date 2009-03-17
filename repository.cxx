@@ -12,12 +12,18 @@ using namespace std;
 typedef vector< Repository* > Repos;
 typedef set< string > Branches;
 typedef map< unsigned int, unsigned int > RevisionChanges;
+typedef set< unsigned int > RevisionIgnore;
+typedef set< string > TagIgnore;
 
 static Repos repos;
 
 static Branches branches;
 
 static RevisionChanges revision_changes;
+
+static RevisionIgnore revision_ignore;
+
+static TagIgnore tag_ignore;
 
 Repository::Repository( const std::string& reponame_, const string& regex_ )
     : mark( 1 ), out( ( reponame_ + ".dump" ).c_str() )
@@ -63,9 +69,7 @@ ostream& Repository::modifyFile( const std::string& fname_, const char* mode_ )
 
 void Repository::commit( const Committer& committer_, const std::string& branch_, unsigned int commit_id_, time_t time_, const char* log_, size_t log_len_ )
 {
-#if 0
     if ( file_changes.length() != 0 )
-#endif
     {
         out << "commit refs/heads/" << branch_ << "\n";
 
@@ -83,7 +87,7 @@ void Repository::commit( const Committer& committer_, const std::string& branch_
     mark = 1;
 }
 
-void Repository::createBranch( const std::string& branch_, unsigned int from_ )
+void Repository::createBranch( const std::string& branch_, unsigned int from_, const std::string& from_branch_ )
 {
     unsigned int from = from_;
 
@@ -94,7 +98,7 @@ void Repository::createBranch( const std::string& branch_, unsigned int from_ )
     out << "reset refs/heads/" << branch_ << "\nfrom :" << from << "\n" << endl;
 }
 
-void Repository::createTag( const Committer& committer_, const std::string& name_, unsigned int from_, time_t time_, const char* log_, size_t log_len_ )
+void Repository::createTag( const Committer& committer_, const std::string& name_, unsigned int from_, const std::string& from_branch_, time_t time_, const char* log_, size_t log_len_ )
 {
     unsigned int from = from_;
 
@@ -106,7 +110,7 @@ void Repository::createTag( const Committer& committer_, const std::string& name
         << "\nfrom :" << from
         << "\ntagger " << committer_.name << " <" << committer_.email << "> " << time_ << " -0000\n"
         << "data " << log_len_ << "\n"
-        << log_ << "\n"
+        << log_
         << endl;
 }
 
@@ -152,14 +156,36 @@ bool Repositories::load( const char* fname_ )
             }
             else if ( command == "revision" )
             {
-                size_t equals = line.find( '=', arg );
-                if ( equals == string::npos )
+                size_t colon = line.find( ':', arg );
+                if ( colon == string::npos )
                     continue;
 
-                unsigned int from = atoi( line.substr( arg, equals - arg ).c_str() );
-                unsigned int to = atoi( line.substr( equals + 1 ).c_str() );
+                if ( line.substr( arg, colon - arg ) == "from" )
+                {
+                    size_t equals = line.find( '=', colon + 1 );
+                    if ( equals == string::npos )
+                        continue;
 
-                revision_changes[from] = to;
+                    unsigned int from = atoi( line.substr( colon + 1, equals - colon - 1 ).c_str() );
+                    unsigned int to = atoi( line.substr( equals + 1 ).c_str() );
+
+                    revision_changes[from] = to;
+                }
+                else if ( line.substr( arg, colon - arg ) == "ignore" )
+                {
+                    unsigned int which = atoi( line.substr( colon + 1 ).c_str() );
+                    if ( which > 0 )
+                        revision_ignore.insert( which );
+                }
+            }
+            else if ( command == "tag" )
+            {
+                size_t colon = line.find( ':', arg );
+                if ( colon == string::npos )
+                    continue;
+
+                if ( line.substr( arg, colon - arg ) == "ignore" )
+                    tag_ignore.insert( line.substr( colon + 1 ) );
             }
 
             continue;
@@ -215,16 +241,30 @@ void Repositories::commit( const Committer& committer_, const std::string& branc
         (*it)->commit( committer_, branch_, commit_id_, time_, log_, log_len_ );
 }
 
-void Repositories::createBranch( const std::string& branch_, unsigned int from_ )
+void Repositories::createBranch( const std::string& branch_, unsigned int from_, const std::string& from_branch_ )
 {
     for ( Repos::iterator it = repos.begin(); it != repos.end(); ++it )
-        (*it)->createBranch( branch_, from_ );
+        (*it)->createBranch( branch_, from_, from_branch_ );
 
     branches.insert( branch_ );
 }
 
-void Repositories::createTag( const Committer& committer_, const std::string& name_, unsigned int from_, time_t time_, const char* log_, size_t log_len_ )
+void Repositories::createTag( const Committer& committer_, const std::string& name_, unsigned int from_, const std::string& from_branch_, time_t time_, const char* log_, size_t log_len_ )
 {
     for ( Repos::iterator it = repos.begin(); it != repos.end(); ++it )
-        (*it)->createTag( committer_, name_, from_, time_, log_, log_len_ );
+        (*it)->createTag( committer_, name_, from_, from_branch_, time_, log_, log_len_ );
+}
+
+bool Repositories::ignoreRevision( unsigned int commit_id_ )
+{
+    RevisionIgnore::const_iterator it = revision_ignore.find( commit_id_ );
+
+    return ( it != revision_ignore.end() );
+}
+
+bool Repositories::ignoreTag( const string& name_ )
+{
+    TagIgnore::const_iterator it = tag_ignore.find( name_ );
+
+    return ( it != tag_ignore.end() );
 }
