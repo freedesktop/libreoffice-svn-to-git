@@ -15,14 +15,17 @@ andersca|Anders Carlsson|andersca@codefactory.se
 aprosky|Andreas Proschofsky|suka@gentoo.org
 arekm|Arkadiusz Miskiewicz|arekm@pld-linux.org
 ashrivastava|Amit Shrivastava|samit@novell.com
+ashwanth|Ashwanth Premchandran|apremchandran@novell.com
 atimar|Andras Timar|timar@fsf.hu
 baddog|Abel Cheung|abelcheung@gmail.com
 bansz|Andras Timar|timar@gnome.hu
 bobmauchin|Robert-André Mauchin|zebob.m@pengzone.org
 brosenk|Bernhard Rosenkraenzer|bero@arklinux.org
 carlos|Carlos Perelló Marín|carlos@gnome.org
+cbosdo|Cedric Bosdonnat|cbosdonnat@novell.com
 ccheney|Chris Cheney|ccheney@ubuntu.com
 clyties|Clytie Siddall|clytie@riverland.net.au
+cmcnamara|Caolán McNamara|caolanm@redhat.com
 cneumair|Christian Neumair|chris@gnome-de.org
 cwryu|Changwoo Ryu|cwryu@debian.org
 danilo|Danilo Šegan|dsegan@gmx.net
@@ -30,6 +33,7 @@ davidf|David Fraser|davidf@sjsoft.com
 dcbw|Dan Williams|dcbw@redhat.com
 delacko|Robert Sedak|robert.sedak@sk.htnet.hr
 djihed|Djihed Afifi|djihed@gmail.com
+dkeskar|Dhananjay Keskar|dhananjay.v.keskar@intel.com
 dlodge|David Lodge|dave@cirt.net
 dnloreto|Duarte Loreto|happyguy_pt@hotmail.com
 dnylande|Daniel Nylander|po@danielnylander.se
@@ -42,6 +46,7 @@ gdvieira|Gustavo Maciel Dias Vieira|gdvieira@zaz.com.br
 gforcada|Gil Forcada|gforcada@gnome.org
 gghibo|Giuseppe Ghibò|ghibo@mandriva.com
 gintas|Gintautas Miliauskas|gintas@akl.lt
+gorkem|Görkem Çetin|gorkem@bahcesehir.edu.tr
 gowen|Gareth Owen|gowen72@yahoo.com
 grakic|Goran Rakić|grakic@devbase.net
 hbo|Han Bo|hanbo@redoffice.com
@@ -63,10 +68,12 @@ jpr|JP Rosevear|jpr@novell.com
 jtriplett|Josh Triplett|josh.trip@verizon.net
 karunakar|Guntupalli Karunakar|karunakar@freedomink.org
 kelemeng|Gabor Kelemen|kelemeng@gnome.hu
+kfoskey|Ken Foskey|foskey@optushome.com.au
 kmaraas|Kjartan Maraas|kmaraas@gnome.org
 kyoshida|Kohei Yoshida|kyoshida@novell.com
 lark|Wang Jian|lark@linux.net.cn
 laurenti|Laurent Dhima|laurenti@alblinux.net
+ldentz|Luiz Augusto von Dentz|luiz.dentz@indt.org.br
 leonardof|Leonardo Ferreira Fontenelle|leonardof@gnome.org
 lferrett|Luca Ferretti|elle.uca@libero.it
 marcel|Marcel Telka|marcel@telka.sk
@@ -81,9 +88,11 @@ mjayant|Jayant Madavi|mjayant@novell.com
 mklose|Matthias Klose|doko@ubuntu.com
 mkretzschmar|Martin Kretzschmar|m_kretzschmar@gmx.net
 mloiseleur|Michel Loiseleur|mloiseleur@linagora.com
+mnicel|Nicel KM|mnicel@novell.com
 mrl|Marcelo Ricardo Leitner|mrl@mandriva.com
 muthusub|Muthu Subramanian|muthusuba@gmail.com
 nakai|Yukihiro Nakai|nakai@gnome.gr.jp
+ndevaiah|Naren Devaiah|ndevaiah@openoffice.org
 noelpwer|Noel Power|noel.power@novell.com
 olau|Ole Laursen|olau@hardworking.dk
 pablo|Pablo Saratxaga|pablo@mandrakesoft.com
@@ -93,6 +102,7 @@ pflin|Fong Lin|pflin@novell.com
 pgeyleg|Pema Geyleg|pema.geyleg@gmail.com
 pkst|Kostas Papadimas|pkst@gnome.org
 pmladek|Petr Mladek|pmladek@suse.cz
+plaes|Priit Laes|amd@store20.com
 rasta|Yuriy Syrota|rasta@gnome.org
 redfox|Christophe Merlet|redfox@redfoxcenter.org
 rengelhard|Rene Engelhard|rene@debian.org
@@ -104,15 +114,22 @@ rvojta|Robert Vojta|rvojta@gmail.com
 sammi|Samúel Jón Gunnarsson|sammi@techattack.nu
 sebol|Hasbullah Bin Pit|sebol@ikhlas.com
 serrador|Francisco Javier F. Serrador|serrador@gnome.org
+shilpas|Sreeramalu Shilpa|sshilpa@novell.com
+shres|Shreyas Srinivasan|shres@gnome.org
 smurphy|Steve Murphy|murf@e-tools.com
 sragavan|Srinivasa Ragavan|sragavan@novell.com
 stano|Stanislav Visnovsky|visnovsky@nenya.ms.mff.cuni.cz
+stojmir|Ivan Stojmirov|stojmir@linux.net.mk
 strba|Fridrich Strba|fridrich.strba@bluewin.ch
 szalaik|Kalman Szalai - KAMI|kamihir@freemail.hu
 thorstenb|Thorsten Behrens|tbehrens@novell.com
+tjyrinki|Timo Jyrinki|timo.jyrinki@iki.fi
 tml|Tor Lillqvist|tml@novell.com
 tvainika|Tommi Vainikainen|thv@iki.fi
 vmiklos|Miklos Vajna|vmiklos@frugalware.org
 vsichi|Vladimer Sichinava|vsichi@gnome.org
+vquetschke|Volker Quetschke|quetschke@scytek.de
 wadimd|Wadim Dziedzic|wdziedzic@aviary.pl
 yairhr|Yair Hershkovitz|yairhr@gmail.com
+ymarcheg|Yannig Marchegay|yannig@marchegay.org
+yyabuki|Yukiharu Yabuki|yyabuki@stormix.com
