@@ -38,6 +38,8 @@
 #define apr_sane_push(arr, contents) *(char **)apr_array_push(arr) = contents
 
 #define TRUNK "/trunk/"
+#define BRANCHES "/branches/"
+#define TAGS "/tags/"
 
 using namespace std;
 
@@ -93,7 +95,16 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
 
     revpool = svn_pool_create(pool);
 
-    bool any_changes = false;
+    author = static_cast<svn_string_t*>( apr_hash_get(props, "svn:author", APR_HASH_KEY_STRING) );
+    if (svn_string_isempty(author))
+        author = svn_string_create("nobody", pool);
+    svndate = static_cast<svn_string_t*>( apr_hash_get(props, "svn:date", APR_HASH_KEY_STRING) );
+    time_t epoch = get_epoch( static_cast<const char *>( svndate->data ) );
+
+    svnlog = static_cast<svn_string_t*>( apr_hash_get(props, "svn:log", APR_HASH_KEY_STRING) );
+
+    string branch;
+    bool no_changes = true;
     for (i = apr_hash_first(pool, changes); i; i = apr_hash_next(i)) {
         svn_pool_clear(revpool);
         apr_hash_this(i, &key, NULL, &val);
@@ -102,14 +113,77 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
 
         SVN_ERR(svn_fs_is_dir(&is_dir, fs_root, path, revpool));
 
-        if (is_dir || strncmp(TRUNK, path, strlen(TRUNK))) {
+        if ( is_dir )
+        {
+            if ( ( strncmp( BRANCHES, path, strlen( BRANCHES ) ) == 0 ) ||
+                 ( strncmp( TAGS, path, strlen( TAGS ) ) == 0 ) )
+            {
+                bool is_branch = ( strncmp( BRANCHES, path, strlen( BRANCHES ) ) == 0 );
+
+                string tmp( is_branch? path + strlen( BRANCHES ): path + strlen( TAGS ) );
+                if ( tmp.find( '/' ) != string::npos )
+                    continue;
+
+                // is it a new branch/tag
+                svn_revnum_t rev_from;
+                const char* path_from;
+                SVN_ERR( svn_fs_copied_from( &rev_from, &path_from, fs_root, path, revpool ) );
+                if ( path_from != NULL )
+                {
+                    if ( is_branch )
+                        Repositories::createBranch( tmp, rev_from );
+                    else
+                        Repositories::createTag( Committers::getAuthor( author->data ),
+                                tmp, rev_from, epoch,
+                                svnlog->data, svnlog->len );
+                }
+            }
+
             continue;
         }
 
-        Repository& repo = Repositories::get( path + strlen(TRUNK) );
+        string fname;
+        if ( strncmp( TRUNK, path, strlen( TRUNK ) ) == 0 )
+        {
+            if ( branch.empty() )
+                branch = "master";
+            else if ( branch != "master" )
+            {
+                fprintf( stderr, "ERROR: Found a commit that mixes changes in trunk and a branch (%s).\n", branch.c_str() );
+                continue;
+            }
+            fname = path + strlen( TRUNK );
+        }
+        else if ( strncmp( BRANCHES, path, strlen( BRANCHES ) ) == 0 )
+        {
+            string tmp( path + strlen( BRANCHES ) );
+            size_t slash = tmp.find( '/' );
+            if ( slash == string::npos )
+                continue;
+
+            if ( branch.empty() )
+                branch = tmp.substr( 0, slash );
+            else if ( branch != tmp.substr( 0, slash ) )
+            {
+                fprintf( stderr, "ERROR: Found a commit that mixes changes in two branches (%s, %s).\n",
+                        branch.c_str(), tmp.substr( 0, slash ).c_str() );
+                continue;
+            }
+
+            fname = tmp.substr( slash + 1 );
+        }
+        else if ( strncmp( TAGS, path, strlen( TAGS ) ) == 0 )
+        {
+            fprintf( stderr, "ERROR: Attempting to commit to a tag '%s'.\n", path + strlen( TAGS ) );
+            continue;
+        }
+        else
+            continue;
+
+        Repository& repo = Repositories::get( fname );
 
         if (change->change_kind == svn_fs_path_change_delete) {
-            repo.deleteFile( path + strlen(TRUNK) );
+            repo.deleteFile( fname );
         } else {
             svn_string_t *propvalue;
             SVN_ERR(svn_fs_node_prop(&propvalue, fs_root, (char *)path, "svn:executable", pool));
@@ -121,30 +195,24 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
             if (propvalue)
                 fprintf(stderr, "ERROR: Got a symlink; we cannot handle symlinks now.\n");
 
-            ostream& out = repo.modifyFile( path + strlen(TRUNK), mode );
+            ostream& out = repo.modifyFile( fname, mode );
 
             dump_blob(fs_root, (char *)path, revpool, out);
         }
 
-        any_changes = true;
+        no_changes = false;
     }
 
-    if ( !any_changes )
+    if ( no_changes || branch.empty() )
     {
         fprintf( stderr, "skipping.\n" );
         svn_pool_destroy( revpool );
         return 0;
     }
 
-    author = static_cast<svn_string_t*>( apr_hash_get(props, "svn:author", APR_HASH_KEY_STRING) );
-    if (svn_string_isempty(author))
-        author = svn_string_create("nobody", pool);
-    svndate = static_cast<svn_string_t*>( apr_hash_get(props, "svn:date", APR_HASH_KEY_STRING) );
-    svnlog = static_cast<svn_string_t*>( apr_hash_get(props, "svn:log", APR_HASH_KEY_STRING) );
-
     Repositories::commit( Committers::getAuthor( author->data ),
-            rev,
-            get_epoch( static_cast<const char *>( svndate->data ) ),
+            branch, rev,
+            epoch,
             svnlog->data, svnlog->len );
 
     svn_pool_destroy(revpool);

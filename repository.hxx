@@ -32,16 +32,22 @@ public:
     ~Repository();
 
     /// Does the file belong to this repository (based on the regex we got?)
-    bool matches( const char* fname_ ) const;
+    bool matches( const std::string& fname_ ) const;
 
     /// The file should be marked for deletion.
-    void deleteFile( const char* fname_ );
+    void deleteFile( const std::string& fname_ );
 
     /// The file should be marked for addition/modification.
-    std::ostream& modifyFile( const char* fname_, const char* mode_ );
+    std::ostream& modifyFile( const std::string& fname_, const char* mode_ );
 
     /// Commit all the changes we did.
-    void commit( const Committer& committer_, unsigned int commit_id_, time_t time_, const char* log_, size_t log_len_ );
+    void commit( const Committer& committer_, const std::string& branch_, unsigned int commit_id_, time_t time_, const char* log_, size_t log_len_ );
+
+    /// Create a branch.
+    void createBranch( const std::string& branch_, unsigned int from_ );
+
+    /// Create a tag.
+    void createTag( const Committer& committer_, const std::string& name_, unsigned int from_, time_t time_, const char* log_, size_t log_len_ );
 };
 
 namespace Repositories
@@ -53,10 +59,16 @@ namespace Repositories
     void close();
 
     /// Get the right repository according to the filename.
-    Repository& get( const char* fname_ );
+    Repository& get( const std::string& fname_ );
 
     /// Commit to the all repositories that have some changes.
-    void commit( const Committer& committer_, unsigned int commit_id_, time_t time_, const char* log_, size_t log_len_ );
+    void commit( const Committer& committer_, const std::string& branch_, unsigned int commit_id_, time_t time_, const char* log_, size_t log_len_ );
+
+    /// Create a branch in all the repositories.
+    void createBranch( const std::string& branch_, unsigned int from_ );
+
+    /// Create a tag in all the repositories.
+    void createTag( const Committer& committer_, const std::string& name_, unsigned int from_, time_t time_, const char* log_, size_t log_len_ );
 }
 
 #endif // _REPOSITORY_HXX_
