@@ -6,8 +6,8 @@
 SOURCE="$1"
 TARGET="$2"
 
-COMMITTERS="committers.txt"
-LAYOUT="reposlayout.txt"
+COMMITTERS="ooo-committers.txt"
+LAYOUT="ooo-repositories.txt"
 
 WD=`pwd`
 
