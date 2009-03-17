@@ -96,8 +96,8 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
     revpool = svn_pool_create(pool);
 
     author = static_cast<svn_string_t*>( apr_hash_get(props, "svn:author", APR_HASH_KEY_STRING) );
-    if (svn_string_isempty(author))
-        author = svn_string_create("nobody", pool);
+    if ( !author || svn_string_isempty( author ) )
+        author = svn_string_create( "nobody", pool );
     svndate = static_cast<svn_string_t*>( apr_hash_get(props, "svn:date", APR_HASH_KEY_STRING) );
     time_t epoch = get_epoch( static_cast<const char *>( svndate->data ) );
 

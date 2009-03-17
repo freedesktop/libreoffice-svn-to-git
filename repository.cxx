@@ -1,4 +1,5 @@
 #include "committers.hxx"
+#include "filter.hxx"
 #include "repository.hxx"
 
 #include <iostream>
@@ -7,6 +8,16 @@
 #include <vector>
 
 using namespace std;
+
+typedef vector< Repository* > Repos;
+typedef set< string > Branches;
+typedef map< unsigned int, unsigned int > RevisionChanges;
+
+static Repos repos;
+
+static Branches branches;
+
+static RevisionChanges revision_changes;
 
 Repository::Repository( const std::string& reponame_, const string& regex_ )
     : mark( 1 ), out( ( reponame_ + ".dump" ).c_str() )
@@ -52,7 +63,9 @@ ostream& Repository::modifyFile( const std::string& fname_, const char* mode_ )
 
 void Repository::commit( const Committer& committer_, const std::string& branch_, unsigned int commit_id_, time_t time_, const char* log_, size_t log_len_ )
 {
+#if 0
     if ( file_changes.length() != 0 )
+#endif
     {
         out << "commit refs/heads/" << branch_ << "\n";
 
@@ -72,25 +85,30 @@ void Repository::commit( const Committer& committer_, const std::string& branch_
 
 void Repository::createBranch( const std::string& branch_, unsigned int from_ )
 {
-    out << "reset refs/heads/" << branch_ << "\nfrom :" << from_ << "\n" << endl;
+    unsigned int from = from_;
+
+    RevisionChanges::const_iterator it( revision_changes.find( from_ ) );
+    if ( it != revision_changes.end() )
+        from = it->second;
+    
+    out << "reset refs/heads/" << branch_ << "\nfrom :" << from << "\n" << endl;
 }
 
 void Repository::createTag( const Committer& committer_, const std::string& name_, unsigned int from_, time_t time_, const char* log_, size_t log_len_ )
 {
+    unsigned int from = from_;
+
+    RevisionChanges::const_iterator it( revision_changes.find( from_ ) );
+    if ( it != revision_changes.end() )
+        from = it->second;
+    
     out << "tag " << name_
-        << "\nfrom :" << from_
+        << "\nfrom :" << from
         << "\ntagger " << committer_.name << " <" << committer_.email << "> " << time_ << " -0000\n"
         << "data " << log_len_ << "\n"
         << log_ << "\n"
         << endl;
 }
-
-typedef vector< Repository* > Repos;
-typedef set< string > Branches;
-
-static Repos repos;
-
-static Branches branches;
 
 bool Repositories::load( const char* fname_ )
 {
@@ -106,8 +124,49 @@ bool Repositories::load( const char* fname_ )
         if ( line.length() == 0 || line[0] == '#' )
             continue;
 
+        // settings
+        if ( line[0] == ':' )
+        {
+            size_t space = line.find( ' ' );
+            if ( space == string::npos )
+                continue;
+
+            string command( line.substr( 1, space - 1 ) );
+            size_t arg = space + 1;
+            
+            if ( command == "set" )
+            {
+                size_t equals = line.find( '=', arg );
+                if ( equals == string::npos )
+                    continue;
+
+                if ( line.substr( arg, equals - arg ) == "tabs_to_spaces" )
+                {
+                    size_t comma = line.find( ',', equals + 1 );
+                    if ( comma = string::npos )
+                        Filter::setTabsToSpaces( atoi( line.substr( equals + 1 ).c_str() ), string( ".*" ) );
+                    else
+                        Filter::setTabsToSpaces( atoi( line.substr( equals + 1, comma - equals - 1 ).c_str() ),
+                                line.substr( comma + 1 ) );
+                }
+            }
+            else if ( command == "revision" )
+            {
+                size_t equals = line.find( '=', arg );
+                if ( equals == string::npos )
+                    continue;
+
+                unsigned int from = atoi( line.substr( arg, equals - arg ).c_str() );
+                unsigned int to = atoi( line.substr( equals + 1 ).c_str() );
+
+                revision_changes[from] = to;
+            }
+
+            continue;
+        }
+
         // find the separators
-        size_t delim = line.find( "=" );
+        size_t delim = line.find( '=' );
         if ( delim == string::npos )
         {
             fprintf( stderr, "ERROR: Wrong repository description '%s'\n", line.c_str() );

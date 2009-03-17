@@ -1,8 +1,20 @@
 #include "filter.hxx"
 
+#include <regex.h>
+
 #include <iostream>
 
 using namespace std;
+
+struct Tabs {
+    int spaces;
+    regex_t regex;
+
+    Tabs() : spaces( 0 ) {}
+    ~Tabs() { regfree( &regex ); }
+};
+
+static Tabs tabs;
 
 Filter::Filter( const char* fname_ )
     : tabs_to_spaces( true ),
@@ -11,65 +23,33 @@ Filter::Filter( const char* fname_ )
     data.reserve( 16384 );
 
     char* suffix = strrchr( fname_, '.' );
-    if ( suffix != NULL )
+    if ( tabs.spaces > 0 && suffix != NULL )
     {
         ++suffix;
-#define IS_SUFFIX( suf ) strcasecmp( suf, suffix ) == 0
-        if ( IS_SUFFIX( "c"   ) ||
-             IS_SUFFIX( "cpp" ) ||
-             IS_SUFFIX( "cxx" ) ||
-             IS_SUFFIX( "h"   ) ||
-             IS_SUFFIX( "hrc" ) ||
-             IS_SUFFIX( "hxx" ) ||
-             IS_SUFFIX( "idl" ) ||
-             IS_SUFFIX( "inl" ) ||
-             IS_SUFFIX( "java") ||
-             IS_SUFFIX( "map" ) ||
-             IS_SUFFIX( "mk"  ) ||
-             IS_SUFFIX( "pmk" ) ||
-             IS_SUFFIX( "pl"  ) ||
-             IS_SUFFIX( "pm"  ) ||
-             IS_SUFFIX( "sdi" ) ||
-             IS_SUFFIX( "sh"  ) ||
-             IS_SUFFIX( "src" ) ||
-             IS_SUFFIX( "tab" ) ||
-             IS_SUFFIX( "xcu" ) ||
-             IS_SUFFIX( "xml" ) )
-        {
+        if ( regexec( &tabs.regex, suffix, 0, NULL, 0 ) == 0 )
             type = FILTER_TABS;
-        }
-#undef IS_SUFFIX
     }
 }
 
 void Filter::addData( const char* data_, size_t len_ )
 {
-    switch ( type )
+    if ( type == NO_FILTER || tabs.spaces <= 0 )
     {
-        case NO_FILTER:   addDataNoFilter( data_, len_ ); break;
-        case FILTER_TABS: addDataFilterTabs( data_, len_ ); break;
+        data.append( data_, len_ );
+        return;
     }
-}
-
-void Filter::addDataNoFilter( const char* data_, size_t len_ )
-{
-    data.append( data_, len_ );
-}
-
-void Filter::addDataFilterTabs( const char* data_, size_t len_ )
-{
+    
+    // type == FILTER_TABS
     char tmp[4*len_];
     char *dest = tmp;
 
-    // convert the leading tabs to 4 spaces
+    // convert the leading tabs to N spaces (according to tabs.spaces)
     for ( const char* it = data_; it < data_ + len_; ++it )
     {
         if ( *it == '\t' && tabs_to_spaces )
         {
-            *dest++ = ' ';
-            *dest++ = ' ';
-            *dest++ = ' ';
-            *dest++ = ' ';
+            for ( int i = 0; i < tabs.spaces; ++i )
+                *dest++ = ' ';
             continue;
         }
         else if ( *it == '\n' )
@@ -87,4 +67,16 @@ void Filter::write( std::ostream& out_ )
 {
     out_ << "data " << data.size() << endl
          << data << endl;
+}
+
+void Filter::setTabsToSpaces( int how_many_spaces_, const std::string& files_regex_ )
+{
+    tabs.spaces = how_many_spaces_;
+
+    int status = regcomp( &tabs.regex, files_regex_.c_str(), REG_EXTENDED | REG_NOSUB );
+    if ( status != 0 )
+    {
+        fprintf( stderr, "ERROR: Cannot create regex '%s' (for tabs_to_spaces_files).\n", files_regex_.c_str() );
+        tabs.spaces = 0;
+    }
 }

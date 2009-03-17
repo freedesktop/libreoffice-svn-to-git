@@ -1,3 +1,10 @@
+# rewrite tabs to spaces
+:set tabs_to_spaces=4,\.(c|cpp|cxx|h|hrc|hxx|idl|inl|java|map|mk|MK|pmk|pl|pm|sdi|sh|src|tab|xcu|xml)$
+
+# change some revevisions (for tags and branches)
+:revision 261917=261912
+
+# the actual layout of the repository
 l10n=[Ll][Oo][Cc][Aa][Ll][Ii][Zz][Ee]\.[Ss][Dd][Ff]$
 ure=^(bridges|cli_ure|codemaker|cppu|cppuhelper|cpputools|idlc|io|javaunohelper|jurt|jvmaccess|jvmfwk|offapi|offuh|pyuno|rdbmaker|registry|remotebridges|ridljar|sal|salhelper|stoc|store|udkapi|unoil|ure|xml2cmp|jut)\>
 sdk=^(autodoc|cosv|odk|udm|unodevtools)\>

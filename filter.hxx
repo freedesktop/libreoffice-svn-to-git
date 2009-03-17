@@ -24,10 +24,7 @@ public:
 
     void write( std::ostream& out_ );
 
-private:
-    void addDataNoFilter( const char* data_, size_t len_ );
-
-    void addDataFilterTabs( const char* data_, size_t len_ );
+    static void setTabsToSpaces( int how_many_spaces_, const std::string& files_regex_ );
 };
 
 #endif // _FILTER_HXX_
