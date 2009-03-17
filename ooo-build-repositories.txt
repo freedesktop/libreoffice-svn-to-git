@@ -1,0 +1,4 @@
+# the actual layout of the repository
+www=^www\>
+buildbot=^scratch\/buildbot\>
+ooo-build=.*
