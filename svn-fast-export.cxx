@@ -257,7 +257,7 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
     return 0;
 }
 
-int crawl_revisions(char *repos_path)
+int crawl_revisions( char *repos_path, const char* repos_config )
 {
     apr_pool_t   *pool, *subpool;
     svn_fs_t     *fs;
@@ -274,6 +274,12 @@ int crawl_revisions(char *repos_path)
 
     min_rev = 1;
     max_rev = youngest_rev;
+
+    if ( !Repositories::load( repos_config, max_rev ) )
+    {
+        fprintf( stderr, "ERROR: Must have at least one valid repository definition.\n" );
+        return 1;
+    }
 
     subpool = svn_pool_create(pool);
     for (rev = min_rev; rev <= max_rev; rev++) {
@@ -300,13 +306,7 @@ int main(int argc, char *argv[])
 
     Committers::load( argv[2] );
 
-    if ( !Repositories::load( argv[3] ) )
-    {
-        fprintf( stderr, "ERROR: Must have at least one valid repository definition.\n" );
-        return 1;
-    }
-
-    crawl_revisions( argv[1] );
+    crawl_revisions( argv[1], argv[3] );
 
     apr_terminate();
 

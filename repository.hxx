@@ -25,9 +25,14 @@ class Repository
     /// can feed the git fast-import(s).
     std::ofstream out;
 
+    /// We have to remember our commits
+    ///
+    /// Index - commit number, content - branch id.
+    unsigned char* commits;
+
 public:
     /// The regex_ is here to decide if the file belongs to this repository.
-    Repository( const std::string& reponame_, const std::string& regex_ );
+    Repository( const std::string& reponame_, const std::string& regex_, unsigned int max_revs_ );
 
     ~Repository();
 
@@ -48,12 +53,16 @@ public:
 
     /// Create a tag.
     void createTag( const Committer& committer_, const std::string& name_, unsigned int from_, const std::string& from_branch_, time_t time_, const char* log_, size_t log_len_ );
+
+private:
+    /// Find the most recent commit to the specified branch smaller than the reference one.
+    unsigned int findCommit( unsigned int from_, const std::string& from_branch_ );
 };
 
 namespace Repositories
 {
     /// Load the repositories layout from the config file.
-    bool load( const char* fname_ );
+    bool load( const char* fname_, unsigned int max_revs_ );
 
     /// Close all the repositories.
     void close();

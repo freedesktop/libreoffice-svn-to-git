@@ -11,31 +11,43 @@ using namespace std;
 
 typedef vector< Repository* > Repos;
 typedef set< string > Branches;
-typedef map< unsigned int, unsigned int > RevisionChanges;
 typedef set< unsigned int > RevisionIgnore;
 typedef set< string > TagIgnore;
+typedef vector< string > BranchIds;
 
 static Repos repos;
-
 static Branches branches;
-
-static RevisionChanges revision_changes;
-
 static RevisionIgnore revision_ignore;
-
 static TagIgnore tag_ignore;
+static BranchIds branch_ids;
 
-Repository::Repository( const std::string& reponame_, const string& regex_ )
-    : mark( 1 ), out( ( reponame_ + ".dump" ).c_str() )
+static unsigned char branchId( const string& branch_ )
+{
+    unsigned char id = 1;
+    BranchIds::const_iterator it = branch_ids.begin();
+
+    for ( ; ( it != branch_ids.end() ) && ( *it != branch_ ); ++it, ++id );
+
+    if ( it == branch_ids.end() )
+        branch_ids.push_back( branch_ );
+
+    return id;
+}
+
+Repository::Repository( const std::string& reponame_, const string& regex_, unsigned int max_revs_ )
+    : mark( 1 ), out( ( reponame_ + ".dump" ).c_str() ), commits( new unsigned char[max_revs_ + 10] )
 {
     int status = regcomp( &regex_rule, regex_.c_str(), REG_EXTENDED | REG_NOSUB );
     if ( status != 0 )
         fprintf( stderr, "ERROR: Cannot create regex '%s'.\n", regex_.c_str() );
+
+    memset( commits, 0, ( max_revs_ + 10 ) * sizeof( unsigned char ) );
 }
 
 Repository::~Repository()
 {
     regfree( &regex_rule );
+    delete[] commits;
 }
 
 bool Repository::matches( const std::string& fname_ ) const
@@ -81,6 +93,8 @@ void Repository::commit( const Committer& committer_, const std::string& branch_
             << log_ << "\n"
             << file_changes
             << endl;
+
+        commits[commit_id_] = branchId( branch_ );
     }
 
     file_changes.clear();
@@ -89,23 +103,19 @@ void Repository::commit( const Committer& committer_, const std::string& branch_
 
 void Repository::createBranch( const std::string& branch_, unsigned int from_, const std::string& from_branch_ )
 {
-    unsigned int from = from_;
+    unsigned int from = findCommit( from_, from_branch_ );
+    if ( from == 0 )
+        return;
 
-    RevisionChanges::const_iterator it( revision_changes.find( from_ ) );
-    if ( it != revision_changes.end() )
-        from = it->second;
-    
     out << "reset refs/heads/" << branch_ << "\nfrom :" << from << "\n" << endl;
 }
 
 void Repository::createTag( const Committer& committer_, const std::string& name_, unsigned int from_, const std::string& from_branch_, time_t time_, const char* log_, size_t log_len_ )
 {
-    unsigned int from = from_;
+    unsigned int from = findCommit( from_, from_branch_ );
+    if ( from == 0 )
+        return;
 
-    RevisionChanges::const_iterator it( revision_changes.find( from_ ) );
-    if ( it != revision_changes.end() )
-        from = it->second;
-    
     out << "tag " << name_
         << "\nfrom :" << from
         << "\ntagger " << committer_.name << " <" << committer_.email << "> " << time_ << " -0000\n"
@@ -114,7 +124,18 @@ void Repository::createTag( const Committer& committer_, const std::string& name
         << endl;
 }
 
-bool Repositories::load( const char* fname_ )
+unsigned int Repository::findCommit( unsigned int from_, const std::string& from_branch_ )
+{
+    unsigned char branch_id = branchId( from_branch_ );
+    unsigned int commit_no = from_;
+    
+    while ( commit_no > 0 && commits[commit_no] != branch_id )
+        --commit_no;
+
+    return commit_no;
+}
+
+bool Repositories::load( const char* fname_, unsigned int max_revs_ )
 {
     ifstream input( fname_, ifstream::in );
     string line;
@@ -160,18 +181,7 @@ bool Repositories::load( const char* fname_ )
                 if ( colon == string::npos )
                     continue;
 
-                if ( line.substr( arg, colon - arg ) == "from" )
-                {
-                    size_t equals = line.find( '=', colon + 1 );
-                    if ( equals == string::npos )
-                        continue;
-
-                    unsigned int from = atoi( line.substr( colon + 1, equals - colon - 1 ).c_str() );
-                    unsigned int to = atoi( line.substr( equals + 1 ).c_str() );
-
-                    revision_changes[from] = to;
-                }
-                else if ( line.substr( arg, colon - arg ) == "ignore" )
+                if ( line.substr( arg, colon - arg ) == "ignore" )
                 {
                     unsigned int which = atoi( line.substr( colon + 1 ).c_str() );
                     if ( which > 0 )
@@ -199,7 +209,7 @@ bool Repositories::load( const char* fname_ )
             continue;
         }
 
-        repos.push_back( new Repository( line.substr( 0, delim ), line.substr( delim + 1 ) ) );
+        repos.push_back( new Repository( line.substr( 0, delim ), line.substr( delim + 1 ), max_revs_ ) );
 
         result = true;
     }
