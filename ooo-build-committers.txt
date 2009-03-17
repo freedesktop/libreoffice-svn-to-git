@@ -24,6 +24,7 @@ brosenk|Bernhard Rosenkraenzer|bero@arklinux.org
 carlos|Carlos Perelló Marín|carlos@gnome.org
 cbosdo|Cedric Bosdonnat|cbosdonnat@novell.com
 ccheney|Chris Cheney|ccheney@ubuntu.com
+challs|Chris Halls|halls@debian.org
 clyties|Clytie Siddall|clytie@riverland.net.au
 cmcnamara|Caolán McNamara|caolanm@redhat.com
 cneumair|Christian Neumair|chris@gnome-de.org
@@ -52,7 +53,6 @@ grakic|Goran Rakić|grakic@devbase.net
 hbo|Han Bo|hanbo@redoffice.com
 hmth|Hanno Meyer-Thurow|h.mth@web.de
 hub|Hubert Figuiere|hub@figuiere.net
-challs|Chris Halls|halls@debian.org
 icq|Ignacio Casal Quinteiro|nacho.resa@gmail.com
 iharh|Ihar Hrachyshka|ihar.hrachyshka@gmail.com
 ismaild|İsmail Dönmez|ismail@pardus.org.tr

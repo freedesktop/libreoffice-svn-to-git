@@ -1,3 +1,7 @@
+# ignore some revisions/tags completely (broken ones)
+#:revision ignore:XYZ
+:tag ignore:OPENOFFICE
+
 # the actual layout of the repository
 www=^www\>
 buildbot=^scratch\/buildbot\>
