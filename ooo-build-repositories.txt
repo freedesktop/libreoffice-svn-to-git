@@ -1,8 +1,12 @@
+# change the commit messages from ChangeLog-like to git-like
+:set convert_commit_messages
+
 # ignore some revisions/tags completely (broken ones)
 #:revision ignore:XYZ
 :tag ignore:OPENOFFICE
 
 # the actual layout of the repository
+changelogs=\<ChangeLog
 www=^www\>
 buildbot=^scratch\/buildbot\>
 ooo-build=.*

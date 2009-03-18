@@ -162,7 +162,7 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
                                 tmp,
                                 rev_from, from_branch,
                                 epoch,
-                                svnlog->data, svnlog->len );
+                                string( svnlog->data, svnlog->len ) );
                 }
             }
 
@@ -248,7 +248,7 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
     Repositories::commit( Committers::getAuthor( author->data ),
             branch, rev,
             epoch,
-            svnlog->data, svnlog->len );
+            string( svnlog->data, svnlog->len ) );
 
     svn_pool_destroy(revpool);
 
