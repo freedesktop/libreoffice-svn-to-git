@@ -13,6 +13,12 @@ class Repository
     /// Remember what files we changed and how (deletes/modifications).
     std::string file_changes;
 
+    /// Remember the copies of paths.
+    ///
+    /// We cannot use file_changes here, because this has to happen before the
+    /// deletion of the source paths.
+    std::string path_copies;
+
     /// Counter for the files.
     unsigned int mark;
 
@@ -44,6 +50,9 @@ public:
 
     /// The file should be marked for addition/modification.
     std::ostream& modifyFile( const std::string& fname_, const char* mode_ );
+
+    /// Copy an entire subdir.
+    void copyPath( const std::string& from_, const std::string& to_ );
 
     /// Commit all the changes we did.
     void commit( const Committer& committer_, const std::string& branch_, unsigned int commit_id_, time_t time_, const std::string& log_ );

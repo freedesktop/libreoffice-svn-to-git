@@ -221,9 +221,18 @@ ostream& Repository::modifyFile( const std::string& fname_, const char* mode_ )
     return out;
 }
 
+void Repository::copyPath( const std::string& from_, const std::string& to_ )
+{
+    path_copies.append( "C " );
+    path_copies.append( from_ );
+    path_copies.append( " " );
+    path_copies.append( to_ );
+    path_copies.append( "\n" );
+}
+
 void Repository::commit( const Committer& committer_, const std::string& branch_, unsigned int commit_id_, time_t time_, const std::string& log_ )
 {
-    if ( file_changes.length() != 0 )
+    if ( !file_changes.empty() || !path_copies.empty() )
     {
         out << "commit refs/heads/" << branch_ << "\n";
 
@@ -235,6 +244,7 @@ void Repository::commit( const Committer& committer_, const std::string& branch_
         out << "committer " << committer_.name << " <" << committer_.email << "> " << time_ << " -0000\n"
             << "data " << log.length() << "\n"
             << log << "\n"
+            << path_copies
             << file_changes
             << endl;
 
@@ -242,6 +252,7 @@ void Repository::commit( const Committer& committer_, const std::string& branch_
     }
 
     file_changes.clear();
+    path_copies.clear();
     mark = 1;
 }
 

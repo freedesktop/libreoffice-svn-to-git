@@ -6,7 +6,7 @@
 :tag ignore:OPENOFFICE
 
 # the actual layout of the repository
-changelogs=\<ChangeLog
-www=^www\>
-buildbot=^scratch\/buildbot\>
+changelogs=^(ChangeLog|po/ChangeLog|bonobo/po/ChangeLog|bonobo/ChangeLog)
+website=^www\>
+buildbot=^scratch/buildbot\>
 ooo-build=.*

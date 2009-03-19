@@ -52,7 +52,7 @@ static time_t get_epoch( const char *svn_date )
     return mktime(&tm);
 }
 
-int dump_blob(svn_fs_root_t *root, char *full_path, apr_pool_t *pool, ostream& out)
+static int dump_blob(svn_fs_root_t *root, char *full_path, apr_pool_t *pool, ostream& out)
 {
     svn_stream_t   *stream;
 
@@ -72,6 +72,65 @@ int dump_blob(svn_fs_root_t *root, char *full_path, apr_pool_t *pool, ostream& o
     filter.write( out );
 
     return 0;
+}
+
+static bool is_trunk( const char* path_ )
+{
+    return strncmp( TRUNK, path_, strlen( TRUNK ) ) == 0;
+}
+
+static bool is_branch( const char* path_ )
+{
+    return strncmp( BRANCHES, path_, strlen( BRANCHES ) ) == 0;
+}
+
+static bool is_tag( const char* path_ )
+{
+    return strncmp( TAGS, path_, strlen( TAGS ) ) == 0;
+}
+
+static string branch_name( const char* path_ )
+{
+    if ( is_trunk( path_ ) )
+        return string( "master" );
+    else
+    {
+        string tmp;
+        if ( is_branch( path_ ) )
+            tmp = path_ + strlen( BRANCHES );
+        else if ( is_tag( path_ ) )
+            tmp = path_ + strlen( TAGS );
+        else
+            return string();
+
+        size_t slash = tmp.find( '/' );
+        if ( slash == string::npos )
+            return tmp;
+        else
+            return tmp.substr( 0, slash );
+    }
+}
+
+static string file_name( const char* path_ )
+{
+    if ( is_trunk( path_ ) )
+        return string( path_ + strlen( TRUNK ) );
+    else
+    {
+        string tmp;
+        if ( is_branch( path_ ) )
+            tmp = path_ + strlen( BRANCHES );
+        else if ( is_tag( path_ ) )
+            tmp = path_ + strlen( TAGS );
+        else
+            return string();
+
+        size_t slash = tmp.find( '/' );
+        if ( slash == string::npos )
+            return string();
+        else
+            return tmp.substr( slash + 1 );
+    }
 }
 
 int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
@@ -124,102 +183,101 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
             debug_once = false;
         }
 
+        // don't care about anything in the toplevel
+        if ( path[0] != '/' || strchr( path + 1, '/' ) == NULL )
+            continue;
+
         SVN_ERR(svn_fs_is_dir(&is_dir, fs_root, path, revpool));
 
-        if ( is_dir )
+        // detect creation of branch/tag
+        if ( is_dir && change->change_kind == svn_fs_path_change_add )
         {
-            if ( ( strncmp( BRANCHES, path, strlen( BRANCHES ) ) == 0 ) ||
-                 ( strncmp( TAGS, path, strlen( TAGS ) ) == 0 ) )
+            // create a new branch/tag?
+            if ( is_branch( path ) || is_tag( path ) )
             {
-                bool is_branch = ( strncmp( BRANCHES, path, strlen( BRANCHES ) ) == 0 );
+                bool branching = is_branch( path );
 
-                string tmp( is_branch? path + strlen( BRANCHES ): path + strlen( TAGS ) );
-                if ( tmp.find( '/' ) != string::npos )
-                    continue;
-
-                if ( !is_branch && Repositories::ignoreTag( tmp ) )
-                    continue;
-
-                // is it a new branch/tag
-                svn_revnum_t rev_from;
-                const char* path_from;
-                SVN_ERR( svn_fs_copied_from( &rev_from, &path_from, fs_root, path, revpool ) );
-                if ( path_from != NULL )
+                string tmp( branch_name( path ) );
+                if ( file_name( path ).empty() )
                 {
-                    string from_branch( "master" );
-                    if ( strncmp( BRANCHES, path_from, strlen( BRANCHES ) ) == 0 )
-                        from_branch = path_from + strlen( BRANCHES );
-                    else if ( strncmp( TAGS, path_from, strlen( TAGS ) ) == 0 )
-                        from_branch = path_from + strlen( TAGS );
-
-                    if ( from_branch.find( '/' ) != string::npos )
+                    if ( !branching && Repositories::ignoreTag( tmp ) )
                         continue;
-                    
-                    if ( is_branch )
-                        Repositories::createBranch( tmp, rev_from, from_branch );
-                    else
-                        Repositories::createTag( Committers::getAuthor( author->data ),
-                                tmp,
-                                rev_from, from_branch,
-                                epoch,
-                                string( svnlog->data, svnlog->len ) );
+
+                    // is it a new branch/tag
+                    svn_revnum_t rev_from;
+                    const char* path_from;
+                    SVN_ERR( svn_fs_copied_from( &rev_from, &path_from, fs_root, path, revpool ) );
+                    if ( path_from != NULL )
+                    {
+                        string from_branch( branch_name( path_from ) );
+
+                        if ( file_name( path_from ).empty() )
+                        {
+                            if ( branching )
+                                Repositories::createBranch( tmp, rev_from, from_branch );
+                            else
+                                Repositories::createTag( Committers::getAuthor( author->data ),
+                                        tmp,
+                                        rev_from, from_branch,
+                                        epoch,
+                                        string( svnlog->data, svnlog->len ) );
+                        }
+                    }
+                    continue;
                 }
             }
+        }
 
+        string fname( file_name( path ) );
+        string check_branch( branch_name( path ) );
+
+        if ( is_tag( path ) )
+        {
+            if ( Repositories::ignoreTag( check_branch ) )
+                continue;
+
+            fprintf( stderr, "ERROR: Attempting to commit to a tag (%s).\n", check_branch.c_str() );
             continue;
         }
 
-        string fname;
-        if ( strncmp( TRUNK, path, strlen( TRUNK ) ) == 0 )
+        // sanity check
+        if ( branch.empty() )
+            branch = check_branch;
+        else if ( branch != check_branch )
         {
-            if ( branch.empty() )
-                branch = "master";
-            else if ( branch != "master" )
-            {
-                fprintf( stderr, "ERROR: Found a commit that mixes changes in trunk and a branch (%s).\n", branch.c_str() );
-                continue;
-            }
-            fname = path + strlen( TRUNK );
-        }
-        else if ( strncmp( BRANCHES, path, strlen( BRANCHES ) ) == 0 )
-        {
-            string tmp( path + strlen( BRANCHES ) );
-            size_t slash = tmp.find( '/' );
-            if ( slash == string::npos )
-                continue;
-
-            if ( branch.empty() )
-                branch = tmp.substr( 0, slash );
-            else if ( branch != tmp.substr( 0, slash ) )
-            {
-                fprintf( stderr, "ERROR: Found a commit that mixes changes in two branches (%s, %s).\n",
-                        branch.c_str(), tmp.substr( 0, slash ).c_str() );
-                continue;
-            }
-
-            fname = tmp.substr( slash + 1 );
-        }
-        else if ( strncmp( TAGS, path, strlen( TAGS ) ) == 0 )
-        {
-            string tag( path + strlen( TAGS ) );
-            size_t slash = tag.find( '/' );
-            if ( ( slash == string::npos && Repositories::ignoreTag( tag ) ) ||
-                 ( slash != string::npos && Repositories::ignoreTag( tag.substr( 0, slash ) ) ) )
-            {
-                continue;
-            }
-
-            fprintf( stderr, "ERROR: Attempting to commit to a tag (%s).\n", path + strlen( TAGS ) );
+            fprintf( stderr, "ERROR: Found a commit that mixes changes in two branches ('%s', when the branch is '%s').\n",
+                    path, branch.c_str() );
             continue;
         }
-        else
-            continue;
 
+        // get the repository where do we want to commit
         Repository& repo = Repositories::get( fname );
 
-        if (change->change_kind == svn_fs_path_change_delete) {
+        // add/remove/move the files
+        if ( change->change_kind == svn_fs_path_change_delete )
             repo.deleteFile( fname );
-        } else {
+        else if ( is_dir )
+        {
+            svn_revnum_t rev_from;
+            const char* path_from;
+            SVN_ERR( svn_fs_copied_from( &rev_from, &path_from, fs_root, path, revpool ) );
+            if ( path_from == NULL )
+                continue;
+
+            string from_branch( branch_name( path_from ) );
+            string from_fname( file_name( path_from ) );
+
+            if ( branch != from_branch )
+            {
+                fprintf( stderr, "ERROR: Copy of directories across branches (%s, %s).\n",
+                        branch.c_str(), from_branch.c_str() );
+                continue;
+            }
+
+            repo.copyPath( from_fname, fname );
+        }
+        else
+        {
             svn_string_t *propvalue;
             SVN_ERR(svn_fs_node_prop(&propvalue, fs_root, (char *)path, "svn:executable", pool));
             const char* mode = "644";
