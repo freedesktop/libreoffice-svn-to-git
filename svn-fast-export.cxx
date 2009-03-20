@@ -245,9 +245,14 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
             branch = check_branch;
         else if ( branch != check_branch )
         {
-            fprintf( stderr, "ERROR: Found a commit that mixes changes in two branches ('%s', when the branch is '%s').\n",
-                    path, branch.c_str() );
-            continue;
+            // we found a commit that belongs to more branches at once!
+            // let's commit what we have so far so that we can commit the
+            // rest to the other branch later
+            Repositories::commit( Committers::getAuthor( author->data ),
+                    branch, rev,
+                    epoch,
+                    string( svnlog->data, svnlog->len ) );
+            branch = check_branch;
         }
 
         // get the repository where do we want to commit
