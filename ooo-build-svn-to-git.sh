@@ -32,6 +32,14 @@ done
 
 ./svn-fast-export "$SOURCE" "$COMMITTERS" "$LAYOUT"
 
+# wait until everything's finished
+while [ -n "`jobs`" ] ; do
+    echo jobs:
+    jobs
+    sleep 1
+done
+
 for I in `sed -e 's/^[#:].*//' -e 's/^did-not-fit-anywhere.*//' -e 's/=.*//' "$LAYOUT" | grep -v '^$'` ; do
+    ( cd "$TARGET/$I" ; echo `pwd` ; git branch | sed 's/^\*/ /' | grep 'tag-branches/' | xargs git branch -D )
     rm $I.dump
 done

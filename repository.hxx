@@ -8,6 +8,28 @@
 
 class Committer;
 
+struct Tag
+{
+    /// Name of the tag.
+    std::string name;
+
+    /// Name of the branch that tracks commits to /tags/branch/
+    std::string tag_branch;
+
+    /// Committer.
+    const Committer& committer;
+
+    /// Time.
+    time_t time;
+
+    /// Log message.
+    std::string log;
+
+    Tag( const Committer& committer_, const std::string& name_, time_t time_, const std::string& log_ );
+};
+
+typedef unsigned short BranchId;
+
 class Repository
 {
     /// Remember what files we changed and how (deletes/modifications).
@@ -34,7 +56,10 @@ class Repository
     /// We have to remember our commits
     ///
     /// Index - commit number, content - branch id.
-    unsigned char* commits;
+    BranchId* commits;
+
+    /// Max number of revisions.
+    unsigned int max_revs;
 
 public:
     /// The regex_ is here to decide if the file belongs to this repository.
@@ -57,9 +82,12 @@ public:
     /// Commit all the changes we did.
     void commit( const Committer& committer_, const std::string& name_, unsigned int commit_id_, time_t time_, const std::string& log_, bool force_ = false );
 
-    /// Create a branch or a tag.
-    void createBranchOrTag( bool is_branch_, unsigned int from_, const std::string& from_branch_,
+    /// Create a branch.
+    void createBranch( unsigned int from_, const std::string& from_branch_,
             const Committer& committer_, const std::string& name_, unsigned int commit_id_, time_t time_, const std::string& log_ );
+
+    /// Create a tag (based on the 'tag tracking' branch).
+    void createTag( const Tag& tag_ );
 
 private:
     /// Find the most recent commit to the specified branch smaller than the reference one.

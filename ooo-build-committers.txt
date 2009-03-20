@@ -68,6 +68,7 @@ jpr|JP Rosevear|jpr@novell.com
 jtriplett|Josh Triplett|josh.trip@verizon.net
 karunakar|Guntupalli Karunakar|karunakar@freedomink.org
 kelemeng|Gabor Kelemen|kelemeng@gnome.hu
+kennethn|Kenneth Nielsen|k.nielsen81@gmail.com
 kfoskey|Ken Foskey|foskey@optushome.com.au
 kmaraas|Kjartan Maraas|kmaraas@gnome.org
 kyoshida|Kohei Yoshida|kyoshida@novell.com

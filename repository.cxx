@@ -14,12 +14,14 @@ typedef set< string > Branches;
 typedef set< unsigned int > RevisionIgnore;
 typedef set< string > TagIgnore;
 typedef vector< string > BranchIds;
+typedef vector< Tag* > Tags;
 
 static Repos repos;
 static Branches branches;
 static RevisionIgnore revision_ignore;
 static TagIgnore tag_ignore;
 static BranchIds branch_ids; // needed in addition to 'branches' because here we create the ids on demand
+static Tags tags;
 
 struct CommitMessages
 {
@@ -54,9 +56,9 @@ struct CommitMessages
 
 static CommitMessages commit_messages;
 
-static unsigned char branchId( const string& branch_ )
+static BranchId branchId( const string& branch_ )
 {
-    unsigned char id = 1;
+    BranchId id = 1;
     BranchIds::const_iterator it = branch_ids.begin();
 
     for ( ; ( it != branch_ids.end() ) && ( *it != branch_ ); ++it, ++id );
@@ -176,14 +178,26 @@ static string commitMessage( const string& log_ )
     return eatWhitespace( log_.substr( start_line ) );
 }
 
+Tag::Tag( const Committer& committer_, const std::string& name_, time_t time_, const std::string& log_ )
+    : name( name_ ), tag_branch( name_ ), committer( committer_ ), time( time_ ), log( commitMessage( log_ ) )
+{
+    if ( strncmp( "tag-branches/", name.c_str(), strlen( "tag-branches/" ) ) == 0 )
+        name = name.substr( strlen( "tag-branches/" ) );
+    else
+        fprintf( stderr, "ERROR: Cannot guess the branch name for '%s'\n", name_.c_str() );
+}
+
 Repository::Repository( const std::string& reponame_, const string& regex_, unsigned int max_revs_ )
-    : mark( 1 ), out( ( reponame_ + ".dump" ).c_str() ), commits( new unsigned char[max_revs_ + 10] )
+    : mark( 1 ),
+      out( ( reponame_ + ".dump" ).c_str() ),
+      commits( new BranchId[max_revs_ + 10] ),
+      max_revs( max_revs_ )
 {
     int status = regcomp( &regex_rule, regex_.c_str(), REG_EXTENDED | REG_NOSUB );
     if ( status != 0 )
         fprintf( stderr, "ERROR: Cannot create regex '%s'.\n", regex_.c_str() );
 
-    memset( commits, 0, ( max_revs_ + 10 ) * sizeof( unsigned char ) );
+    memset( commits, 0, ( max_revs_ + 10 ) * sizeof( BranchId ) );
 }
 
 Repository::~Repository()
@@ -237,7 +251,7 @@ void Repository::commit( const Committer& committer_, const std::string& name_, 
         out << "commit refs/heads/" << name_ << "\n";
 
         if ( commit_id_ )
-            out << "mark :" << commit_id_ << "\n";
+            out << "mark :" << 100000 + commit_id_ << "\n";
 
         string log( commitMessage( log_ ) );
 
@@ -256,35 +270,35 @@ void Repository::commit( const Committer& committer_, const std::string& name_, 
     mark = 1;
 }
 
-void Repository::createBranchOrTag( bool is_branch_, unsigned int from_, const std::string& from_branch_,
+void Repository::createBranch( unsigned int from_, const std::string& from_branch_,
         const Committer& committer_, const std::string& name_, unsigned int commit_id_, time_t time_, const std::string& log_ )
 {
     unsigned int from = findCommit( from_, from_branch_ );
     if ( from == 0 )
         return;
 
-    out << "reset refs/heads/" << name_ << "\nfrom :" << from << "\n" << endl;
+    out << "reset refs/heads/" << name_ << "\nfrom :" << 100000 + from << "\n" << endl;
 
     commit( committer_, name_, commit_id_, time_, log_, true );
-    
-    if ( !is_branch_ )
-    {
-        /* TODO record for later tagging.
-        string log( commitMessage( log_ ) );
+}
 
-        out << "tag " << name_
-            << "\nfrom :" << from
-            << "\ntagger " << committer_.name << " <" << committer_.email << "> " << time_ << " -0000\n"
-            << "data " << log.length() << "\n"
-            << log
-            << endl;
-        */
-    }
+void Repository::createTag( const Tag& tag_ )
+{
+    unsigned int from = findCommit( max_revs, tag_.tag_branch );
+    if ( from == 0 )
+        return;
+    
+    out << "tag " << tag_.name
+        << "\nfrom :" << 100000 + from
+        << "\ntagger " << tag_.committer.name << " <" << tag_.committer.email << "> " << tag_.time << " -0000\n"
+        << "data " << tag_.log.length() << "\n"
+        << tag_.log
+        << endl;
 }
 
 unsigned int Repository::findCommit( unsigned int from_, const std::string& from_branch_ )
 {
-    unsigned char branch_id = branchId( from_branch_ );
+    BranchId branch_id = branchId( from_branch_ );
     unsigned int commit_no = from_;
     
     while ( commit_no > 0 && commits[commit_no] != branch_id )
@@ -386,10 +400,21 @@ bool Repositories::load( const char* fname_, unsigned int max_revs_ )
 
 void Repositories::close()
 {
+    // write tags for all the 'tag tracking' branches
+    for ( Repos::iterator it = repos.begin(); it != repos.end(); ++it )
+        for ( Tags::const_iterator tag = tags.begin(); tag != tags.end(); ++tag )
+            (*it)->createTag( *(*tag) );
+
     while ( !repos.empty() )
     {
         delete repos.back();
         repos.pop_back();
+    }
+    
+    while ( !tags.empty() )
+    {
+        delete tags.back();
+        tags.pop_back();
     }
 }
 
@@ -420,9 +445,12 @@ void Repositories::createBranchOrTag( bool is_branch_, unsigned int from_, const
         const Committer& committer_, const std::string& name_, unsigned int commit_id_, time_t time_, const std::string& log_ )
 {
     for ( Repos::iterator it = repos.begin(); it != repos.end(); ++it )
-        (*it)->createBranchOrTag( is_branch_, from_, from_branch_, committer_, name_, commit_id_, time_, log_ );
+        (*it)->createBranch( from_, from_branch_, committer_, name_, commit_id_, time_, log_ );
 
     branches.insert( name_ );
+
+    if ( !is_branch_ )
+        tags.push_back( new Tag( committer_, name_, time_, log_ ) );
 }
 
 bool Repositories::ignoreRevision( unsigned int commit_id_ )
