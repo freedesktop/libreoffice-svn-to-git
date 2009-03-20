@@ -230,11 +230,11 @@ void Repository::copyPath( const std::string& from_, const std::string& to_ )
     path_copies.append( "\n" );
 }
 
-void Repository::commit( const Committer& committer_, const std::string& branch_, unsigned int commit_id_, time_t time_, const std::string& log_ )
+void Repository::commit( const Committer& committer_, const std::string& name_, unsigned int commit_id_, time_t time_, const std::string& log_, bool force_ )
 {
-    if ( !file_changes.empty() || !path_copies.empty() )
+    if ( force_ || !file_changes.empty() || !path_copies.empty() )
     {
-        out << "commit refs/heads/" << branch_ << "\n";
+        out << "commit refs/heads/" << name_ << "\n";
 
         if ( commit_id_ )
             out << "mark :" << commit_id_ << "\n";
@@ -248,7 +248,7 @@ void Repository::commit( const Committer& committer_, const std::string& branch_
             << file_changes
             << endl;
 
-        commits[commit_id_] = branchId( branch_ );
+        commits[commit_id_] = branchId( name_ );
     }
 
     file_changes.clear();
@@ -256,29 +256,30 @@ void Repository::commit( const Committer& committer_, const std::string& branch_
     mark = 1;
 }
 
-void Repository::createBranch( const std::string& branch_, unsigned int from_, const std::string& from_branch_ )
+void Repository::createBranchOrTag( bool is_branch_, unsigned int from_, const std::string& from_branch_,
+        const Committer& committer_, const std::string& name_, unsigned int commit_id_, time_t time_, const std::string& log_ )
 {
     unsigned int from = findCommit( from_, from_branch_ );
     if ( from == 0 )
         return;
 
-    out << "reset refs/heads/" << branch_ << "\nfrom :" << from << "\n" << endl;
-}
+    out << "reset refs/heads/" << name_ << "\nfrom :" << from << "\n" << endl;
 
-void Repository::createTag( const Committer& committer_, const std::string& name_, unsigned int from_, const std::string& from_branch_, time_t time_, const std::string& log_ )
-{
-    unsigned int from = findCommit( from_, from_branch_ );
-    if ( from == 0 )
-        return;
+    commit( committer_, name_, commit_id_, time_, log_, true );
+    
+    if ( !is_branch_ )
+    {
+        /* TODO record for later tagging.
+        string log( commitMessage( log_ ) );
 
-    string log( commitMessage( log_ ) );
-
-    out << "tag " << name_
-        << "\nfrom :" << from
-        << "\ntagger " << committer_.name << " <" << committer_.email << "> " << time_ << " -0000\n"
-        << "data " << log.length() << "\n"
-        << log
-        << endl;
+        out << "tag " << name_
+            << "\nfrom :" << from
+            << "\ntagger " << committer_.name << " <" << committer_.email << "> " << time_ << " -0000\n"
+            << "data " << log.length() << "\n"
+            << log
+            << endl;
+        */
+    }
 }
 
 unsigned int Repository::findCommit( unsigned int from_, const std::string& from_branch_ )
@@ -406,27 +407,22 @@ Repository& Repositories::get( const std::string& fname_ )
     return *repo;
 }
 
-void Repositories::commit( const Committer& committer_, const std::string& branch_, unsigned int commit_id_, time_t time_, const std::string& log_ )
+void Repositories::commit( const Committer& committer_, const std::string& name_, unsigned int commit_id_, time_t time_, const std::string& log_ )
 {
-    if ( branches.find( branch_ ) == branches.end() )
-        cerr << "ERROR: Committing to a branch that hasn't been initialized using Repositories::createBranch()!" << endl;
+    if ( branches.find( name_ ) == branches.end() )
+        cerr << "ERROR: Committing to a branch that hasn't been initialized using Repositories::createBranchOrTag()!" << endl;
 
     for ( Repos::iterator it = repos.begin(); it != repos.end(); ++it )
-        (*it)->commit( committer_, branch_, commit_id_, time_, log_ );
+        (*it)->commit( committer_, name_, commit_id_, time_, log_ );
 }
 
-void Repositories::createBranch( const std::string& branch_, unsigned int from_, const std::string& from_branch_ )
+void Repositories::createBranchOrTag( bool is_branch_, unsigned int from_, const std::string& from_branch_,
+        const Committer& committer_, const std::string& name_, unsigned int commit_id_, time_t time_, const std::string& log_ )
 {
     for ( Repos::iterator it = repos.begin(); it != repos.end(); ++it )
-        (*it)->createBranch( branch_, from_, from_branch_ );
+        (*it)->createBranchOrTag( is_branch_, from_, from_branch_, committer_, name_, commit_id_, time_, log_ );
 
-    branches.insert( branch_ );
-}
-
-void Repositories::createTag( const Committer& committer_, const std::string& name_, unsigned int from_, const std::string& from_branch_, time_t time_, const std::string& log_ )
-{
-    for ( Repos::iterator it = repos.begin(); it != repos.end(); ++it )
-        (*it)->createTag( committer_, name_, from_, from_branch_, time_, log_ );
+    branches.insert( name_ );
 }
 
 bool Repositories::ignoreRevision( unsigned int commit_id_ )

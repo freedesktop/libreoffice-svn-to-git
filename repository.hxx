@@ -55,13 +55,11 @@ public:
     void copyPath( const std::string& from_, const std::string& to_ );
 
     /// Commit all the changes we did.
-    void commit( const Committer& committer_, const std::string& branch_, unsigned int commit_id_, time_t time_, const std::string& log_ );
+    void commit( const Committer& committer_, const std::string& name_, unsigned int commit_id_, time_t time_, const std::string& log_, bool force_ = false );
 
-    /// Create a branch.
-    void createBranch( const std::string& branch_, unsigned int from_, const std::string& from_branch_ );
-
-    /// Create a tag.
-    void createTag( const Committer& committer_, const std::string& name_, unsigned int from_, const std::string& from_branch_, time_t time_, const std::string& log_ );
+    /// Create a branch or a tag.
+    void createBranchOrTag( bool is_branch_, unsigned int from_, const std::string& from_branch_,
+            const Committer& committer_, const std::string& name_, unsigned int commit_id_, time_t time_, const std::string& log_ );
 
 private:
     /// Find the most recent commit to the specified branch smaller than the reference one.
@@ -80,13 +78,11 @@ namespace Repositories
     Repository& get( const std::string& fname_ );
 
     /// Commit to the all repositories that have some changes.
-    void commit( const Committer& committer_, const std::string& branch_, unsigned int commit_id_, time_t time_, const std::string& log_ );
+    void commit( const Committer& committer_, const std::string& name_, unsigned int commit_id_, time_t time_, const std::string& log_ );
 
-    /// Create a branch in all the repositories.
-    void createBranch( const std::string& branch_, unsigned int from_, const std::string& from_branch_ );
-
-    /// Create a tag in all the repositories.
-    void createTag( const Committer& committer_, const std::string& name_, unsigned int from_, const std::string& from_branch_, time_t time_, const std::string& log_ );
+    /// Create a branch or a tag in all the repositories.
+    void createBranchOrTag( bool is_branch_, unsigned int from_, const std::string& from_branch_,
+            const Committer& committer_, const std::string& name_, unsigned int commit_id_, time_t time_, const std::string& log_ );
 
     /// Should the revision with this number be ignored?
     bool ignoreRevision( unsigned int commit_id_ );

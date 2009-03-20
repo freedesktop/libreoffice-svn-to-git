@@ -37,7 +37,8 @@
 #define SVN_ERR(expr) SVN_INT_ERR(expr)
 #define apr_sane_push(arr, contents) *(char **)apr_array_push(arr) = contents
 
-#define TRUNK "/trunk/"
+#define TRUNK_BASE "/trunk"
+#define TRUNK TRUNK_BASE "/"
 #define BRANCHES "/branches/"
 #define TAGS "/tags/"
 
@@ -91,23 +92,27 @@ static bool is_tag( const char* path_ )
 
 static string branch_name( const char* path_ )
 {
-    if ( is_trunk( path_ ) )
+    if ( is_trunk( path_ ) || strcmp( path_, TRUNK_BASE ) == 0 )
         return string( "master" );
     else
     {
         string tmp;
+        string prefix;
         if ( is_branch( path_ ) )
             tmp = path_ + strlen( BRANCHES );
         else if ( is_tag( path_ ) )
+        {
             tmp = path_ + strlen( TAGS );
+            prefix = "tag-branches/";
+        }
         else
             return string();
 
         size_t slash = tmp.find( '/' );
         if ( slash == string::npos )
-            return tmp;
+            return prefix + tmp;
         else
-            return tmp.substr( 0, slash );
+            return prefix + tmp.substr( 0, slash );
     }
 }
 
@@ -115,6 +120,8 @@ static string file_name( const char* path_ )
 {
     if ( is_trunk( path_ ) )
         return string( path_ + strlen( TRUNK ) );
+    else if ( strcmp( path_, TRUNK_BASE ) == 0 )
+        return string();
     else
     {
         string tmp;
@@ -197,31 +204,25 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
             {
                 bool branching = is_branch( path );
 
-                string tmp( branch_name( path ) );
+                string this_branch( branch_name( path ) );
                 if ( file_name( path ).empty() )
                 {
-                    if ( !branching && Repositories::ignoreTag( tmp ) )
+                    if ( !branching && Repositories::ignoreTag( this_branch ) )
                         continue;
 
                     // is it a new branch/tag
                     svn_revnum_t rev_from;
                     const char* path_from;
                     SVN_ERR( svn_fs_copied_from( &rev_from, &path_from, fs_root, path, revpool ) );
-                    if ( path_from != NULL )
-                    {
-                        string from_branch( branch_name( path_from ) );
 
-                        if ( file_name( path_from ).empty() )
-                        {
-                            if ( branching )
-                                Repositories::createBranch( tmp, rev_from, from_branch );
-                            else
-                                Repositories::createTag( Committers::getAuthor( author->data ),
-                                        tmp,
-                                        rev_from, from_branch,
-                                        epoch,
-                                        string( svnlog->data, svnlog->len ) );
-                        }
+                    if ( path_from != NULL && file_name( path_from ).empty() )
+                    {
+                        Repositories::createBranchOrTag( branching,
+                                rev_from, branch_name( path_from ),
+                                Committers::getAuthor( author->data ),
+                                this_branch, rev,
+                                epoch,
+                                string( svnlog->data, svnlog->len ) );
                     }
                     continue;
                 }
@@ -231,14 +232,8 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
         string fname( file_name( path ) );
         string check_branch( branch_name( path ) );
 
-        if ( is_tag( path ) )
-        {
-            if ( Repositories::ignoreTag( check_branch ) )
-                continue;
-
-            fprintf( stderr, "ERROR: Attempting to commit to a tag (%s).\n", check_branch.c_str() );
+        if ( is_tag( path ) && Repositories::ignoreTag( check_branch ) )
             continue;
-        }
 
         // sanity check
         if ( branch.empty() )

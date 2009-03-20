@@ -3,7 +3,7 @@
 
 # ignore some revisions/tags completely (broken ones)
 #:revision ignore:XYZ
-:tag ignore:OPENOFFICE
+#:tag ignore:ABC
 
 # the actual layout of the repository
 changelogs=^(ChangeLog|po/ChangeLog|bonobo/po/ChangeLog|bonobo/ChangeLog)
