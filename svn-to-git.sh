@@ -6,17 +6,19 @@
 SOURCE="$1"
 TARGET="$2"
 
-COMMITTERS="ooo-build-committers.txt"
-LAYOUT="ooo-build-repositories.txt"
+COMMITTERS="$3"
+LAYOUT="$4"
 
 WD=`pwd`
 
-if [ ! -d "$SOURCE" -o -e "$TARGET" -o -z "$TARGET" ] ; then
+if [ ! -d "$SOURCE" -o -e "$TARGET" -o -z "$TARGET" -o -z "$COMMITTERS" -o -z "$LAYOUT" ] ; then
     cat 1>&2 <<EOF
-Usage: ooo-build-svn-to-git.sh source target
+Usage: svn-to-git.sh source target
 
-source Directory with the SVN repo
-target Directory where the resulting git repos are created (must not exist)
+source     Directory with the SVN repo
+target     Directory where the resulting git repos are created (must not exist)
+committers A file describing the committers
+layout     A file describing the layout of the repositories
 EOF
     exit 1;
 fi
