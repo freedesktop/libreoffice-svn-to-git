@@ -1,0 +1,14 @@
+# change the commit messages from ChangeLog-like to git-like
+:set convert_commit_messages
+
+# no trunk
+:set trunk=
+
+# the actual layout of the repository
+changelog=\<ChangeLog\>
+website=^go-oo.org\>
+lxr=^(lib|lxr.go-oo.org|tests)\>
+planet=^(planet.go-oo.org|planetplanet)\>
+tinderbox=^tinderbox\>
+bonsai=^bonsai\>
+common=.*

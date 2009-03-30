@@ -1,0 +1,11 @@
+@localhost
+
+hub|Hubert Figuiere|hub@figuiere.net
+michael|Michael Meeks|michael.meeks@novell.com
+vmiklos|Miklos Vajna|vmiklos@frugalware.org
+jonp|Jonathan Pryor|jpryor@novell.com
+strba|Fridrich Strba|fridrich.strba@bluewin.ch
+pmladek|Petr Mladek|pmladek@suse.cz
+freuter|Florian Reuter|freuter@novell.com
+rlihm|Robert Lihm|rlihm@suse.de
+rene|Rene Engelhard|rene@debian.org
