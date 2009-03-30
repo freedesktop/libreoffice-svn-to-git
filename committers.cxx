@@ -1,5 +1,6 @@
 #include "committers.hxx"
 
+#include <cstring>
 #include <fstream>
 #include <string>
 

@@ -2,6 +2,7 @@
 
 #include <regex.h>
 
+#include <cstring>
 #include <iostream>
 
 using namespace std;

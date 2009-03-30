@@ -106,7 +106,7 @@ static string branch_name( const char* path_ )
         else if ( is_tag( path_ ) )
         {
             tmp = path_ + tags.length();
-            prefix = "tag-branches/";
+            prefix = TAG_TEMP_BRANCH;
         }
         else
             return string();
@@ -235,6 +235,11 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
         string fname( file_name( path ) );
         string check_branch( branch_name( path ) );
 
+        // skip whatever we do not know where does it fit
+        if ( check_branch.empty() )
+            continue;
+
+        // ignore the tags we do not want
         if ( is_tag( path ) && Repositories::ignoreTag( check_branch ) )
             continue;
 

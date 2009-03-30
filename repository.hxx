@@ -6,6 +6,8 @@
 
 #include <regex.h>
 
+#define TAG_TEMP_BRANCH "tag-branches/"
+
 class Committer;
 
 struct Tag

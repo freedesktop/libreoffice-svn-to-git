@@ -183,8 +183,8 @@ static string commitMessage( const string& log_ )
 Tag::Tag( const Committer& committer_, const std::string& name_, time_t time_, const std::string& log_ )
     : name( name_ ), tag_branch( name_ ), committer( committer_ ), time( time_ ), log( commitMessage( log_ ) )
 {
-    const size_t tag_branches_len = strlen( "tag-branches/" );
-    if ( name.compare( 0, tag_branches_len, "tag-branches/" ) == 0 )
+    const size_t tag_branches_len = strlen( TAG_TEMP_BRANCH );
+    if ( name.compare( 0, tag_branches_len, TAG_TEMP_BRANCH ) == 0 )
         name = name.substr( tag_branches_len );
     else
         fprintf( stderr, "ERROR: Cannot guess the branch name for '%s'\n", name_.c_str() );
@@ -492,7 +492,7 @@ bool Repositories::ignoreRevision( unsigned int commit_id_ )
 
 bool Repositories::ignoreTag( const string& name_ )
 {
-    TagIgnore::const_iterator it = tag_ignore.find( name_ );
+    TagIgnore::const_iterator it = tag_ignore.find( TAG_TEMP_BRANCH + name_ );
 
     return ( it != tag_ignore.end() );
 }
