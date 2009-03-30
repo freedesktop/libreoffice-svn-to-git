@@ -2,6 +2,8 @@
 #include "filter.hxx"
 #include "repository.hxx"
 
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <set>
 #include <sstream>
@@ -181,8 +183,9 @@ static string commitMessage( const string& log_ )
 Tag::Tag( const Committer& committer_, const std::string& name_, time_t time_, const std::string& log_ )
     : name( name_ ), tag_branch( name_ ), committer( committer_ ), time( time_ ), log( commitMessage( log_ ) )
 {
-    if ( strncmp( "tag-branches/", name.c_str(), strlen( "tag-branches/" ) ) == 0 )
-        name = name.substr( strlen( "tag-branches/" ) );
+    const size_t tag_branches_len = strlen( "tag-branches/" );
+    if ( name.compare( 0, tag_branches_len, "tag-branches/" ) == 0 )
+        name = name.substr( tag_branches_len );
     else
         fprintf( stderr, "ERROR: Cannot guess the branch name for '%s'\n", name_.c_str() );
 }
@@ -307,7 +310,7 @@ unsigned int Repository::findCommit( unsigned int from_, const std::string& from
     return commit_no;
 }
 
-bool Repositories::load( const char* fname_, unsigned int max_revs_ )
+bool Repositories::load( const char* fname_, unsigned int max_revs_, std::string& trunk_base_, std::string& trunk_, std::string& branches_, std::string& tags_ )
 {
     ifstream input( fname_, ifstream::in );
     string line;
@@ -352,6 +355,33 @@ bool Repositories::load( const char* fname_, unsigned int max_revs_ )
                 else if ( line.substr( arg, equals - arg ) == "convert_commit_messages" )
                 {
                     commit_messages.convert = true;
+                }
+                else if ( equals != string::npos && line.substr( arg, equals - arg ) == "trunk" )
+                {
+                    string tmp = line.substr( equals + 1 );
+                    if ( tmp.empty() )
+                        trunk_ = trunk_base_ = "/";
+                    else
+                    {
+                        trunk_base_ = "/" + tmp;
+                        trunk_ = trunk_base_ + "/";
+                    }
+                }
+                else if ( equals != string::npos && line.substr( arg, equals - arg ) == "branches" )
+                {
+                    string tmp = line.substr( equals + 1 );
+                    if ( tmp.empty() )
+                        branches_ = "/";
+                    else
+                        branches_ = "/" + tmp + "/";
+                }
+                else if ( equals != string::npos && line.substr( arg, equals - arg ) == "tags" )
+                {
+                    string tmp = line.substr( equals + 1 );
+                    if ( tmp.empty() )
+                        tags_ = "/";
+                    else
+                        tags_ = "/" + tmp + "/";
                 }
             }
             else if ( command == "revision" )

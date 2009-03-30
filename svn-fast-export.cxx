@@ -37,12 +37,12 @@
 #define SVN_ERR(expr) SVN_INT_ERR(expr)
 #define apr_sane_push(arr, contents) *(char **)apr_array_push(arr) = contents
 
-#define TRUNK_BASE "/trunk"
-#define TRUNK TRUNK_BASE "/"
-#define BRANCHES "/branches/"
-#define TAGS "/tags/"
-
 using namespace std;
+
+static string trunk_base = "/trunk";
+static string trunk = trunk_base + "/";
+static string branches = "/branches/";
+static string tags = "/tags/";
 
 static time_t get_epoch( const char *svn_date )
 {
@@ -77,32 +77,35 @@ static int dump_blob(svn_fs_root_t *root, char *full_path, apr_pool_t *pool, ost
 
 static bool is_trunk( const char* path_ )
 {
-    return strncmp( TRUNK, path_, strlen( TRUNK ) ) == 0;
+    const size_t len = trunk.length();
+    return trunk.compare( 0, len, path_, 0, len ) == 0;
 }
 
 static bool is_branch( const char* path_ )
 {
-    return strncmp( BRANCHES, path_, strlen( BRANCHES ) ) == 0;
+    const size_t len = branches.length(); 
+    return branches.compare( 0, len, path_, 0, len ) == 0;
 }
 
 static bool is_tag( const char* path_ )
 {
-    return strncmp( TAGS, path_, strlen( TAGS ) ) == 0;
+    const size_t len = tags.length();
+    return tags.compare( 0, len, path_, 0, len ) == 0;
 }
 
 static string branch_name( const char* path_ )
 {
-    if ( is_trunk( path_ ) || strcmp( path_, TRUNK_BASE ) == 0 )
+    if ( is_trunk( path_ ) || trunk_base == path_ )
         return string( "master" );
     else
     {
         string tmp;
         string prefix;
         if ( is_branch( path_ ) )
-            tmp = path_ + strlen( BRANCHES );
+            tmp = path_ + branches.length();
         else if ( is_tag( path_ ) )
         {
-            tmp = path_ + strlen( TAGS );
+            tmp = path_ + tags.length();
             prefix = "tag-branches/";
         }
         else
@@ -119,16 +122,16 @@ static string branch_name( const char* path_ )
 static string file_name( const char* path_ )
 {
     if ( is_trunk( path_ ) )
-        return string( path_ + strlen( TRUNK ) );
-    else if ( strcmp( path_, TRUNK_BASE ) == 0 )
+        return string( path_ + trunk.length() );
+    else if ( trunk_base == path_ )
         return string();
     else
     {
         string tmp;
         if ( is_branch( path_ ) )
-            tmp = path_ + strlen( BRANCHES );
+            tmp = path_ + branches.length();
         else if ( is_tag( path_ ) )
-            tmp = path_ + strlen( TAGS );
+            tmp = path_ + tags.length();
         else
             return string();
 
@@ -333,7 +336,7 @@ int crawl_revisions( char *repos_path, const char* repos_config )
     min_rev = 1;
     max_rev = youngest_rev;
 
-    if ( !Repositories::load( repos_config, max_rev ) )
+    if ( !Repositories::load( repos_config, max_rev, trunk_base, trunk, branches, tags ) )
     {
         fprintf( stderr, "ERROR: Must have at least one valid repository definition.\n" );
         return 1;

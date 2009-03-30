@@ -97,7 +97,7 @@ private:
 namespace Repositories
 {
     /// Load the repositories layout from the config file.
-    bool load( const char* fname_, unsigned int max_revs_ );
+    bool load( const char* fname_, unsigned int max_revs_, std::string& trunk_base_, std::string& trunk_, std::string& branches_, std::string& tags_ );
 
     /// Close all the repositories.
     void close();
