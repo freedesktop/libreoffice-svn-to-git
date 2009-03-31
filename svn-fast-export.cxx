@@ -93,10 +93,18 @@ static bool is_tag( const char* path_ )
     return tags.compare( 0, len, path_, 0, len ) == 0;
 }
 
-static string branch_name( const char* path_ )
+static bool split_into_branch_filename( const char* path_, string& branch_, string& fname_ )
 {
-    if ( is_trunk( path_ ) || trunk_base == path_ )
-        return string( "master" );
+    if ( is_trunk( path_ ) )
+    {
+        branch_ = "master";
+        fname_  = path_ + trunk.length();
+    }
+    else if ( trunk_base == path_ )
+    {
+        branch_ = "master";
+        fname_  = string();
+    }
     else
     {
         string tmp;
@@ -109,38 +117,24 @@ static string branch_name( const char* path_ )
             prefix = TAG_TEMP_BRANCH;
         }
         else
-            return string();
+            return false;
 
         size_t slash = tmp.find( '/' );
-        if ( slash == string::npos )
-            return prefix + tmp;
+        if ( slash == 0 )
+            return false;
+        else if ( slash == string::npos )
+        {
+            branch_ = prefix + tmp;
+            fname_  = string();
+        }
         else
-            return prefix + tmp.substr( 0, slash );
+        {
+            branch_ = prefix + tmp.substr( 0, slash );
+            fname_  = tmp.substr( slash + 1 );
+        }
     }
-}
 
-static string file_name( const char* path_ )
-{
-    if ( is_trunk( path_ ) )
-        return string( path_ + trunk.length() );
-    else if ( trunk_base == path_ )
-        return string();
-    else
-    {
-        string tmp;
-        if ( is_branch( path_ ) )
-            tmp = path_ + branches.length();
-        else if ( is_tag( path_ ) )
-            tmp = path_ + tags.length();
-        else
-            return string();
-
-        size_t slash = tmp.find( '/' );
-        if ( slash == string::npos )
-            return string();
-        else
-            return tmp.substr( slash + 1 );
-    }
+    return true;
 }
 
 int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
@@ -197,6 +191,16 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
         if ( path[0] != '/' || strchr( path + 1, '/' ) == NULL )
             continue;
 
+        string this_branch, fname;
+
+        // skip if we cannot find the branch
+        if ( !split_into_branch_filename( path, this_branch, fname ) )
+            continue;
+
+        // ignore the tags we do not want
+        if ( is_tag( path ) && Repositories::ignoreTag( this_branch ) )
+            continue;
+
         SVN_ERR(svn_fs_is_dir(&is_dir, fs_root, path, revpool));
 
         // detect creation of branch/tag
@@ -207,21 +211,20 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
             {
                 bool branching = is_branch( path );
 
-                string this_branch( branch_name( path ) );
-                if ( file_name( path ).empty() )
+                if ( fname.empty() )
                 {
-                    if ( !branching && Repositories::ignoreTag( this_branch ) )
-                        continue;
-
                     // is it a new branch/tag
                     svn_revnum_t rev_from;
                     const char* path_from;
                     SVN_ERR( svn_fs_copied_from( &rev_from, &path_from, fs_root, path, revpool ) );
 
-                    if ( path_from != NULL && file_name( path_from ).empty() )
+                    string from_branch, from_fname;
+                    if ( path_from != NULL &&
+                         split_into_branch_filename( path_from, from_branch, from_fname ) &&
+                         from_fname.empty() )
                     {
                         Repositories::createBranchOrTag( branching,
-                                rev_from, branch_name( path_from ),
+                                rev_from, from_branch,
                                 Committers::getAuthor( author->data ),
                                 this_branch, rev,
                                 epoch,
@@ -232,21 +235,10 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
             }
         }
 
-        string fname( file_name( path ) );
-        string check_branch( branch_name( path ) );
-
-        // skip whatever we do not know where does it fit
-        if ( check_branch.empty() )
-            continue;
-
-        // ignore the tags we do not want
-        if ( is_tag( path ) && Repositories::ignoreTag( check_branch ) )
-            continue;
-
         // sanity check
         if ( branch.empty() )
-            branch = check_branch;
-        else if ( branch != check_branch )
+            branch = this_branch;
+        else if ( branch != this_branch )
         {
             // we found a commit that belongs to more branches at once!
             // let's commit what we have so far so that we can commit the
@@ -255,7 +247,7 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
                     branch, rev,
                     epoch,
                     string( svnlog->data, svnlog->len ) );
-            branch = check_branch;
+            branch = this_branch;
         }
 
         // get the repository where do we want to commit
@@ -269,16 +261,18 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
             svn_revnum_t rev_from;
             const char* path_from;
             SVN_ERR( svn_fs_copied_from( &rev_from, &path_from, fs_root, path, revpool ) );
+
             if ( path_from == NULL )
                 continue;
 
-            string from_branch( branch_name( path_from ) );
-            string from_fname( file_name( path_from ) );
+            string from_branch, from_fname;
+            if ( !split_into_branch_filename( path_from, from_branch, from_fname ) )
+                continue;
 
             if ( branch != from_branch )
             {
-                fprintf( stderr, "ERROR: Copy of directories across branches (%s, %s).\n",
-                        branch.c_str(), from_branch.c_str() );
+                fprintf( stderr, "ERROR: Copy of directories across branches (%s, %s), path == '%s', path_from == '%s'.\n",
+                        branch.c_str(), from_branch.c_str(), path, path_from );
                 continue;
             }
 

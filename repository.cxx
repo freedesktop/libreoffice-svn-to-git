@@ -404,7 +404,7 @@ bool Repositories::load( const char* fname_, unsigned int max_revs_, std::string
                     continue;
 
                 if ( line.substr( arg, colon - arg ) == "ignore" )
-                    tag_ignore.insert( line.substr( colon + 1 ) );
+                    tag_ignore.insert( TAG_TEMP_BRANCH + line.substr( colon + 1 ) );
             }
 
             continue;
@@ -492,7 +492,7 @@ bool Repositories::ignoreRevision( unsigned int commit_id_ )
 
 bool Repositories::ignoreTag( const string& name_ )
 {
-    TagIgnore::const_iterator it = tag_ignore.find( TAG_TEMP_BRANCH + name_ );
+    TagIgnore::const_iterator it = tag_ignore.find( name_ );
 
     return ( it != tag_ignore.end() );
 }
