@@ -9,11 +9,18 @@ abi|Andreas Bille|abi@openoffice.org
 ace_dent|Andrew Dent|ace_dent@openoffice.org
 af|Andre Fischer|af@openoffice.org
 aidan|Aidan Butler|aidan@openoffice.org
+abutler|Aidan Butler|abutler@openoffice.org
+akhva|Artem Khvat|akhva@openoffice.org
+aledoux|Alexis Ledoux|aledoux@openoffice.org
 ama|Andreas Martens|ama@openoffice.org
 antoxu|Antonio Xu|antoxu@openoffice.org
 armin|Armin Theissen|armin@openoffice.org
+armin.theissen|Armin Theissen|armin.theissen@openoffice.org
 as|Andreas Schlüns|as@openoffice.org
 asrail|Caio Tiago Oliveira|asrail@openoffice.org
+arellano|arellano|arellano@openoffice.org
+asaunders|asaunders|asaunders@openoffice.org
+avy|avy|avy@openoffice.org
 aw|Armin Weiss|aw@openoffice.org
 bc|Behrend Cornelius|bc@openoffice.org
 bei|Bernd Eilers|bei@openoffice.org
@@ -21,6 +28,7 @@ beppec56|Giuseppe Castagno|beppec56@openoffice.org
 berryjia|Berry Jia|berryjia@openoffice.org
 bh|Bettina Haberer|bh@openoffice.org
 Bibek|Bibek Sahu|Bibek@openoffice.org
+babak.mahbod|Babak Mahbod|babak.mahbod@openoffice.org
 bluedwarf|Takashi Nakamoto|bluedwarf@openoffice.org
 bmahbod|Babak Mahbod|bmahbod@openoffice.org
 bm|Björn Milcke|bm@openoffice.org
@@ -28,9 +36,14 @@ b_michaelsen|Björn Michaelsen|b_michaelsen@openoffice.org
 bnolte|Bertram Nolte|bnolte@openoffice.org
 bustamam|Bustamam Harun|bustamam@openoffice.org
 cd|Carsten Driesner|cd@openoffice.org
+cdt|cdt|cdt@openoffice.org
 cgu|Christian Guenther|cgu@openoffice.org
+chainchen|Jinhong Chen|chainchen@openoffice.org
+christophnoack|Christoph Noack|christophnoack@openoffice.org
+ch2000liuy|YU Liu|ch2000liuy@openoffice.org
 cj|Christian Jansen|cj@openoffice.org
 cl|Christian Lippka|cl@openoffice.org
+cloph|Christian Lohmaier|cloph@openoffice.org
 clu|Chris Lukasiak|clu@openoffice.org
 cmc|Caolán McNamara|cmc@openoffice.org
 cn|Christoph Neumann|cn@openoffice.org
@@ -38,13 +51,18 @@ coni|Rafaella Braconi|coni@openoffice.org
 cphennessy|Con Hennessy|cphennessy@openoffice.org
 cp|Christof Pintaske|cp@openoffice.org
 cremlae|Omer Bar-or|cremlae@openoffice.org
+csaba|csaba|csaba@openoffice.org
+csaba.borbola|Csaba Borbola|csaba.borbola@openoffice.org
 cs|Claus Agerskov|cs@openoffice.org
 Cyb|Christian Junker|Cyb@openoffice.org
 cyrillem|Cyrille Moureaux|cyrillem@openoffice.org
 davidfraser|David Fraser|davidfraser@openoffice.org
 dbo|Daniel Boelzle|dbo@openoffice.org
+dc|dc|dc@openoffice.org
 dfoster|Duncan Foster|dfoster@openoffice.org
 dg|Dirk Grobler|dg@openoffice.org
+dic|dic|dic@openoffice.org
+dkenny|dkenny|dkenny@openoffice.org
 dkeskar|Dhananjay Keskar|dkeskar@openoffice.org
 dl|Dieter Loeschky|dl@openoffice.org
 doko|Matthias Klose|doko@openoffice.org
@@ -72,6 +90,7 @@ fma|Frank Mau|fma@openoffice.org
 fme|Frank Meies|fme@openoffice.org
 fne|Frank Neumann|fne@openoffice.org
 fpe|Frank Peters|fpe@openoffice.org
+fredrikh|fredrikh|fredrikh@openoffice.org
 fridrich_strba|Fridrich Štrba|fridrich_strba@openoffice.org
 fs|Frank Schönheit|fs@openoffice.org
 fst|Frank Stecher|fst@openoffice.org
@@ -79,12 +98,16 @@ ganaya|Gene Anaya|ganaya@openoffice.org
 gaozemin|Zemin Gao|gaozemin@openoffice.org
 georgez|George Zahopoulos|georgez@openoffice.org
 gh|Gregor Hartmann|gh@openoffice.org
+ghiggins|ghiggins|ghiggins@openoffice.org
 gm|Gerd Weiss|gm@openoffice.org
 goranrakic|Goran Rakić|goranrakic@openoffice.org
 grichter|Georg Richter|grichter@openoffice.org
 grsingleton|G. Roderick Singleton|grsingleton@openoffice.org
+gt|gt|gt@openoffice.org
+gyang|gyang|gyang@openoffice.org
 haggai|Chris Halls|haggai@openoffice.org
 hanbo|Bo Han|hanbo@openoffice.org
+hbrinkm|Henning Brinkmann|hbrinkm@openoffice.org
 hde|Helge Delfs|hde@openoffice.org
 hdu|Herbert Duerr|hdu@openoffice.org
 hi|Hasan Ilter|hi@openoffice.org
@@ -92,9 +115,7 @@ hjs|Hans-Joachim Lankenau|hjs@openoffice.org
 hr|Jens-Heiner Rechtien|hr@openoffice.org
 hro|Hennes Rohling|hro@openoffice.org
 hub|Hubert Figuière|hub@openoffice.org
-chainchen|Jinhong Chen|chainchen@openoffice.org
-christophnoack|Christoph Noack|christophnoack@openoffice.org
-ch2000liuy|YU Liu|ch2000liuy@openoffice.org
+htajima|htajima|htajima@openoffice.org
 icobgr|Hristo Hristov|icobgr@openoffice.org
 iha|Ingrid Halama|iha@openoffice.org
 ihi|Ivo Hinkelmann|ihi@openoffice.org
@@ -114,10 +135,15 @@ jiangc|Chuang Jiang|jiangc@openoffice.org
 jj|Jörg Jahnke|jj@openoffice.org
 jl|Joachim Lingner|jl@openoffice.org
 jmarmion|John Marmion|jmarmion@openoffice.org
+jmeng|jmeng|jmeng@openoffice.org
+jmrice|John Rice|jmrice@openoffice.org
 jnavrati|Jan Navrátil|jnavrati@openoffice.org
+jobin|jobin|jobin@openoffice.org
 jodygoldberg|Jody Goldberg|jodygoldberg@openoffice.org
+john.marmion|John Marmion|john.marmion@openoffice.org
+jp|jp|jp@openoffice.org
 jpryor|Jonathan Pryor|jpryor@openoffice.org
-jsc|J&uuml;rgen Schmidt|jsc@openoffice.org
+jsc|Juergen Schmidt|jsc@openoffice.org
 jsi|Joerg Sievers|jsi@openoffice.org
 jsk|Joerg Skottke|jsk@openoffice.org
 jspindler|Jörg Spindler|jspindler@openoffice.org
@@ -131,6 +157,7 @@ kendy|Jan Holesovsky|kendy@openoffice.org
 khendricks|Kevin Hendricks|khendricks@openoffice.org
 khirano|Hirano Kazunari|khirano@openoffice.org
 khong|Karl Hong|khong@openoffice.org
+khz|khz|khz@openoffice.org
 kla|Thomas Klarhoefer|kla@openoffice.org
 kohei|Kohei Yoshida|kohei@openoffice.org
 kr|Kay Ramme|kr@openoffice.org
@@ -150,22 +177,32 @@ lkovacs|Laszlo Kovacs|lkovacs@openoffice.org
 lla|Lars Langhans|lla@openoffice.org
 lo|Lars Oppermann|lo@openoffice.org
 louis|Louis Suárez-Potts|louis@openoffice.org
+luctur|luctur|luctur@openoffice.org
 lvxg|Xugang Lv|lvxg@openoffice.org
 lvyue|Yue Lv|lvyue@openoffice.org
+lwang|lwang|lwang@openoffice.org
+ma|ma|ma@openoffice.org
 maho|Nakata Maho|maho@openoffice.org
 maoyonggang|Yonggang Mao|maoyonggang@openoffice.org
+markm|markm|markm@openoffice.org
+martin.maher|Martin Maher|martin.maher@openoffice.org
 maveric|Eric Hoch|maveric@openoffice.org
 mav|Mikhail Voitenko|mav@openoffice.org
 mba|Mathias Bauer|mba@openoffice.org
+mbu|mbu|mbu@openoffice.org
 mci|Michael Cziebalski|mci@openoffice.org
+mfe|mfe|mfe@openoffice.org
 mh|Martin Hollmichel|mh@openoffice.org
+mhayes|Mike Hayes|mhayes@openoffice.org
 mhu|Matthias Huetsch|mhu@openoffice.org
 mib|Michael Brauer|mib@openoffice.org
 mikeleib|Michael Leibowitz|mikeleib@openoffice.org
 mi|Michael Hönnig|mi@openoffice.org
 mindyliu|Mindy Liu|mindyliu@openoffice.org
+misha|misha|misha@openoffice.org
 mkretzschmar|Martin Kretzschmar|mkretzschmar@openoffice.org
 mloiseleur|Michel Loiseleur|mloiseleur@openoffice.org
+mm|mm|mm@openoffice.org
 mmaher|Martin Maher|mmaher@openoffice.org
 mmeeks|Michael Meeks|mmeeks@openoffice.org
 mmi|Michael Mi|mmi@openoffice.org
@@ -176,12 +213,17 @@ mox|Mox Soini|mox@openoffice.org
 mrauch|Michael Rauch|mrauch@openoffice.org
 mru|Michael Rüß|mru@openoffice.org
 msc|Marc Neumann|msc@openoffice.org
+mst|mst|mst@openoffice.org
 mtg|Martin Gallwey|mtg@openoffice.org
 mt|Malte Timmermann|mt@openoffice.org
 muthusuba|Muthu Subramanian|muthusuba@openoffice.org
+mwu|mwu|mwu@openoffice.org
+mxiao|mxiao|mxiao@openoffice.org
+neilm|neilm|neilm@openoffice.org
 nemeth|Németh László|nemeth@openoffice.org
 nf|Nils Fuhrmann|nf@openoffice.org
 nick|Nick Blievers|nick@openoffice.org
+nidd|nidd|nidd@openoffice.org
 nn|Niklas Nebel|nn@openoffice.org
 np|Nikolai Pretzell|np@openoffice.org
 npower|Noel Power|npower@openoffice.org
@@ -190,15 +232,19 @@ obr|Oliver Braun|obr@openoffice.org
 oc|Oliver Craemer|oc@openoffice.org
 od|Oliver Düsterhoff|od@openoffice.org
 of|Olaf Felka|of@openoffice.org
+oisin|oisin|oisin@openoffice.org
 oj|Ocke Janssen|oj@openoffice.org
+ok|ok|ok@openoffice.org
 OPENSTEP|Edward Peterlin|OPENSTEP@openoffice.org
 os|Oliver Specht|os@openoffice.org
 pagalmes|Pierre-Andre Galmes|pagalmes@openoffice.org
 pastea_p|Pierre Pasteau|pastea_p@openoffice.org
+patrick.luby|Patrick Luby|patrick.luby@openoffice.org
 pb|Peter Burow|pb@openoffice.org
 pdefilippis|Pierre de Filippis|pdefilippis@openoffice.org
 pereriksson|Per Eriksson|pereriksson@openoffice.org
 pflin|Fong Lin|pflin@openoffice.org
+ping.liao|Ping Liao|ping.liao@openoffice.org
 pjanik|Pavel Janík|pjanik@openoffice.org
 pj|Peter Junge|pj@openoffice.org
 pjunck|Pascal Junck|pjunck@openoffice.org
@@ -208,11 +254,13 @@ pl|Philipp Lohmann|pl@openoffice.org
 pluby|Patrick Luby|pluby@openoffice.org
 pmadhav|Prasad Madhav|pmadhav@openoffice.org
 pmladek|Petr Mladek|pmladek@openoffice.org
+pw|pw|pw@openoffice.org
 quch|Canghua Qu|quch@openoffice.org
 radekdoulik|Radek Doulik|radekdoulik@openoffice.org
 rail|Rail Aliev|rail@openoffice.org
 rajeshsola|Rajesh Sola|rajeshsola@openoffice.org
 rakeshpandit|Rakesh Pandit|rakeshpandit@openoffice.org
+releng|Release Engineers|releng@openoffice.org
 rene|René Engelhard|rene@openoffice.org
 rkinsella|Robert Kinsella|rkinsella@openoffice.org
 rodarvus|Rodrigo Parra Novo|rodarvus@openoffice.org
@@ -226,6 +274,7 @@ sb|Stephan Bergmann|sb@openoffice.org
 sewardj|Julian Seward|sewardj@openoffice.org
 sgauti|Sophie Gautier|sgauti@openoffice.org
 sg|Steffen Grund|sg@openoffice.org
+shane|shane|shane@openoffice.org
 shilei|Lei shi|shilei@openoffice.org
 shiwg|Wei Guo SHI|shiwg@openoffice.org
 shizhoubo|Zhoubo  Shi|shizhoubo@openoffice.org
@@ -242,21 +291,27 @@ st|Stefan Taxhet|st@openoffice.org
 sus|Svante Schubert|sus@openoffice.org
 svesik|Sander Vesik|svesik@openoffice.org
 sw|Stephan Wunderlich|sw@openoffice.org
+sz|sz|sz@openoffice.org
 tbe|Thomas Benisch|tbe@openoffice.org
 tbo|Thorsten Bosbach|tbo@openoffice.org
 thb|Thorsten Behrens|thb@openoffice.org
+th|th|th@openoffice.org
 thorstenziehm|Thorsten Ziehm|thorstenziehm@openoffice.org
 tietjens|Jan Tietjens|tietjens@openoffice.org
 tkr|Tobias Krause|tkr@openoffice.org
 tl|Thomas Lange|tl@openoffice.org
+tlx|tlx|tlx@openoffice.org
 tml|Tor Lillqvist|tml@openoffice.org
 tm|Thorsten Martens|tm@openoffice.org
+terence.tse|Terence Tse|terence.tse@openoffice.org
 toconnor|Tomas O'Connor|toconnor@openoffice.org
 tonn|Gerhard Tonn|tonn@openoffice.org
 tono|Takashi Ono|tono@openoffice.org
 tonygalmiche|Tony Galmiche|tonygalmiche@openoffice.org
+tpf|tpf|tpf@openoffice.org
 tqfa|Quanfa Tang|tqfa@openoffice.org
 tra|Tino Rachui|tra@openoffice.org
+ts|ts|ts@openoffice.org
 tv|Tom Verbeek|tv@openoffice.org
 ufi|Uwe Fischer|ufi@openoffice.org
 ul|Uwe Luebbers|ul@openoffice.org
@@ -265,6 +320,7 @@ va|Volker Ahrendt|va@openoffice.org
 vg|Vladimir Glazounov|vg@openoffice.org
 volody|Volodymyr Khrystynych|volody@openoffice.org
 vq|Volker Quetschke|vq@openoffice.org
+vs|vs|vs@openoffice.org
 waratah|Ken Foskey|waratah@openoffice.org
 weiz|Zhao Wei|weiz@openoffice.org
 wg|Wolfram Garten|wg@openoffice.org
@@ -272,10 +328,12 @@ willem.vandorp|Willem van Dorp|willem.vandorp@openoffice.org
 windly|Wind Li|windly@openoffice.org
 wlach|Will Lachance|wlach@openoffice.org
 wuy|Yan Wu|wuy@openoffice.org
+wvd|wvd|wvd@openoffice.org
 xudehua|Dehua Xu|xudehua@openoffice.org
 xxjack12xx|Jackson Low|xxjack12xx@openoffice.org
 xzcheng|Xiuzhi Cheng|xzcheng@openoffice.org
 ydario|Yuri Dario|ydario@openoffice.org
+yl146652|Wind Li|yl146652@openoffice.org
 yugq|Yu Guoqiang|yugq@openoffice.org
 zhanghuajun|Huajun Zhang|zhanghuajun@openoffice.org
 Zhangxiaofei|Xiaofei Zhang|Zhangxiaofei@openoffice.org
