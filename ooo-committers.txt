@@ -77,6 +77,7 @@ dvo|Daniel Vogelheim|dvo@openoffice.org
 ebischoff|Éric Bischoff|ebischoff@openoffice.org
 ekato|Etsushi Kato|ekato@openoffice.org
 er|Eike Rathke|er@openoffice.org
+erack|Eike Rathke|erack@openoffice.org
 ericb|Eric Bachard|ericb@openoffice.org
 es|Éric Savary|es@openoffice.org
 fa|Dan Williams|fa@openoffice.org
