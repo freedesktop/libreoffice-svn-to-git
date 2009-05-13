@@ -18,7 +18,7 @@ class Filter
     FilterType type;
 
 public:
-    Filter( const char* fname_ );
+    Filter( const std::string& fname_ );
 
     void addData( const char* data_, size_t len_ );
 

@@ -78,9 +78,6 @@ public:
     /// The file should be marked for addition/modification.
     std::ostream& modifyFile( const std::string& fname_, const char* mode_ );
 
-    /// Copy an entire subdir.
-    void copyPath( const std::string& from_, const std::string& to_ );
-
     /// Commit all the changes we did.
     void commit( const Committer& committer_, const std::string& name_, unsigned int commit_id_, time_t time_, const std::string& log_, bool force_ = false );
 
@@ -106,6 +103,12 @@ namespace Repositories
 
     /// Get the right repository according to the filename.
     Repository& get( const std::string& fname_ );
+
+    /// The file should be marked for deletion.
+    inline void deleteFile( const std::string& fname_ ) { get( fname_ ).deleteFile( fname_ ); }
+
+    /// The file should be marked for addition/modification.
+    inline std::ostream& modifyFile( const std::string& fname_, const char* mode_ ) { return get( fname_ ).modifyFile( fname_, mode_ ); }
 
     /// Commit to the all repositories that have some changes.
     void commit( const Committer& committer_, const std::string& name_, unsigned int commit_id_, time_t time_, const std::string& log_ );

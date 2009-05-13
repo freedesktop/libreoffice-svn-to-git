@@ -17,17 +17,17 @@ struct Tabs {
 
 static Tabs tabs;
 
-Filter::Filter( const char* fname_ )
+Filter::Filter( const string& fname_ )
     : tabs_to_spaces( true ),
       type( NO_FILTER )
 {
     data.reserve( 16384 );
 
-    char* suffix = strrchr( fname_, '.' );
-    if ( tabs.spaces > 0 && suffix != NULL )
+    size_t suffix = fname_.find_last_of( '.' );
+    if ( tabs.spaces > 0 && suffix != string::npos && suffix + 1 > fname_.length() )
     {
         ++suffix;
-        if ( regexec( &tabs.regex, suffix, 0, NULL, 0 ) == 0 )
+        if ( regexec( &tabs.regex, fname_.substr( suffix + 1 ).c_str(), 0, NULL, 0 ) == 0 )
             type = FILTER_TABS;
     }
 }

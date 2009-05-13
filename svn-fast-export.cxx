@@ -53,16 +53,29 @@ static time_t get_epoch( const char *svn_date )
     return mktime(&tm);
 }
 
-static int dump_blob(svn_fs_root_t *root, char *full_path, apr_pool_t *pool, ostream& out)
+static int dump_blob( svn_fs_root_t *root, char *full_path, const string &target_name, apr_pool_t *pool )
 {
-    svn_stream_t   *stream;
+    // prepare the stream
+    svn_string_t *propvalue;
+    SVN_ERR( svn_fs_node_prop( &propvalue, root, full_path, "svn:executable", pool ) );
+    const char* mode = "644";
+    if ( propvalue )
+        mode = "755";
 
+    SVN_ERR( svn_fs_node_prop( &propvalue, root, full_path, "svn:special", pool ) );
+    if ( propvalue )
+        fprintf(stderr, "ERROR: Got a symlink; we cannot handle symlinks now.\n");
+
+    ostream& out = Repositories::modifyFile( target_name, mode );
+
+    // dump the content of the file
+    svn_stream_t   *stream;
     SVN_ERR( svn_fs_file_contents( &stream, root, full_path, pool ) );
 
     const size_t buffer_size = 8192;
     char buffer[buffer_size];
 
-    Filter filter( full_path );
+    Filter filter( target_name );
     apr_size_t len;
     do {
         len = buffer_size;
@@ -73,6 +86,40 @@ static int dump_blob(svn_fs_root_t *root, char *full_path, apr_pool_t *pool, ost
     filter.write( out );
 
     return 0;
+}
+
+static int dump_hierarchy( svn_fs_root_t *fs_root, char *path, int skip,
+        const string &prefix, apr_pool_t *pool )
+{
+    svn_boolean_t is_dir;
+    SVN_ERR( svn_fs_is_dir( &is_dir, fs_root, path, pool ) );
+
+    if ( is_dir )
+    {
+        apr_hash_t *entries;
+        SVN_ERR( svn_fs_dir_entries( &entries, fs_root, path, pool ) );
+
+        for ( apr_hash_index_t *i = apr_hash_first( pool, entries ); i; i = apr_hash_next( i ) )
+        {
+            const void *key;
+            void       *val;
+            apr_hash_this( i, &key, NULL, &val );
+
+            dump_hierarchy( fs_root, (char *)( string( path ) + '/' + (char *)key ).c_str(), skip, prefix, pool );
+        }
+    }
+    else
+        dump_blob( fs_root, path, prefix + string( path + skip ), pool );
+
+    return 0;
+}
+
+static int copy_hierarchy( svn_fs_t *fs, svn_revnum_t rev, char *path_from, const string &path_to, apr_pool_t *pool )
+{
+    svn_fs_root_t *fs_root;
+    SVN_ERR( svn_fs_revision_root( &fs_root, fs, rev, pool ) );
+
+    return dump_hierarchy( fs_root, path_from, strlen( path_from ), path_to, pool );
 }
 
 static bool is_trunk( const char* path_ )
@@ -250,12 +297,9 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
             branch = this_branch;
         }
 
-        // get the repository where do we want to commit
-        Repository& repo = Repositories::get( fname );
-
         // add/remove/move the files
         if ( change->change_kind == svn_fs_path_change_delete )
-            repo.deleteFile( fname );
+            Repositories::deleteFile( fname );
         else if ( is_dir )
         {
             svn_revnum_t rev_from;
@@ -269,31 +313,10 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
             if ( !split_into_branch_filename( path_from, from_branch, from_fname ) )
                 continue;
 
-            if ( branch != from_branch )
-            {
-                fprintf( stderr, "ERROR: Copy of directories across branches (%s, %s), path == '%s', path_from == '%s'.\n",
-                        branch.c_str(), from_branch.c_str(), path, path_from );
-                continue;
-            }
-
-            repo.copyPath( from_fname, fname );
+            copy_hierarchy( fs, rev_from, (char *)path_from, fname, revpool );
         }
         else
-        {
-            svn_string_t *propvalue;
-            SVN_ERR(svn_fs_node_prop(&propvalue, fs_root, (char *)path, "svn:executable", pool));
-            const char* mode = "644";
-            if (propvalue)
-                mode = "755";
-            
-            SVN_ERR(svn_fs_node_prop(&propvalue, fs_root, (char *)path, "svn:special", pool));
-            if (propvalue)
-                fprintf(stderr, "ERROR: Got a symlink; we cannot handle symlinks now.\n");
-
-            ostream& out = repo.modifyFile( fname, mode );
-
-            dump_blob(fs_root, (char *)path, revpool, out);
-        }
+            dump_blob( fs_root, (char *)path, fname, revpool );
 
         no_changes = false;
     }
