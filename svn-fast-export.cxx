@@ -55,14 +55,17 @@ static time_t get_epoch( const char *svn_date )
 
 static int dump_blob( svn_fs_root_t *root, char *full_path, const string &target_name, apr_pool_t *pool )
 {
+    // create an own pool to avoid overflow of open streams
+    apr_pool_t *subpool = svn_pool_create( pool );
+
     // prepare the stream
     svn_string_t *propvalue;
-    SVN_ERR( svn_fs_node_prop( &propvalue, root, full_path, "svn:executable", pool ) );
+    SVN_ERR( svn_fs_node_prop( &propvalue, root, full_path, "svn:executable", subpool ) );
     const char* mode = "644";
     if ( propvalue )
         mode = "755";
 
-    SVN_ERR( svn_fs_node_prop( &propvalue, root, full_path, "svn:special", pool ) );
+    SVN_ERR( svn_fs_node_prop( &propvalue, root, full_path, "svn:special", subpool ) );
     if ( propvalue )
         fprintf(stderr, "ERROR: Got a symlink; we cannot handle symlinks now.\n");
 
@@ -70,7 +73,7 @@ static int dump_blob( svn_fs_root_t *root, char *full_path, const string &target
 
     // dump the content of the file
     svn_stream_t   *stream;
-    SVN_ERR( svn_fs_file_contents( &stream, root, full_path, pool ) );
+    SVN_ERR( svn_fs_file_contents( &stream, root, full_path, subpool ) );
 
     const size_t buffer_size = 8192;
     char buffer[buffer_size];
@@ -84,6 +87,8 @@ static int dump_blob( svn_fs_root_t *root, char *full_path, const string &target
     } while ( len > 0 );
 
     filter.write( out );
+
+    svn_pool_destroy( subpool );
 
     return 0;
 }
@@ -307,10 +312,6 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
             SVN_ERR( svn_fs_copied_from( &rev_from, &path_from, fs_root, path, revpool ) );
 
             if ( path_from == NULL )
-                continue;
-
-            string from_branch, from_fname;
-            if ( !split_into_branch_filename( path_from, from_branch, from_fname ) )
                 continue;
 
             copy_hierarchy( fs, rev_from, (char *)path_from, fname, revpool );

@@ -26,7 +26,7 @@ fi
 mkdir -p "$TARGET"
 rm *.dump
 
-for I in `sed -e 's/^[#:].*//' -e 's/^did-not-fit-anywhere.*//' -e 's/=.*//' "$LAYOUT" | grep -v '^$'` ; do
+for I in `sed -e 's/^[#:].*//' -e 's/^ignore-.*//' -e 's/=.*//' "$LAYOUT" | grep -v '^$'` ; do
     mkdir "$TARGET/$I"
     mkfifo $I.dump
     ( cd "$TARGET/$I" ; git init ; git fast-import < "$WD"/$I.dump ) &
@@ -41,7 +41,7 @@ while [ -n "`jobs`" ] ; do
     sleep 1
 done
 
-for I in `sed -e 's/^[#:].*//' -e 's/^did-not-fit-anywhere.*//' -e 's/=.*//' "$LAYOUT" | grep -v '^$'` ; do
+for I in `sed -e 's/^[#:].*//' -e 's/^ignore-.*//' -e 's/=.*//' "$LAYOUT" | grep -v '^$'` ; do
     ( cd "$TARGET/$I" ; echo `pwd` ; git branch | sed 's/^\*/ /' | grep 'tag-branches/' | xargs git branch -D )
     rm $I.dump
 done

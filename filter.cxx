@@ -23,13 +23,8 @@ Filter::Filter( const string& fname_ )
 {
     data.reserve( 16384 );
 
-    size_t suffix = fname_.find_last_of( '.' );
-    if ( tabs.spaces > 0 && suffix != string::npos && suffix + 1 > fname_.length() )
-    {
-        ++suffix;
-        if ( regexec( &tabs.regex, fname_.substr( suffix + 1 ).c_str(), 0, NULL, 0 ) == 0 )
-            type = FILTER_TABS;
-    }
+    if ( tabs.spaces > 0 && regexec( &tabs.regex, fname_.c_str(), 0, NULL, 0 ) == 0 )
+        type = FILTER_TABS;
 }
 
 void Filter::addData( const char* data_, size_t len_ )

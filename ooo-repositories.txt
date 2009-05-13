@@ -1,40 +1,14 @@
 # rewrite tabs to spaces
 :set tabs_to_spaces=4,\.(c|cpp|cxx|h|hrc|hxx|idl|inl|java|map|mk|MK|pmk|pl|pm|sdi|sh|src|tab|xcu|xml)$
 
-# we want to temporarily use the data from /cws/, but discard it later
-#:set temp_branches=cws
-
 # ignore some revisions completely (broken ones, mostly deletions of entire
 # defunct CWSes)
-:revision ignore:261963
-:revision ignore:261972
-:revision ignore:261975
-:revision ignore:261977
-:revision ignore:262044
-:revision ignore:262160
-:revision ignore:262167
-:revision ignore:262181
-:revision ignore:262199
-:revision ignore:262229
-:revision ignore:262250
-:revision ignore:262255
-:revision ignore:262336
-:revision ignore:262498
-:revision ignore:262655
-:revision ignore:262799
-:revision ignore:263321
-:revision ignore:263327
-:revision ignore:263328
-:revision ignore:263767
-:revision ignore:263769
-:revision ignore:264142
-:revision ignore:264184
-:revision ignore:264847
+#:revision ignore:XYZ
 
 # ignore some tags completely (broken ones)
 :tag ignore:DEV300_m99
 
-# the actual layout of the repository
+# the actual layout of the repositories
 l10n=(^l10n|[Ll][Oo][Cc][Aa][Ll][Ii][Zz][Ee]\.[Ss][Dd][Ff]$)
 ure=^(bridges|cli_ure|codemaker|cppu|cppuhelper|cpputools|idlc|io|javaunohelper|jurt|jvmaccess|jvmfwk|offapi|offuh|pyuno|rdbmaker|registry|remotebridges|ridljar|sal|salhelper|stoc|store|udkapi|unoil|ure|xml2cmp|jut)\>
 sdk=^(autodoc|cosv|odk|udm|unodevtools)\>
@@ -55,4 +29,5 @@ components=^(accessibility|automation|basctl|bean|crashrep|embedserv|extensions|
 postprocess=^(postprocess|packimages)\>
 libs-extern-sys=^(berkeleydb|bitstream_vera_fonts|expat|graphite|icu|jpeg|libxml2|libxslt|moz|neon|python|zlib|saxon|stax|boost|curl|dictionaries|cairo|hunspell)\>
 extensions=^(sdext|swext|tomcat|apache-commons|jfreereport|reportbuilder|xpdf)\>
-did-not-fit-anywhere=.*
+ignore-we-do-not-want=^.gitignore
+ignore-did-not-fit-anywhere=.*
