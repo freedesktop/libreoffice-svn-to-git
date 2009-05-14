@@ -44,6 +44,8 @@ static string trunk = trunk_base + "/";
 static string branches = "/branches/";
 static string tags = "/tags/";
 
+static bool split_into_branch_filename( const char* path_, string& branch_, string& fname_ );
+
 static time_t get_epoch( const char *svn_date )
 {
     struct tm tm = {0};
@@ -91,6 +93,48 @@ static int dump_blob( svn_fs_root_t *root, char *full_path, const string &target
     svn_pool_destroy( subpool );
 
     return 0;
+}
+
+static int delete_hierarchy( svn_fs_root_t *fs_root, char *path, apr_pool_t *pool )
+{
+    // we have to crawl the hierarchy and delete the files one by one because
+    // the regexp deciding to what repository does the file belong can be just
+    // anything
+    svn_boolean_t is_dir;
+    SVN_ERR( svn_fs_is_dir( &is_dir, fs_root, path, pool ) );
+
+    if ( is_dir )
+    {
+        apr_hash_t *entries;
+        SVN_ERR( svn_fs_dir_entries( &entries, fs_root, path, pool ) );
+
+        for ( apr_hash_index_t *i = apr_hash_first( pool, entries ); i; i = apr_hash_next( i ) )
+        {
+            const void *key;
+            void       *val;
+            apr_hash_this( i, &key, NULL, &val );
+
+            delete_hierarchy( fs_root, (char *)( string( path ) + '/' + (char *)key ).c_str(), pool );
+        }
+    }
+    else
+    {
+        string this_branch, fname;
+
+        // we don't have to care about the branch name, it cannot change
+        if ( split_into_branch_filename( path, this_branch, fname ) )
+            Repositories::deleteFile( fname );
+    }
+}
+
+static int delete_hierarchy_rev( svn_fs_t *fs, svn_revnum_t rev, char *path, apr_pool_t *pool )
+{
+    svn_fs_root_t *fs_root;
+
+    // rev - 1: the last rev where the deleted thing still existed
+    SVN_ERR( svn_fs_revision_root( &fs_root, fs, rev - 1, pool ) );
+
+    return delete_hierarchy( fs_root, path, pool );
 }
 
 static int dump_hierarchy( svn_fs_root_t *fs_root, char *path, int skip,
@@ -227,6 +271,7 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
     string branch;
     bool no_changes = true;
     bool debug_once = true;
+    bool tagged_or_branched = false;
     for (i = apr_hash_first(pool, changes); i; i = apr_hash_next(i)) {
         svn_pool_clear(revpool);
         apr_hash_this(i, &key, NULL, &val);
@@ -281,6 +326,8 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
                                 this_branch, rev,
                                 epoch,
                                 string( svnlog->data, svnlog->len ) );
+
+                        tagged_or_branched = true;
                     }
                     continue;
                 }
@@ -304,7 +351,7 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
 
         // add/remove/move the files
         if ( change->change_kind == svn_fs_path_change_delete )
-            Repositories::deleteFile( fname );
+            delete_hierarchy_rev( fs, rev, (char *)path, revpool );
         else if ( is_dir )
         {
             svn_revnum_t rev_from;
@@ -324,7 +371,7 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
 
     if ( no_changes || branch.empty() )
     {
-        fprintf( stderr, "skipping.\n" );
+        fprintf( stderr, "%s.\n", tagged_or_branched? "created": "skipping" );
         svn_pool_destroy( revpool );
         return 0;
     }
@@ -334,9 +381,9 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
             epoch,
             string( svnlog->data, svnlog->len ) );
 
-    svn_pool_destroy(revpool);
+    svn_pool_destroy( revpool );
 
-    fprintf(stderr, "done!\n");
+    fprintf( stderr, "done!\n" );
 
     return 0;
 }
