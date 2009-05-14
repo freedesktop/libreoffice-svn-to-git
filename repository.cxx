@@ -336,7 +336,7 @@ bool Repositories::load( const char* fname_, unsigned int max_revs_, std::string
                     else
                     {
                         size_t comma = line.find( ',', equals + 1 );
-                        if ( comma = string::npos )
+                        if ( comma == string::npos )
                             Filter::setTabsToSpaces( atoi( line.substr( equals + 1 ).c_str() ), string( ".*" ) );
                         else
                             Filter::setTabsToSpaces( atoi( line.substr( equals + 1, comma - equals - 1 ).c_str() ),
