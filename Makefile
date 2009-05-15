@@ -6,7 +6,7 @@ LDFLAGS += -L${SVN}/lib64 -lsvn_fs-1 -lsvn_repos-1
 
 all: svn-fast-export
 
-svn-fast-export: committers.o filter.o repository.o svn-fast-export.o
+svn-fast-export: committers.o error.o filter.o repository.o svn-fast-export.o
 	${CXX} $^ -o $@ ${LDFLAGS}
 
 %.o: %.cxx
@@ -15,4 +15,4 @@ svn-fast-export: committers.o filter.o repository.o svn-fast-export.o
 .PHONY: clean
 
 clean:
-	rm -rf svn-fast-export committers.o filter.o repository.o svn-fast-export.o
+	rm -rf svn-fast-export committers.o error.o filter.o repository.o svn-fast-export.o

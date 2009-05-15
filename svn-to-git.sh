@@ -33,6 +33,7 @@ for I in `sed -e 's/^[#:].*//' -e 's/^ignore-.*//' -e 's/=.*//' "$LAYOUT" | grep
 done
 
 ./svn-fast-export "$SOURCE" "$COMMITTERS" "$LAYOUT"
+RETURN_VALUE=$?
 
 # wait until everything's finished
 while [ -n "`jobs`" ] ; do
@@ -45,3 +46,5 @@ for I in `sed -e 's/^[#:].*//' -e 's/^ignore-.*//' -e 's/=.*//' "$LAYOUT" | grep
     ( cd "$TARGET/$I" ; echo `pwd` ; git branch | sed 's/^\*/ /' | grep 'tag-branches/' | xargs git branch -D )
     rm $I.dump
 done
+
+exit $RETURN_VALUE

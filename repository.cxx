@@ -1,4 +1,5 @@
 #include "committers.hxx"
+#include "error.hxx"
 #include "filter.hxx"
 #include "repository.hxx"
 
@@ -187,7 +188,7 @@ Tag::Tag( const Committer& committer_, const std::string& name_, time_t time_, c
     if ( name.compare( 0, tag_branches_len, TAG_TEMP_BRANCH ) == 0 )
         name = name.substr( tag_branches_len );
     else
-        fprintf( stderr, "ERROR: Cannot guess the branch name for '%s'\n", name_.c_str() );
+        Error::report( "Cannot guess the branch name for '" + name_ + "'" );
 }
 
 Repository::Repository( const std::string& reponame_, const string& regex_, unsigned int max_revs_ )
@@ -198,7 +199,7 @@ Repository::Repository( const std::string& reponame_, const string& regex_, unsi
 {
     int status = regcomp( &regex_rule, regex_.c_str(), REG_EXTENDED | REG_NOSUB );
     if ( status != 0 )
-        fprintf( stderr, "ERROR: Cannot create regex '%s'.\n", regex_.c_str() );
+        Error::report( "Cannot create regex '" + regex_ + "'" );
 
     memset( commits, 0, ( max_revs_ + 10 ) * sizeof( BranchId ) );
 }
@@ -405,7 +406,7 @@ bool Repositories::load( const char* fname_, unsigned int max_revs_, std::string
         size_t delim = line.find( '=' );
         if ( delim == string::npos )
         {
-            fprintf( stderr, "ERROR: Wrong repository description '%s'\n", line.c_str() );
+            Error::report( "Wrong repository description '" + line + "'" );
             continue;
         }
 
@@ -456,7 +457,7 @@ Repository& Repositories::get( const std::string& fname_ )
 void Repositories::commit( const Committer& committer_, const std::string& name_, unsigned int commit_id_, time_t time_, const std::string& log_ )
 {
     if ( branches.find( name_ ) == branches.end() )
-        cerr << "ERROR: Committing to a branch that hasn't been initialized using Repositories::createBranchOrTag()!" << endl;
+        Error::report( "Committing to a branch that hasn't been initialized using Repositories::createBranchOrTag()!" );
 
     for ( Repos::iterator it = repos.begin(); it != repos.end(); ++it )
         (*it)->commit( committer_, name_, commit_id_, time_, log_ );

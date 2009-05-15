@@ -1,4 +1,5 @@
 #include "committers.hxx"
+#include "error.hxx"
 
 #include <cstring>
 #include <fstream>
@@ -42,16 +43,11 @@ void Committers::load( const char *fname )
 
         // find the separators
         size_t delim1 = line.find( "|" );
-        if ( delim1 == string::npos )
-        {
-            fprintf( stderr, "ERROR: Wrong committer '%s'\n", line.c_str() );
-            continue;
-        }
-        
-        size_t delim2 = line.find( "|", delim1 + 1 );
+        size_t delim2 = ( delim1 == string::npos )? string::npos: line.find( "|", delim1 + 1 );
+
         if ( delim2 == string::npos )
         {
-            fprintf( stderr, "ERROR: Wrong committer '%s'\n", line.c_str() );
+            Error::report( "Wrong committer '" + line + "'" );
             continue;
         }
 
@@ -68,7 +64,7 @@ const Committer& Committers::getAuthor( const char* name )
 
     if ( it == committers.end() )
     {
-        fprintf( stderr, "ERROR: Author '%s' is missing, adding as '%s%s'.\n", name, name, default_address.c_str() );
+        Error::report( string( "Author '" ) + name + "' is missing, adding as '" + name + default_address + "'" );
 
         return ( committers[ strdup( name ) ] = Committer( string( name ), string( name ) + default_address ) );
     }

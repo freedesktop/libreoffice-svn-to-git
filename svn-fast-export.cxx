@@ -17,6 +17,7 @@
 #include <ostream>
 
 #include "committers.hxx"
+#include "error.hxx"
 #include "filter.hxx"
 #include "repository.hxx"
 
@@ -69,7 +70,7 @@ static int dump_blob( svn_fs_root_t *root, char *full_path, const string &target
 
     SVN_ERR( svn_fs_node_prop( &propvalue, root, full_path, "svn:special", subpool ) );
     if ( propvalue )
-        fprintf(stderr, "ERROR: Got a symlink; we cannot handle symlinks now.\n");
+        Error::report( "Got a symlink; we cannot handle symlinks now." );
 
     ostream& out = Repositories::modifyFile( target_name, mode );
 
@@ -408,7 +409,7 @@ int crawl_revisions( char *repos_path, const char* repos_config )
 
     if ( !Repositories::load( repos_config, max_rev, trunk_base, trunk, branches, tags ) )
     {
-        fprintf( stderr, "ERROR: Must have at least one valid repository definition.\n" );
+        Error::report( "Must have at least one valid repository definition." );
         return 1;
     }
 
@@ -426,13 +427,13 @@ int crawl_revisions( char *repos_path, const char* repos_config )
 int main(int argc, char *argv[])
 {
     if (argc != 4) {
-        fprintf(stderr, "usage: %s REPOS_PATH committers.txt reposlayout.txt\n", argv[0]);
-        return -1;
+        Error::report( string( "usage: " ) + argv[0] + " REPOS_PATH committers.txt reposlayout.txt\n" );
+        return Error::returnValue();
     }
 
     if (apr_initialize() != APR_SUCCESS) {
-        fprintf(stderr, "You lose at apr_initialize().\n");
-        return -1;
+        Error::report( "You lose at apr_initialize()." );
+        return Error::returnValue();
     }
 
     Committers::load( argv[2] );
@@ -443,5 +444,5 @@ int main(int argc, char *argv[])
 
     Repositories::close();
 
-    return 0;
+    return Error::returnValue();
 }

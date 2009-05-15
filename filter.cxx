@@ -1,3 +1,4 @@
+#include "error.hxx"
 #include "filter.hxx"
 
 #include <regex.h>
@@ -72,7 +73,7 @@ void Filter::setTabsToSpaces( int how_many_spaces_, const std::string& files_reg
     int status = regcomp( &tabs.regex, files_regex_.c_str(), REG_EXTENDED | REG_NOSUB );
     if ( status != 0 )
     {
-        fprintf( stderr, "ERROR: Cannot create regex '%s' (for tabs_to_spaces_files).\n", files_regex_.c_str() );
+        Error::report( "Cannot create regex '" + files_regex_ + "' (for tabs_to_spaces_files)." );
         tabs.spaces = 0;
     }
 }
