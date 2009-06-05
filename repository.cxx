@@ -1,3 +1,11 @@
+/*
+ * Output the files to the appropriate repositories.
+ * Filter the commit messages when necessary.
+ *
+ * Author: Jan Holesovsky <kendy@suse.cz>
+ * License: MIT <http://www.opensource.org/licenses/mit-license.php>
+ */
+
 #include "committers.hxx"
 #include "error.hxx"
 #include "filter.hxx"
@@ -37,7 +45,7 @@ struct CommitMessages
         // asterisk
         regcomp( &regex, "^([0-9]{4}-[0-9][0-9]?-[0-9][0-9]? .*<.*@.*>|^[ \t]*\\*)", REG_EXTENDED | REG_NOSUB );
     }
-    
+
     ~CommitMessages()
     {
         regfree( &regex );
@@ -102,7 +110,7 @@ static string eatWhitespace( const string& text_, bool uppercase_first_letter = 
                 else
                     *it++ = *i;
             }
-            else    
+            else
                 *it++ = *i;
         }
     }

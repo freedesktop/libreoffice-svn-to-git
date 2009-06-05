@@ -1,3 +1,10 @@
+/*
+ * Filter tabs -> spaces.
+ *
+ * Author: Jan Holesovsky <kendy@suse.cz>
+ * License: MIT <http://www.opensource.org/licenses/mit-license.php>
+ */
+
 #include "error.hxx"
 #include "filter.hxx"
 
@@ -35,7 +42,7 @@ void Filter::addData( const char* data_, size_t len_ )
         data.append( data_, len_ );
         return;
     }
-    
+
     // type == FILTER_TABS
     char tmp[4*len_];
     char *dest = tmp;

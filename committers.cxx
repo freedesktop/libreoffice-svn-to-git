@@ -1,3 +1,10 @@
+/*
+ * Read committers from a file, assign commits to them.
+ *
+ * Author: Jan Holesovsky <kendy@suse.cz>
+ * License: MIT <http://www.opensource.org/licenses/mit-license.php>
+ */
+
 #include "committers.hxx"
 #include "error.hxx"
 

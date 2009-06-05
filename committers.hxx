@@ -1,3 +1,10 @@
+/*
+ * Read committers from a file, assign commits to them.
+ *
+ * Author: Jan Holesovsky <kendy@suse.cz>
+ * License: MIT <http://www.opensource.org/licenses/mit-license.php>
+ */
+
 #ifndef _COMMITTERS_HXX_
 #define _COMMITTERS_HXX_
 
@@ -17,7 +24,7 @@ struct Committer
 namespace Committers
 {
     void load( const char *fname );
-    
+
     const Committer& getAuthor( const char* name );
 }
 

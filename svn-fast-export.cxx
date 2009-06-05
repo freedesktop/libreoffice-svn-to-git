@@ -1,10 +1,11 @@
 /*
- * svn-fast-export.c
- * ----------
- *  Walk through each revision of a local Subversion repository and export it
- *  in a stream that git-fast-import can consume.
+ * Based on svn-fast-export.c
+ *
+ * Walk through each revision of a local Subversion repository and export it
+ * in a stream that git-fast-import can consume.
  *
  * Author: Chris Lee <clee@kde.org>
+ *         Jan Holesovsky <kendy@suse.cz>
  * License: MIT <http://www.opensource.org/licenses/mit-license.php>
  */
 
@@ -180,7 +181,7 @@ static bool is_trunk( const char* path_ )
 
 static bool is_branch( const char* path_ )
 {
-    const size_t len = branches.length(); 
+    const size_t len = branches.length();
     return branches.compare( 0, len, path_, 0, len ) == 0;
 }
 
@@ -248,7 +249,7 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
     svn_fs_path_change_t *change;
 
     fprintf( stderr, "Exporting revision %ld... ", rev );
-    
+
     if ( Repositories::ignoreRevision( rev ) )
     {
         fprintf( stderr, "ignored.\n" );

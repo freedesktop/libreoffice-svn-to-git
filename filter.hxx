@@ -1,3 +1,10 @@
+/*
+ * Filter tabs -> spaces.
+ *
+ * Author: Jan Holesovsky <kendy@suse.cz>
+ * License: MIT <http://www.opensource.org/licenses/mit-license.php>
+ */
+
 #ifndef _FILTER_HXX_
 #define _FILTER_HXX_
 

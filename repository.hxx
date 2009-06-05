@@ -1,3 +1,11 @@
+/*
+ * Output the files to the appropriate repositories.
+ * Filter the commit messages when necessary.
+ *
+ * Author: Jan Holesovsky <kendy@suse.cz>
+ * License: MIT <http://www.opensource.org/licenses/mit-license.php>
+ */
+
 #ifndef _REPOSITORY_HXX_
 #define _REPOSITORY_HXX_
 
