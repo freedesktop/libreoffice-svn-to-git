@@ -31,5 +31,5 @@ libs-extern-sys=^(berkeleydb|bitstream_vera_fonts|expat|graphite|icu|jpeg|libxml
 extensions=^(sdext|swext|tomcat|apache-commons|jfreereport|reportbuilder|xpdf|migrationanalysis)\>
 
 # parts of the svn tree that are going to be just dumped, not imported
-ignore-we-do-not-want=^.gitignore
+ignore-we-do-not-want=^(.gitignore|.hgignore)\>
 ignore-did-not-fit-anywhere=.*
