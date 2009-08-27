@@ -27,7 +27,7 @@ libs-core=^(avmedia|basic|configmgr|connectivity|desktop|drawinglayer|embeddedob
 libs-extern=^(afms|agg|beanshell|epm|external|fondu|hsqldb|libegg|libtextcat|libxmlsec|msfontextract|np_sdk|rhino|sane|twain|lpsolve|icc|openssl|unixODBC|vigra|x11_extensions|hyphen|libwpd|lucene|redland|cppunit|apple_remote|xsltml)\>
 components=^(accessibility|automation|basctl|bean|crashrep|embedserv|extensions|forms|javainstaller2|lingucomponent|MathMLDTD|package|setup_native|UnoControls|wizards|xmlsecurity)\>
 postprocess=^(postprocess|packimages)\>
-libs-extern-sys=^(berkeleydb|bitstream_vera_fonts|expat|graphite|icu|jpeg|libxml2|libxslt|moz|neon|python|zlib|saxon|stax|boost|curl|dictionaries|cairo|hunspell)\>
+libs-extern-sys=^(berkeleydb|bitstream_vera_fonts|expat|graphite|icu|jpeg|libxml2|libxslt|moz|neon|nss|python|zlib|saxon|stax|boost|curl|dictionaries|cairo|hunspell)\>
 extensions=^(sdext|swext|tomcat|apache-commons|jfreereport|reportbuilder|xpdf|migrationanalysis)\>
 
 # parts of the svn tree that are going to be just dumped, not imported
