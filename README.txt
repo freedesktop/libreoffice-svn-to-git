@@ -33,6 +33,18 @@ for nightly imports from the OOo SVN [4].
 Maybe you'll need to tweak it for your needs a bit, but hopefully it will
 generally work for you well :-)
 
+How to import your SVN tree to git
+==================================
+
+- You need a local copy of the SVN tree
+  - see http://svn.collab.net/repos/svn/trunk/notes/svnsync.txt
+
+- Then you need to create a file with the list of committers (to map the login
+  names to real people and mail addresses), and a repository layout file
+
+- As the last thing, you have to run svn-to-git.sh :-)
+  - it will tell you what parameters does it need
+
 Some example configurations:
 
 - ooo-build
