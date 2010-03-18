@@ -26,6 +26,7 @@ namespace Committers
     void load( const char *fname );
 
     const Committer& getAuthor( const char* name );
+    const Committer& getAuthor( const std::string& name );
 }
 
 #endif // _COMMITTERS_HXX_

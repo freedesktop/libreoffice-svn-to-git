@@ -14,15 +14,7 @@
 
 using namespace std;
 
-struct ltstr
-{
-    bool operator()( const char* s1, const char* s2 ) const
-    {
-        return strcmp( s1, s2 ) < 0;
-    }
-};
-
-typedef std::map< const char*, Committer, ltstr > CommittersMap;
+typedef std::map< string, Committer > CommittersMap;
 
 static CommittersMap committers;
 
@@ -59,7 +51,7 @@ void Committers::load( const char *fname )
         }
 
         // store the data
-        const char* login = strdup( line.substr( 0, delim1 ).c_str() );
+        string login = line.substr( 0, delim1 );
         committers[login] = Committer( line.substr( delim1 + 1, delim2 - delim1 - 1 ),
                                        line.substr( delim2 + 1 ) );
     }
@@ -67,14 +59,31 @@ void Committers::load( const char *fname )
 
 const Committer& Committers::getAuthor( const char* name )
 {
+    return getAuthor( string( name ) );
+}
+
+const Committer& Committers::getAuthor( const string& name )
+{
     CommittersMap::iterator it( committers.find( name ) );
 
-    if ( it == committers.end() )
-    {
-        Error::report( string( "Author '" ) + name + "' is missing, adding as '" + name + default_address + "'" );
+    if ( it != committers.end() )
+        return it->second;
 
-        return ( committers[ strdup( name ) ] = Committer( string( name ), string( name ) + default_address ) );
+    // name + email
+    size_t addr = name.rfind( " <" );
+    if ( addr != string::npos )
+    {
+        size_t at = name.find( "@", addr );
+        if ( at != string::npos )
+        {
+            size_t end = name.find( ">", at );
+            if ( end != string::npos )
+            {
+                return ( committers[name] = Committer( name.substr( 0, addr ) , name.substr( addr + 2, end - addr - 2 ) ) );
+            }
+        }
     }
 
-    return it->second;
+    Error::report( string( "Author '" ) + name + "' is missing, adding as '" + name + default_address + "'" );
+    return ( committers[name] = Committer( name, name + default_address ) );
 }
