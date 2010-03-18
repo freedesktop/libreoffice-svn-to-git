@@ -1,3 +1,4 @@
 *.o
+hg-fast-export
 svn-fast-export
 .*.sw[po]
