@@ -13,6 +13,7 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <iomanip>
 #include <iostream>
 #include <set>
 #include <sstream>
@@ -189,7 +190,7 @@ static string commitMessage( const string& log_ )
     return eatWhitespace( log_.substr( start_line ) );
 }
 
-Tag::Tag( const Committer& committer_, const std::string& name_, time_t time_, const std::string& log_ )
+Tag::Tag( const Committer& committer_, const std::string& name_, Time time_, const std::string& log_ )
     : name( name_ ), tag_branch( name_ ), committer( committer_ ), time( time_ ), log( commitMessage( log_ ) )
 {
     const size_t tag_branches_len = strlen( TAG_TEMP_BRANCH );
@@ -247,7 +248,7 @@ ostream& Repository::modifyFile( const std::string& fname_, const char* mode_ )
     return out;
 }
 
-void Repository::commit( const Committer& committer_, const std::string& name_, unsigned int commit_id_, time_t time_, const std::string& log_, bool force_ )
+void Repository::commit( const Committer& committer_, const std::string& name_, unsigned int commit_id_, Time time_, const std::string& log_, bool force_ )
 {
     if ( force_ || !file_changes.empty() || !path_copies.empty() )
     {
@@ -258,7 +259,7 @@ void Repository::commit( const Committer& committer_, const std::string& name_, 
 
         string log( commitMessage( log_ ) );
 
-        out << "committer " << committer_.name << " <" << committer_.email << "> " << time_ << " -0000\n"
+        out << "committer " << committer_.name << " <" << committer_.email << "> " << time_ << "\n"
             << "data " << log.length() << "\n"
             << log << "\n"
             << path_copies
@@ -274,7 +275,7 @@ void Repository::commit( const Committer& committer_, const std::string& name_, 
 }
 
 void Repository::createBranch( unsigned int from_, const std::string& from_branch_,
-        const Committer& committer_, const std::string& name_, unsigned int commit_id_, time_t time_, const std::string& log_ )
+        const Committer& committer_, const std::string& name_, unsigned int commit_id_, Time time_, const std::string& log_ )
 {
     unsigned int from = findCommit( from_, from_branch_ );
     if ( from == 0 )
@@ -293,8 +294,8 @@ void Repository::createTag( const Tag& tag_ )
     
     out << "tag " << tag_.name
         << "\nfrom :" << 100000 + from
-        << "\ntagger " << tag_.committer.name << " <" << tag_.committer.email << "> " << tag_.time << " -0000\n"
-        << "data " << tag_.log.length() << "\n"
+        << "\ntagger " << tag_.committer.name << " <" << tag_.committer.email << "> " << tag_.time
+        << "\ndata " << tag_.log.length() << "\n"
         << tag_.log
         << endl;
 }
@@ -462,7 +463,7 @@ Repository& Repositories::get( const std::string& fname_ )
     return *repo;
 }
 
-void Repositories::commit( const Committer& committer_, const std::string& name_, unsigned int commit_id_, time_t time_, const std::string& log_ )
+void Repositories::commit( const Committer& committer_, const std::string& name_, unsigned int commit_id_, Time time_, const std::string& log_ )
 {
     if ( branches.find( name_ ) == branches.end() )
         Error::report( "Committing to a branch that hasn't been initialized using Repositories::createBranchOrTag()!" );
@@ -472,7 +473,7 @@ void Repositories::commit( const Committer& committer_, const std::string& name_
 }
 
 void Repositories::createBranchOrTag( bool is_branch_, unsigned int from_, const std::string& from_branch_,
-        const Committer& committer_, const std::string& name_, unsigned int commit_id_, time_t time_, const std::string& log_ )
+        const Committer& committer_, const std::string& name_, unsigned int commit_id_, Time time_, const std::string& log_ )
 {
     for ( Repos::iterator it = repos.begin(); it != repos.end(); ++it )
         (*it)->createBranch( from_, from_branch_, committer_, name_, commit_id_, time_, log_ );
@@ -495,4 +496,10 @@ bool Repositories::ignoreTag( const string& name_ )
     TagIgnore::const_iterator it = tag_ignore.find( name_ );
 
     return ( it != tag_ignore.end() );
+}
+
+std::ostream& operator<<( std::ostream& ostream_, const Time& time_ )
+{
+    ostream_ << time_.time << " " << ( ( time_.timezone > 0 )? '+': '-' ) << setfill( '0' ) << setw( 4 ) << abs( time_.timezone );
+    return ostream_;
 }

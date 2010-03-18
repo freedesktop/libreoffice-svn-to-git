@@ -18,6 +18,17 @@
 
 class Committer;
 
+struct Time
+{
+    /// Time.
+    time_t time;
+
+    /// Timezone;
+    int timezone;
+
+    Time( time_t time_, int timezone_ = 0 ) : time( time_ ), timezone( timezone_ ) {}
+};
+
 struct Tag
 {
     /// Name of the tag.
@@ -30,12 +41,12 @@ struct Tag
     const Committer& committer;
 
     /// Time.
-    time_t time;
+    Time time;
 
     /// Log message.
     std::string log;
 
-    Tag( const Committer& committer_, const std::string& name_, time_t time_, const std::string& log_ );
+    Tag( const Committer& committer_, const std::string& name_, Time time_, const std::string& log_ );
 };
 
 typedef unsigned short BranchId;
@@ -87,11 +98,11 @@ public:
     std::ostream& modifyFile( const std::string& fname_, const char* mode_ );
 
     /// Commit all the changes we did.
-    void commit( const Committer& committer_, const std::string& name_, unsigned int commit_id_, time_t time_, const std::string& log_, bool force_ = false );
+    void commit( const Committer& committer_, const std::string& name_, unsigned int commit_id_, Time time_, const std::string& log_, bool force_ = false );
 
     /// Create a branch.
     void createBranch( unsigned int from_, const std::string& from_branch_,
-            const Committer& committer_, const std::string& name_, unsigned int commit_id_, time_t time_, const std::string& log_ );
+            const Committer& committer_, const std::string& name_, unsigned int commit_id_, Time time_, const std::string& log_ );
 
     /// Create a tag (based on the 'tag tracking' branch).
     void createTag( const Tag& tag_ );
@@ -119,11 +130,11 @@ namespace Repositories
     inline std::ostream& modifyFile( const std::string& fname_, const char* mode_ ) { return get( fname_ ).modifyFile( fname_, mode_ ); }
 
     /// Commit to the all repositories that have some changes.
-    void commit( const Committer& committer_, const std::string& name_, unsigned int commit_id_, time_t time_, const std::string& log_ );
+    void commit( const Committer& committer_, const std::string& name_, unsigned int commit_id_, Time time_, const std::string& log_ );
 
     /// Create a branch or a tag in all the repositories.
     void createBranchOrTag( bool is_branch_, unsigned int from_, const std::string& from_branch_,
-            const Committer& committer_, const std::string& name_, unsigned int commit_id_, time_t time_, const std::string& log_ );
+            const Committer& committer_, const std::string& name_, unsigned int commit_id_, Time time_, const std::string& log_ );
 
     /// Should the revision with this number be ignored?
     bool ignoreRevision( unsigned int commit_id_ );
@@ -131,5 +142,7 @@ namespace Repositories
     /// Should the tag with this name be ignored?
     bool ignoreTag( const std::string& name_ );
 }
+
+std::ostream& operator<<( std::ostream& ostream_, const Time& time_ );
 
 #endif // _REPOSITORY_HXX_
