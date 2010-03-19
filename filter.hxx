@@ -29,6 +29,8 @@ public:
 
     void addData( const char* data_, size_t len_ );
 
+    void addData( const std::string& data_ );
+
     void write( std::ostream& out_ );
 
     static void setTabsToSpaces( int how_many_spaces_, const std::string& files_regex_ );

@@ -61,21 +61,9 @@ static int dump_blob( const python::object& filectx, const string &target_name )
     // prepare the stream
     ostream& out = Repositories::modifyFile( target_name, mode );
 
-    const char* content = python::extract< const char* >( filectx.attr( "data" )() );
-    long len = python::extract< long >( filectx.attr( "size" )() );
-
     // dump the content of the file
     Filter filter( target_name );
-
-    const long step = 8192;
-    const char* ptr = content;
-    while ( len > 0 )
-    {
-        filter.addData( ptr, min( len, step ) );
-        ptr += step;
-        len -= step;
-    }
-
+    filter.addData( python::extract< string >( filectx.attr( "data" )() ) );
     filter.write( out );
 
     return 0;

@@ -35,6 +35,22 @@ Filter::Filter( const string& fname_ )
         type = FILTER_TABS;
 }
 
+inline void addDataLoop( char*& dest, char what, bool& tabs_to_spaces, int no_spaces )
+{
+    if ( what == '\t' && tabs_to_spaces )
+    {
+        for ( int i = 0; i < no_spaces; ++i )
+            *dest++ = ' ';
+        return;
+    }
+    else if ( what == '\n' )
+        tabs_to_spaces = true;
+    else if ( what != ' ' )
+        tabs_to_spaces = false;
+
+    *dest++ = what;
+}
+
 void Filter::addData( const char* data_, size_t len_ )
 {
     if ( type == NO_FILTER || tabs.spaces <= 0 )
@@ -49,22 +65,30 @@ void Filter::addData( const char* data_, size_t len_ )
 
     // convert the leading tabs to N spaces (according to tabs.spaces)
     for ( const char* it = data_; it < data_ + len_; ++it )
-    {
-        if ( *it == '\t' && tabs_to_spaces )
-        {
-            for ( int i = 0; i < tabs.spaces; ++i )
-                *dest++ = ' ';
-            continue;
-        }
-        else if ( *it == '\n' )
-            tabs_to_spaces = true;
-        else if ( *it != ' ' )
-            tabs_to_spaces = false;
-
-        *dest++ = *it;
-    }
+        addDataLoop( dest, *it, tabs_to_spaces, tabs.spaces );
 
     data.append( tmp, dest - tmp );
+}
+
+void Filter::addData( const string& data_ )
+{
+    if ( type == NO_FILTER || tabs.spaces <= 0 )
+    {
+        data.append( data_ );
+        return;
+    }
+
+    // type == FILTER_TABS
+    char *tmp = new char[4*data_.size()];
+    char *dest = tmp;
+
+    // convert the leading tabs to N spaces (according to tabs.spaces)
+    for ( string::const_iterator it = data_.begin(); it != data_.end(); ++it )
+        addDataLoop( dest, *it, tabs_to_spaces, tabs.spaces );
+
+    data.append( tmp, dest - tmp );
+
+    delete[] tmp;
 }
 
 void Filter::write( std::ostream& out_ )
