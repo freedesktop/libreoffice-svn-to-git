@@ -190,6 +190,11 @@ static string commitMessage( const string& log_ )
     return eatWhitespace( log_.substr( start_line ) );
 }
 
+Time::Time( double time_, int timezone_ )
+    : time( time_ ), timezone( ( -timezone_ / 3600 ) * 100 + ( -timezone_ % 3600 ) / 60 )
+{
+}
+
 Tag::Tag( const Committer& committer_, const std::string& name_, Time time_, const std::string& log_ )
     : name( name_ ), tag_branch( name_ ), committer( committer_ ), time( time_ ), log( commitMessage( log_ ) )
 {
@@ -500,6 +505,6 @@ bool Repositories::ignoreTag( const string& name_ )
 
 std::ostream& operator<<( std::ostream& ostream_, const Time& time_ )
 {
-    ostream_ << time_.time << " " << ( ( time_.timezone > 0 )? '+': '-' ) << setfill( '0' ) << setw( 4 ) << abs( time_.timezone );
+    ostream_ << time_.time << " " << ( ( time_.timezone < 0 )? '-': '+' ) << setfill( '0' ) << setw( 4 ) << abs( time_.timezone );
     return ostream_;
 }

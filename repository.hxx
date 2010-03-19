@@ -26,7 +26,9 @@ struct Time
     /// Timezone;
     int timezone;
 
-    Time( time_t time_, int timezone_ = 0 ) : time( time_ ), timezone( timezone_ ) {}
+    Time( time_t time_ ) : time( time_ ), timezone( 0 ) {}
+
+    Time( double time_, int timezone_ = 0 );
 };
 
 struct Tag

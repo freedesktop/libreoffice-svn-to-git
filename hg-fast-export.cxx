@@ -229,7 +229,7 @@ int export_changeset( python::object context )
     string author = python::extract< string >( context.attr( "user" )() );
 
     python::object date = context.attr( "date" )();
-    Time epoch( static_cast< time_t >( python::extract< double >( date[0] ) ), python::extract< int >( date[1] ) );
+    Time epoch( static_cast< double >( python::extract< double >( date[0] ) ), python::extract< int >( date[1] ) );
 
     string message = python::extract< string >( context.attr( "description" )() );
 
