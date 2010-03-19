@@ -84,6 +84,13 @@ const Committer& Committers::getAuthor( const string& name )
         }
     }
 
+    // email only
+    size_t at = name.find( "@" );
+    if ( at != string::npos )
+    {
+        return ( committers[name] = Committer( name.substr( 0, at ) , name ) );
+    }
+
     Error::report( string( "Author '" ) + name + "' is missing, adding as '" + name + default_address + "'" );
     return ( committers[name] = Committer( name, name + default_address ) );
 }
