@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <time.h>
 
+#include <iomanip>
 #include <ostream>
 
 #include "committers.hxx"
@@ -218,7 +219,17 @@ static bool split_into_branch_filename( const char* path_, string& branch_, stri
 int export_changeset( python::object context )
 {
     int rev = python::extract< int >( context.attr( "rev" )() );
-    fprintf( stderr, "Exporting revision %d... ", rev ); //TODO output node too?
+
+    ostringstream stm;
+    python::object pnode( context.attr( "node" )() );
+    for ( int i = 0; i < python::len( pnode ); ++i )
+    {
+        unsigned char val = python::extract< char >( pnode[i] );
+        stm << hex << setfill( '0' ) << setw( 2 ) << static_cast< int >( val );
+    }
+    string node( stm.str() );
+
+    fprintf( stderr, "Exporting revision %d (%s)... ", rev, node.c_str() );
 
     if ( Repositories::ignoreRevision( rev ) )
     {
