@@ -138,6 +138,10 @@ namespace Repositories
     void createBranchOrTag( bool is_branch_, unsigned int from_, const std::string& from_branch_,
             const Committer& committer_, const std::string& name_, unsigned int commit_id_, Time time_, const std::string& log_ );
 
+    /// Update the tags according to the .hgtags file
+    void updateMercurialTags( const std::string& tag_file_,
+            const Committer& committer_, Time time_, const std::string& log_ );
+
     /// Should the revision with this number be ignored?
     bool ignoreRevision( unsigned int commit_id_ );
 

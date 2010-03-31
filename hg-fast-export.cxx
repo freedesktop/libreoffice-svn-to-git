@@ -244,24 +244,36 @@ int export_changeset( python::object context )
 
     string message = python::extract< string >( context.attr( "description" )() );
 
-//    printf( "%s %ld %s\n", author.c_str(), epoch, message.c_str() );
+    // create tag? (a tag branch, to be exact)
+    python::object tags = context.attr( "tags" )();
+    for ( int i = 0; i < python::len( tags ); ++i )
+    {
+        python::object tag = tags[i];
+        string tag_name = python::extract< string >( tag );
 
-    string branch( "master" );
+        if ( tag_name != "tip" )
+        {
+            // don't create the tag itself, only the tag branch
+            Repositories::createBranchOrTag( true,
+                    rev, "master",
+                    Committers::getAuthor( author ),
+                    TAG_TEMP_BRANCH + tag_name, rev,
+                    epoch,
+                    message );
+        }
+    }
+
     bool no_changes = true;
-    bool debug_once = true;
-    bool tagged_or_branched = false;
     python::object files = context.attr( "files" )();
     for ( int i = 0; i < python::len( files ); ++i )
     {
         python::object file = files[i];
         string path = python::extract< string >( file );
 
-        if ( debug_once )
-        {
+        if ( no_changes )
             fprintf( stderr, "path: %s... ", path.c_str() );
-            debug_once = false;
-        }
 
+        // dump the file
         python::object filectx;
         try
         {
@@ -271,109 +283,28 @@ int export_changeset( python::object context )
             PyErr_Clear();
         }
 
-#if 0
-        svn_pool_clear(revpool);
-        apr_hash_this(i, &key, NULL, &val);
-        path = (char *)key;
-        change = (svn_fs_path_change_t *)val;
-
-        // don't care about anything in the toplevel
-        if ( path[0] != '/' || strchr( path + 1, '/' ) == NULL )
-            continue;
-
-        string this_branch, fname;
-
-        // skip if we cannot find the branch
-        if ( !split_into_branch_filename( path, this_branch, fname ) )
-            continue;
-
-        // ignore the tags we do not want
-        if ( is_tag( path ) && Repositories::ignoreTag( this_branch ) )
-            continue;
-
-        SVN_ERR(svn_fs_is_dir(&is_dir, fs_root, path, revpool));
-
-        // detect creation of branch/tag
-        if ( is_dir && change->change_kind == svn_fs_path_change_add )
-        {
-            // create a new branch/tag?
-            if ( is_branch( path ) || is_tag( path ) )
-            {
-                bool branching = is_branch( path );
-
-                if ( fname.empty() )
-                {
-                    // is it a new branch/tag
-                    svn_revnum_t rev_from;
-                    const char* path_from;
-                    SVN_ERR( svn_fs_copied_from( &rev_from, &path_from, fs_root, path, revpool ) );
-
-                    string from_branch, from_fname;
-                    if ( path_from != NULL &&
-                         split_into_branch_filename( path_from, from_branch, from_fname ) &&
-                         from_fname.empty() )
-                    {
-                        Repositories::createBranchOrTag( branching,
-                                rev_from, from_branch,
-                                Committers::getAuthor( author ),
-                                this_branch, rev,
-                                epoch,
-                                message );
-
-                        tagged_or_branched = true;
-                    }
-                    continue;
-                }
-            }
-        }
-
-        // sanity check
-        if ( branch.empty() )
-            branch = this_branch;
-        else if ( branch != this_branch )
-        {
-            // we found a commit that belongs to more branches at once!
-            // let's commit what we have so far so that we can commit the
-            // rest to the other branch later
-            Repositories::commit( Committers::getAuthor( author ),
-                    branch, rev,
-                    epoch,
-                    message );
-            branch = this_branch;
-        }
-
-        // add/remove/move the files
-        if ( change->change_kind == svn_fs_path_change_delete )
-            delete_hierarchy_rev( fs, rev, (char *)path, revpool );
-        else if ( is_dir )
-        {
-            svn_revnum_t rev_from;
-            const char* path_from;
-            SVN_ERR( svn_fs_copied_from( &rev_from, &path_from, fs_root, path, revpool ) );
-
-            if ( path_from == NULL )
-                continue;
-
-            copy_hierarchy( fs, rev_from, (char *)path_from, fname, revpool );
-        }
-        else
-#endif
         if ( filectx )
-            dump_blob( filectx, path );
+        {
+            if ( path != ".hgtags" )
+                dump_blob( filectx, path );
+            else
+                Repositories::updateMercurialTags( python::extract< string >( filectx.attr( "data" )() ),
+                        Committers::getAuthor( author ), epoch, message );
+        }
         else
             Repositories::deleteFile( path );
 
         no_changes = false;
     }
 
-    if ( no_changes || branch.empty() )
+    if ( no_changes )
     {
-        fprintf( stderr, "%s.\n", tagged_or_branched? "created": "skipping" );
+        fprintf( stderr, "%s.\n", "skipping" );
         return 0;
     }
 
     Repositories::commit( Committers::getAuthor( author ),
-            branch, rev,
+            "master", rev,
             epoch,
             message );
 

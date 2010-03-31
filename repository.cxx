@@ -489,6 +489,40 @@ void Repositories::createBranchOrTag( bool is_branch_, unsigned int from_, const
         tags.push_back( new Tag( committer_, name_, time_, log_ ) );
 }
 
+void Repositories::updateMercurialTags( const std::string& tag_file_,
+        const Committer& committer_, Time time_, const std::string& log_ )
+{
+    size_t line = 0;
+    while ( line != string::npos )
+    {
+        size_t tag_name = tag_file_.find( ' ', line );
+        if ( tag_name == string::npos )
+            break;
+
+        line = tag_file_.find( '\n', tag_name + 1 );
+
+        string tag;
+        if ( line == string::npos )
+            tag = TAG_TEMP_BRANCH + tag_file_.substr( tag_name + 1 );
+        else
+            tag = TAG_TEMP_BRANCH + tag_file_.substr( tag_name + 1, line - tag_name - 1 );
+
+        if ( branches.find( tag ) != branches.end() )
+        {
+            bool found = false;
+            for ( Tags::const_iterator t = tags.begin(); t != tags.end(); ++t )
+                if ( (*t)->name == tag )
+                {
+                    found = true;
+                    break;
+                }
+
+            if ( !found )
+                tags.push_back( new Tag( committer_, tag, time_, log_ ) );
+        }
+    }
+}
+
 bool Repositories::ignoreRevision( unsigned int commit_id_ )
 {
     RevisionIgnore::const_iterator it = revision_ignore.find( commit_id_ );
