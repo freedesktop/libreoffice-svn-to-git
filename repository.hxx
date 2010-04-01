@@ -11,6 +11,7 @@
 
 #include <string>
 #include <fstream>
+#include <vector>
 
 #include <regex.h>
 
@@ -58,12 +59,6 @@ class Repository
     /// Remember what files we changed and how (deletes/modifications).
     std::string file_changes;
 
-    /// Remember the copies of paths.
-    ///
-    /// We cannot use file_changes here, because this has to happen before the
-    /// deletion of the source paths.
-    std::string path_copies;
-
     /// Counter for the files.
     unsigned int mark;
 
@@ -80,6 +75,9 @@ class Repository
     ///
     /// Index - commit number, content - branch id.
     BranchId* commits;
+
+    /// Remember chain of parents
+    int* parents;
 
     /// Max number of revisions.
     unsigned int max_revs;
@@ -100,7 +98,7 @@ public:
     std::ostream& modifyFile( const std::string& fname_, const char* mode_ );
 
     /// Commit all the changes we did.
-    void commit( const Committer& committer_, const std::string& name_, unsigned int commit_id_, Time time_, const std::string& log_, bool force_ = false );
+    void commit( const Committer& committer_, const std::string& name_, unsigned int commit_id_, Time time_, const std::string& log_, const std::vector< int >& merges_, bool force_ = false );
 
     /// Create a branch.
     void createBranch( unsigned int from_, const std::string& from_branch_,
@@ -108,6 +106,12 @@ public:
 
     /// Create a tag (based on the 'tag tracking' branch).
     void createTag( const Tag& tag_ );
+
+    /// Setup the initial commit in the repo (from parenting point of view)
+    void setupFirstParent( int rev_ );
+
+    /// Has this commit at least one parent commit?
+    bool hasParents( const std::vector< int >& parents_ );
 
 private:
     /// Find the most recent commit to the specified branch smaller than the reference one.
@@ -117,7 +121,7 @@ private:
 namespace Repositories
 {
     /// Load the repositories layout from the config file.
-    bool load( const char* fname_, unsigned int max_revs_, std::string& trunk_base_, std::string& trunk_, std::string& branches_, std::string& tags_ );
+    bool load( const char* fname_, unsigned int max_revs_, int& min_rev_, std::string& trunk_base_, std::string& trunk_, std::string& branches_, std::string& tags_ );
 
     /// Close all the repositories.
     void close();
@@ -132,7 +136,7 @@ namespace Repositories
     inline std::ostream& modifyFile( const std::string& fname_, const char* mode_ ) { return get( fname_ ).modifyFile( fname_, mode_ ); }
 
     /// Commit to the all repositories that have some changes.
-    void commit( const Committer& committer_, const std::string& name_, unsigned int commit_id_, Time time_, const std::string& log_ );
+    void commit( const Committer& committer_, const std::string& name_, unsigned int commit_id_, Time time_, const std::string& log_, const std::vector< int >& merges_ = std::vector< int >() );
 
     /// Create a branch or a tag in all the repositories.
     void createBranchOrTag( bool is_branch_, unsigned int from_, const std::string& from_branch_,
@@ -147,6 +151,12 @@ namespace Repositories
 
     /// Should the tag with this name be ignored?
     bool ignoreTag( const std::string& name_ );
+
+    /// Setup the initial commit in the repo (from parenting point of view)
+    void setupFirstParent( int rev_ );
+
+    /// Has this commit at least one parent commit?
+    bool hasParents( const std::vector< int >& parents_ );
 }
 
 std::ostream& operator<<( std::ostream& ostream_, const Time& time_ );

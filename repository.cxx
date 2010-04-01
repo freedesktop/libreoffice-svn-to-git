@@ -209,6 +209,7 @@ Repository::Repository( const std::string& reponame_, const string& regex_, unsi
     : mark( 1 ),
       out( ( reponame_ + ".dump" ).c_str() ),
       commits( new BranchId[max_revs_ + 10] ),
+      parents( new int[max_revs_ + 10] ),
       max_revs( max_revs_ )
 {
     int status = regcomp( &regex_rule, regex_.c_str(), REG_EXTENDED | REG_NOSUB );
@@ -216,12 +217,16 @@ Repository::Repository( const std::string& reponame_, const string& regex_, unsi
         Error::report( "Cannot create regex '" + regex_ + "'" );
 
     memset( commits, 0, ( max_revs_ + 10 ) * sizeof( BranchId ) );
+
+    for ( int i = 0; i < max_revs_ + 10; ++i )
+        parents[i] = -1;
 }
 
 Repository::~Repository()
 {
     regfree( &regex_rule );
     delete[] commits;
+    delete[] parents;
 }
 
 bool Repository::matches( const std::string& fname_ ) const
@@ -253,29 +258,56 @@ ostream& Repository::modifyFile( const std::string& fname_, const char* mode_ )
     return out;
 }
 
-void Repository::commit( const Committer& committer_, const std::string& name_, unsigned int commit_id_, Time time_, const std::string& log_, bool force_ )
+void Repository::commit( const Committer& committer_, const std::string& name_, unsigned int commit_id_, Time time_, const std::string& log_, const std::vector< int >& merges_, bool force_ )
 {
-    if ( force_ || !file_changes.empty() || !path_copies.empty() )
+    if ( force_ || !file_changes.empty() )
     {
         out << "commit refs/heads/" << name_ << "\n";
 
         if ( commit_id_ )
-            out << "mark :" << 100000 + commit_id_ << "\n";
+            out << "mark :" << ( 100000 + commit_id_ ) << "\n";
 
         string log( commitMessage( log_ ) );
 
         out << "committer " << committer_.name << " <" << committer_.email << "> " << time_ << "\n"
             << "data " << log.length() << "\n"
-            << log << "\n"
-            << path_copies
-            << file_changes
+            << log << "\n";
+
+        // from & merges
+        bool first = true;
+        for ( vector< int >::const_iterator it = merges_.begin(); it != merges_.end(); ++it )
+        {
+            if ( parents[(*it)] < 0 )
+                continue;
+
+            out << ( first? "from :": "merge :" ) << ( 100000 + parents[(*it)] ) << "\n";
+            first = false;
+        }
+
+        out << file_changes
             << endl;
 
         commits[commit_id_] = branchId( name_ );
+        parents[commit_id_] = commit_id_;
+    }
+    else
+    {
+        // try to find & setup a parent chain
+        for ( vector< int >::const_iterator it = merges_.begin(); it != merges_.end(); ++it )
+        {
+            if ( parents[(*it)] < 0 )
+                continue;
+            else
+            {
+                // one of those, it is not necessary to be _exact_ here, but
+                // it _must_ exist
+                parents[commit_id_] = parents[(*it)];
+                break;
+            }
+        }
     }
 
     file_changes.clear();
-    path_copies.clear();
     mark = 1;
 }
 
@@ -288,7 +320,7 @@ void Repository::createBranch( unsigned int from_, const std::string& from_branc
 
     out << "reset refs/heads/" << name_ << "\nfrom :" << 100000 + from << "\n" << endl;
 
-    commit( committer_, name_, commit_id_, time_, log_, true );
+    commit( committer_, name_, commit_id_, time_, log_, vector< int >(), true );
 }
 
 void Repository::createTag( const Tag& tag_ )
@@ -305,6 +337,22 @@ void Repository::createTag( const Tag& tag_ )
         << endl;
 }
 
+void Repository::setupFirstParent( int rev_ )
+{
+    parents[rev_] = rev_;
+}
+
+bool Repository::hasParents( const std::vector< int >& parents_ )
+{
+    for ( vector< int >::const_iterator it = parents_.begin(); it != parents_.end(); ++it )
+    {
+        if ( (*it) < 0 || parents[(*it)] >= 0 )
+            return true;
+    }
+
+    return false;
+}
+
 unsigned int Repository::findCommit( unsigned int from_, const std::string& from_branch_ )
 {
     BranchId branch_id = branchId( from_branch_ );
@@ -316,7 +364,7 @@ unsigned int Repository::findCommit( unsigned int from_, const std::string& from
     return commit_no;
 }
 
-bool Repositories::load( const char* fname_, unsigned int max_revs_, std::string& trunk_base_, std::string& trunk_, std::string& branches_, std::string& tags_ )
+bool Repositories::load( const char* fname_, unsigned int max_revs_, int& min_rev_, std::string& trunk_base_, std::string& trunk_, std::string& branches_, std::string& tags_ )
 {
     ifstream input( fname_, ifstream::in );
     string line;
@@ -402,6 +450,10 @@ bool Repositories::load( const char* fname_, unsigned int max_revs_, std::string
                     if ( which > 0 )
                         revision_ignore.insert( which );
                 }
+                else if ( line.substr( arg, colon - arg ) == "from" )
+                {
+                    min_rev_ = atoi( line.substr( colon + 1 ).c_str() );
+                }
             }
             else if ( command == "tag" )
             {
@@ -468,13 +520,13 @@ Repository& Repositories::get( const std::string& fname_ )
     return *repo;
 }
 
-void Repositories::commit( const Committer& committer_, const std::string& name_, unsigned int commit_id_, Time time_, const std::string& log_ )
+void Repositories::commit( const Committer& committer_, const std::string& name_, unsigned int commit_id_, Time time_, const std::string& log_, const std::vector< int >& merges_ )
 {
     if ( branches.find( name_ ) == branches.end() )
         Error::report( "Committing to a branch that hasn't been initialized using Repositories::createBranchOrTag()!" );
 
     for ( Repos::iterator it = repos.begin(); it != repos.end(); ++it )
-        (*it)->commit( committer_, name_, commit_id_, time_, log_ );
+        (*it)->commit( committer_, name_, commit_id_, time_, log_, merges_ );
 }
 
 void Repositories::createBranchOrTag( bool is_branch_, unsigned int from_, const std::string& from_branch_,
@@ -535,6 +587,27 @@ bool Repositories::ignoreTag( const string& name_ )
     TagIgnore::const_iterator it = tag_ignore.find( name_ );
 
     return ( it != tag_ignore.end() );
+}
+
+void Repositories::setupFirstParent( int rev_ )
+{
+    if ( rev_ == 0 )
+        return;
+    
+    for ( Repos::iterator it = repos.begin(); it != repos.end(); ++it )
+        (*it)->setupFirstParent( rev_ );
+}
+
+bool Repositories::hasParents( const std::vector< int >& parents_ )
+{
+    // at least one parent in at least one repository
+    for ( Repos::iterator it = repos.begin(); it != repos.end(); ++it )
+    {
+        if ( (*it)->hasParents( parents_ ) )
+            return true;
+    }
+
+    return false;
 }
 
 std::ostream& operator<<( std::ostream& ostream_, const Time& time_ )

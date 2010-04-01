@@ -408,11 +408,14 @@ int crawl_revisions( char *repos_path, const char* repos_config )
     min_rev = 1;
     max_rev = youngest_rev;
 
-    if ( !Repositories::load( repos_config, max_rev, trunk_base, trunk, branches, tags ) )
+    int dummy = -1;
+    if ( !Repositories::load( repos_config, max_rev, dummy, trunk_base, trunk, branches, tags ) )
     {
         Error::report( "Must have at least one valid repository definition." );
         return 1;
     }
+    if ( dummy != -1 )
+        fprintf( stderr, "Warning: svn-fast-export ignores :revision from:%d.\n", dummy );
 
     subpool = svn_pool_create(pool);
     for (rev = min_rev; rev <= max_rev; rev++) {

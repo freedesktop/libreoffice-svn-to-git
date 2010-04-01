@@ -17,6 +17,7 @@
 
 #include <iomanip>
 #include <ostream>
+#include <vector>
 
 #include "committers.hxx"
 #include "error.hxx"
@@ -231,17 +232,31 @@ int export_changeset( python::object context )
 
     fprintf( stderr, "Exporting revision %d (%s)... ", rev, node.c_str() );
 
-    if ( Repositories::ignoreRevision( rev ) )
+    // merges
+    vector< int > merges;
+    python::object parents = context.attr( "parents" )();
+    for ( int i = 0; i < python::len( parents ); ++i )
     {
-        fprintf( stderr, "ignored.\n" );
+        python::object parent = parents[i];
+        int parent_rev = python::extract< int >( parent.attr( "rev" )() );
+
+        merges.push_back( parent_rev );
+    }
+
+    if ( !Repositories::hasParents( merges ) )
+    {
+        fprintf( stderr, "ignored, no parents.\n" );
         return 0;
     }
 
+    // author
     string author = python::extract< string >( context.attr( "user" )() );
 
+    // date
     python::object date = context.attr( "date" )();
     Time epoch( static_cast< double >( python::extract< double >( date[0] ) ), python::extract< int >( date[1] ) );
 
+    // commit message
     string message = python::extract< string >( context.attr( "description" )() );
 
     // create tag? (a tag branch, to be exact)
@@ -263,6 +278,7 @@ int export_changeset( python::object context )
         }
     }
 
+    // files
     bool no_changes = true;
     python::object files = context.attr( "files" )();
     for ( int i = 0; i < python::len( files ); ++i )
@@ -298,15 +314,13 @@ int export_changeset( python::object context )
     }
 
     if ( no_changes )
-    {
-        fprintf( stderr, "%s.\n", "skipping" );
-        return 0;
-    }
+        fprintf( stderr, "no files changed, merge commit? " );
 
     Repositories::commit( Committers::getAuthor( author ),
             "master", rev,
             epoch,
-            message );
+            message,
+            merges );
 
     fprintf( stderr, "done!\n" );
 
@@ -329,11 +343,13 @@ int crawl_revisions( const char *repos_path, const char* repos_config )
     int min_rev = 0;
     int max_rev = python::len( changelog );
 
-    if ( !Repositories::load( repos_config, max_rev, trunk_base, trunk, branches, tags ) )
+    if ( !Repositories::load( repos_config, max_rev, min_rev, trunk_base, trunk, branches, tags ) )
     {
         Error::report( "Must have at least one valid repository definition." );
         return 1;
     }
+
+    Repositories::setupFirstParent( min_rev );
 
     for ( int rev = min_rev; rev < max_rev; rev++ )
     {
