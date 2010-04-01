@@ -77,7 +77,7 @@ class Repository
     BranchId* commits;
 
     /// Remember chain of parents
-    int* parents;
+    std::string* parents;
 
     /// Max number of revisions.
     unsigned int max_revs;
@@ -108,7 +108,7 @@ public:
     void createTag( const Tag& tag_ );
 
     /// Setup the initial commit in the repo (from parenting point of view)
-    void setupFirstParent( int rev_ );
+    void setFrom( int rev_, const std::string& git_commit_ );
 
     /// Has this commit at least one parent commit?
     bool hasParents( const std::vector< int >& parents_ );
@@ -151,9 +151,6 @@ namespace Repositories
 
     /// Should the tag with this name be ignored?
     bool ignoreTag( const std::string& name_ );
-
-    /// Setup the initial commit in the repo (from parenting point of view)
-    void setupFirstParent( int rev_ );
 
     /// Has this commit at least one parent commit?
     bool hasParents( const std::vector< int >& parents_ );

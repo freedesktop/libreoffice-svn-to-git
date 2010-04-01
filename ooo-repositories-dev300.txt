@@ -12,27 +12,27 @@
 :revision from:263206
 
 # the actual layout of the repositories
-l10n=(^l10n|[Ll][Oo][Cc][Aa][Ll][Ii][Zz][Ee]\.[Ss][Dd][Ff]$)
-ure=^(bridges|cli_ure|codemaker|cppu|cppuhelper|cpputools|idlc|io|javaunohelper|jurt|jvmaccess|jvmfwk|offapi|offuh|pyuno|rdbmaker|registry|remotebridges|ridljar|sal|salhelper|stoc|store|udkapi|unoil|ure|xml2cmp|jut)\>
-sdk=^(autodoc|cosv|odk|udm|unodevtools)\>
-base=^(dbaccess|reportdesign)\>
-calc=^(sc|scaddins|sccomp|chart2)\>
-extras=^(extras)\>
-help=^(helpcontent2)\>
-writer=^(sw|starmath)\>
-impress=^(sd|animations|slideshow)\>
-artwork=^(default_images|external_images|ooo_custom_images)\>
-filters=^(binfilter|filter|hwpfilter|unoxml|writerfilter|writerperfect|xmerge|oox|writer2latex)\>
-testing=^(qadevOOo|smoketestoo_native|testshl2|testtools|testautomation)\>
-bootstrap=^(guw|dmake|instsetoo_native|scp2|solenv|soltools|stlport|soldep|aclocal.m4|oowintool|configure.in|configure.cmd|Makefile|Makefile.in|install-sh|set_soenv.in|config.guess|configure|acinclude.m4|config.sub|makefile.rc|bootstrap.1|config_office)\>
-libs-gui=^(basebmp|basegfx|canvas|comphelper|cppcanvas|dtrans|goodies|i18npool|i18nutil|o3tl|padmin|psprint|psprint_config|regexp|rsc|sax|sot|svtools|toolkit|tools|transex3|ucbhelper|unotools|vcl|vos)\>
-libs-core=^(avmedia|basic|configmgr|connectivity|desktop|drawinglayer|embeddedobj|eventattacher|fileaccess|formula|fpicker|framework|idl|linguistic|officecfg|oovbaapi|sandbox|scripting|sfx2|shell|sj2|svx|sysui|ucb|uui|xmlhelp|xmloff|xmlscript|readlicense_oo)\>
-libs-extern=^(afms|agg|beanshell|epm|external|fondu|hsqldb|libegg|libtextcat|libxmlsec|msfontextract|np_sdk|rhino|sane|twain|lpsolve|icc|openssl|unixODBC|vigra|x11_extensions|hyphen|libwpd|lucene|redland|cppunit|apple_remote|xsltml)\>
-components=^(accessibility|automation|basctl|bean|crashrep|embedserv|extensions|forms|javainstaller2|lingucomponent|MathMLDTD|package|setup_native|UnoControls|wizards|xmlsecurity)\>
-postprocess=^(postprocess|packimages)\>
-libs-extern-sys=^(berkeleydb|bitstream_vera_fonts|expat|graphite|icu|jpeg|libxml2|libxslt|moz|neon|nss|python|zlib|saxon|stax|boost|curl|dictionaries|cairo|hunspell)\>
-extensions=^(sdext|swext|tomcat|apache-commons|jfreereport|reportbuilder|xpdf|migrationanalysis)\>
+l10n:e9323842972db834ab47e24c8c85879f6c7c353c=(^l10n|[Ll][Oo][Cc][Aa][Ll][Ii][Zz][Ee]\.[Ss][Dd][Ff]$)
+ure:8c929c2dea4c2b62cbd8c892e0386bb3d7131466=^(bridges|cli_ure|codemaker|cppu|cppuhelper|cpputools|idlc|io|javaunohelper|jurt|jvmaccess|jvmfwk|offapi|offuh|pyuno|rdbmaker|registry|remotebridges|ridljar|sal|salhelper|stoc|store|udkapi|unoil|ure|xml2cmp|jut)\>
+sdk:92dd7b1629992cc193bc80f7689970dc1d36967a=^(autodoc|cosv|odk|udm|unodevtools)\>
+base:f7adfce6730dacc29f89e06a47f2e270956ca532=^(dbaccess|reportdesign)\>
+calc:17afeb05f38050f8e93b59279e67a0860b2b760b=^(sc|scaddins|sccomp|chart2)\>
+extras:dd863e9f6af303988cad6e570f3143540febcaf8=^(extras)\>
+help:bc5cb3872b1f6e3f58acd45b60242b035d0551d1=^(helpcontent2)\>
+writer:d21c39abb8529540853982e657a7464a439c9b29=^(sw|starmath)\>
+impress:cee2ef478d3059403002c7c60ea8905e50215abe=^(sd|animations|slideshow)\>
+artwork:f99900269a0ad1b190ef5c81ccfb56c42c484fb7=^(default_images|external_images|ooo_custom_images)\>
+filters:0ea196d98556a75e28ea14ad91168c8aa4a8885a=^(binfilter|filter|hwpfilter|unoxml|writerfilter|writerperfect|xmerge|oox|writer2latex)\>
+testing:3113cfefc2f1f66f49bfadbc932157774426e77f=^(qadevOOo|smoketestoo_native|testshl2|testtools|testautomation)\>
+bootstrap:7da70d8cbc65daf27f0e43937c046e0ec63a506e=^(guw|dmake|instsetoo_native|scp2|solenv|soltools|stlport|soldep|aclocal.m4|oowintool|configure.in|configure.cmd|Makefile|Makefile.in|install-sh|set_soenv.in|config.guess|configure|acinclude.m4|config.sub|makefile.rc|bootstrap.1|config_office)\>
+libs-gui:d4889356a8bf7834837163cab2859fe7ae2837d1=^(basebmp|basegfx|canvas|comphelper|cppcanvas|dtrans|goodies|i18npool|i18nutil|o3tl|padmin|psprint|psprint_config|regexp|rsc|sax|sot|svtools|toolkit|tools|transex3|ucbhelper|unotools|vcl|vos)\>
+libs-core:7ac3cbc92e93eabfbbbf65b8ac429afc28f84b2e=^(avmedia|basic|configmgr|connectivity|desktop|drawinglayer|embeddedobj|eventattacher|fileaccess|formula|fpicker|framework|idl|linguistic|officecfg|oovbaapi|sandbox|scripting|sfx2|shell|sj2|svx|sysui|ucb|uui|xmlhelp|xmloff|xmlscript|readlicense_oo)\>
+libs-extern:32d6e8b773bcea68a7f9c9e5c56c00276297a761=^(afms|agg|beanshell|epm|external|fondu|hsqldb|libegg|libtextcat|libxmlsec|msfontextract|np_sdk|rhino|sane|twain|lpsolve|icc|openssl|unixODBC|vigra|x11_extensions|hyphen|libwpd|lucene|redland|cppunit|apple_remote|xsltml)\>
+components:7bf1381f02e277dea45e08aed8b2d28bf8360f31=^(accessibility|automation|basctl|bean|crashrep|embedserv|extensions|forms|javainstaller2|lingucomponent|MathMLDTD|package|setup_native|UnoControls|wizards|xmlsecurity)\>
+postprocess:d8e19c2ae73999eb3cbb6e9d32e5b12fb0e524a3=^(postprocess|packimages)\>
+libs-extern-sys:0bb3f2b6572ca504f1fe1a9348e4fddaa2c21a6b=^(berkeleydb|bitstream_vera_fonts|expat|graphite|icu|jpeg|libxml2|libxslt|moz|neon|nss|python|zlib|saxon|stax|boost|curl|dictionaries|cairo|hunspell)\>
+extensions:83fa08dda07020c80dc3eada8d056890f31e3f22=^(sdext|swext|tomcat|apache-commons|jfreereport|reportbuilder|xpdf|migrationanalysis)\>
 
 # parts of the svn tree that are going to be just dumped, not imported
-ignore-we-do-not-want=^(.gitignore|.hgignore)\>
-ignore-did-not-fit-anywhere=.*
+ignore-we-do-not-want:ignore=^(.gitignore|.hgignore)\>
+ignore-did-not-fit-anywhere:ignore=.*

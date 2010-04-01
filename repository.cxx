@@ -209,7 +209,7 @@ Repository::Repository( const std::string& reponame_, const string& regex_, unsi
     : mark( 1 ),
       out( ( reponame_ + ".dump" ).c_str() ),
       commits( new BranchId[max_revs_ + 10] ),
-      parents( new int[max_revs_ + 10] ),
+      parents( new string[max_revs_ + 10] ),
       max_revs( max_revs_ )
 {
     int status = regcomp( &regex_rule, regex_.c_str(), REG_EXTENDED | REG_NOSUB );
@@ -217,9 +217,6 @@ Repository::Repository( const std::string& reponame_, const string& regex_, unsi
         Error::report( "Cannot create regex '" + regex_ + "'" );
 
     memset( commits, 0, ( max_revs_ + 10 ) * sizeof( BranchId ) );
-
-    for ( int i = 0; i < max_revs_ + 10; ++i )
-        parents[i] = -1;
 }
 
 Repository::~Repository()
@@ -277,27 +274,29 @@ void Repository::commit( const Committer& committer_, const std::string& name_, 
         bool first = true;
         for ( vector< int >::const_iterator it = merges_.begin(); it != merges_.end(); ++it )
         {
-            if ( parents[(*it)] < 0 )
-                continue;
-
-            out << ( first? "from :": "merge :" ) << ( 100000 + parents[(*it)] ) << "\n";
-            first = false;
+            if ( parents[(*it)].length() != 0 )
+            {
+                out << ( first? "from ": "merge " ) << parents[(*it)] << "\n";
+                first = false;
+            }
         }
 
         out << file_changes
             << endl;
 
         commits[commit_id_] = branchId( name_ );
-        parents[commit_id_] = commit_id_;
+
+        ostringstream sstr;
+        sstr << ":" << ( 100000 + commit_id_ );
+
+        parents[commit_id_] = sstr.str();
     }
     else
     {
         // try to find & setup a parent chain
         for ( vector< int >::const_iterator it = merges_.begin(); it != merges_.end(); ++it )
         {
-            if ( parents[(*it)] < 0 )
-                continue;
-            else
+            if ( parents[(*it)].length() != 0 )
             {
                 // one of those, it is not necessary to be _exact_ here, but
                 // it _must_ exist
@@ -337,16 +336,16 @@ void Repository::createTag( const Tag& tag_ )
         << endl;
 }
 
-void Repository::setupFirstParent( int rev_ )
+void Repository::setFrom( int rev_, const std::string& git_commit_ )
 {
-    parents[rev_] = rev_;
+    parents[rev_] = git_commit_;
 }
 
 bool Repository::hasParents( const std::vector< int >& parents_ )
 {
     for ( vector< int >::const_iterator it = parents_.begin(); it != parents_.end(); ++it )
     {
-        if ( (*it) < 0 || parents[(*it)] >= 0 )
+        if ( (*it) < 0 || parents[(*it)].length() != 0 )
             return true;
     }
 
@@ -368,6 +367,7 @@ bool Repositories::load( const char* fname_, unsigned int max_revs_, int& min_re
 {
     ifstream input( fname_, ifstream::in );
     string line;
+    bool sets_min_rev = false;
     bool result = false;
 
     while ( !input.eof() )
@@ -453,6 +453,7 @@ bool Repositories::load( const char* fname_, unsigned int max_revs_, int& min_re
                 else if ( line.substr( arg, colon - arg ) == "from" )
                 {
                     min_rev_ = atoi( line.substr( colon + 1 ).c_str() );
+                    sets_min_rev = true;
                 }
             }
             else if ( command == "tag" )
@@ -469,14 +470,32 @@ bool Repositories::load( const char* fname_, unsigned int max_revs_, int& min_re
         }
 
         // find the separators
-        size_t delim = line.find( '=' );
-        if ( delim == string::npos )
+        size_t equal = line.find( '=' );
+        if ( equal == string::npos )
         {
             Error::report( "Wrong repository description '" + line + "'" );
             continue;
         }
+        size_t colon = line.find( ':' );
+        if ( colon > equal )
+            colon = string::npos;
 
-        repos.push_back( new Repository( line.substr( 0, delim ), line.substr( delim + 1 ), max_revs_ ) );
+        if ( sets_min_rev && colon == string::npos )
+        {
+            Error::report( "Minimal revision set, but '" + line + "' does not set the git commit." );
+            continue;
+        }
+        if ( !sets_min_rev && colon != string::npos )
+        {
+            Error::report( "Minimal revision not set, and '" + line + "' sets the git commit." );
+            continue;
+        }
+
+        Repository* rep = new Repository( line.substr( 0, min( equal, colon ) ), line.substr( equal + 1 ), max_revs_ );
+        if ( sets_min_rev )
+            rep->setFrom( min_rev_, line.substr( colon + 1, equal - colon - 1 ) );
+
+        repos.push_back( rep );
 
         result = true;
     }
@@ -587,15 +606,6 @@ bool Repositories::ignoreTag( const string& name_ )
     TagIgnore::const_iterator it = tag_ignore.find( name_ );
 
     return ( it != tag_ignore.end() );
-}
-
-void Repositories::setupFirstParent( int rev_ )
-{
-    if ( rev_ == 0 )
-        return;
-    
-    for ( Repos::iterator it = repos.begin(); it != repos.end(); ++it )
-        (*it)->setupFirstParent( rev_ );
 }
 
 bool Repositories::hasParents( const std::vector< int >& parents_ )

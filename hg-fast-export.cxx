@@ -349,8 +349,6 @@ int crawl_revisions( const char *repos_path, const char* repos_config )
         return 1;
     }
 
-    Repositories::setupFirstParent( min_rev );
-
     for ( int rev = min_rev; rev < max_rev; rev++ )
     {
         //python::object node = repo.attr( "lookup" )( rev );
