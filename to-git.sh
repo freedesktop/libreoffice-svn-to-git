@@ -11,6 +11,8 @@ TARGET="$3"
 COMMITTERS="$4"
 LAYOUT="$5"
 
+FROM="$6"
+
 WD=`pwd`
 
 COMMAND=false
@@ -30,6 +32,7 @@ source     Directory with the repo
 target     Directory where the resulting git repos are created (must not exist)
 committers A file describing the committers
 layout     A file describing the layout of the repositories
+clonefrom  For incremental imports, specify the source repos
 EOF
     exit 1;
 fi
@@ -38,9 +41,17 @@ mkdir -p "$TARGET"
 rm *.dump
 
 for I in `sed -e 's/^[#:].*//' -e 's/^ignore-.*//' -e 's/=.*//' "$LAYOUT" | grep -v '^$'` ; do
-    mkdir "$TARGET/$I"
-    mkfifo $I.dump
-    ( cd "$TARGET/$I" ; git init ; git fast-import < "$WD"/$I.dump ) &
+    echo "$I" | sed 's/:/ /' | (
+        read NAME COMMIT
+        mkdir "$TARGET/$NAME"
+        mkfifo $NAME.dump
+        if [ -z "$COMMIT" -o -z "$FROM" ] ; then
+            ( cd "$TARGET/$NAME" ; git init ; git fast-import < "$WD"/$NAME.dump ) &
+        else
+            ( cd "$TARGET" ; git clone -n -l "$FROM/$NAME" "$NAME" ; \
+              cd "$NAME" ; git reset --hard "$COMMIT" ; git fast-import < "$WD"/$NAME.dump ) &
+        fi
+    )
 done
 
 # execute hg-fast-export, or svn-fast-export
@@ -54,7 +65,7 @@ while [ -n "`jobs`" ] ; do
     sleep 1
 done
 
-for I in `sed -e 's/^[#:].*//' -e 's/^ignore-.*//' -e 's/=.*//' "$LAYOUT" | grep -v '^$'` ; do
+for I in `sed -e 's/^[#:].*//' -e 's/^ignore-.*//' -e 's/=.*//' -e 's/:.*//' "$LAYOUT" | grep -v '^$'` ; do
     ( cd "$TARGET/$I" ; echo `pwd` ; git branch | sed 's/^\*/ /' | grep 'tag-branches/' | xargs git branch -D )
     rm $I.dump
 done
