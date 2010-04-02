@@ -217,7 +217,28 @@ static bool split_into_branch_filename( const char* path_, string& branch_, stri
     return true;
 }
 
-int export_changeset( python::object context )
+static int to_hex( char c )
+{
+    if ( '0' <= c && c <= '9' )
+        return c - '0';
+    else if ( 'a' <= c && c <= 'f' )
+        return 10 + ( c - 'a' );
+    else if ( 'A' <= c && c <= 'F' )
+        return 10 + ( c - 'A' );
+
+    return 0;
+}
+
+static string mercurial_node( const string& nodestr )
+{
+    string node;
+    for ( int i = 0; i + 1 < nodestr.length(); i += 2 )
+        node += static_cast< char >( ( to_hex( nodestr[i] ) << 4 ) + to_hex( nodestr[i+1] ) );
+
+    return node;
+}
+
+static int export_changeset( const python::object& repo, const python::object& context )
 {
     int rev = python::extract< int >( context.attr( "rev" )() );
 
@@ -259,25 +280,6 @@ int export_changeset( python::object context )
     // commit message
     string message = python::extract< string >( context.attr( "description" )() );
 
-    // create tag? (a tag branch, to be exact)
-    python::object tags = context.attr( "tags" )();
-    for ( int i = 0; i < python::len( tags ); ++i )
-    {
-        python::object tag = tags[i];
-        string tag_name = python::extract< string >( tag );
-
-        if ( tag_name != "tip" )
-        {
-            // don't create the tag itself, only the tag branch
-            Repositories::createBranchOrTag( true,
-                    rev, "master",
-                    Committers::getAuthor( author ),
-                    TAG_TEMP_BRANCH + tag_name, rev,
-                    epoch,
-                    message );
-        }
-    }
-
     // files
     bool no_changes = true;
     python::object files = context.attr( "files" )();
@@ -304,8 +306,26 @@ int export_changeset( python::object context )
             if ( path != ".hgtags" )
                 dump_blob( filectx, path );
             else
-                Repositories::updateMercurialTags( python::extract< string >( filectx.attr( "data" )() ),
-                        Committers::getAuthor( author ), epoch, message );
+            {
+                string hgtags = python::extract< string >( filectx.attr( "data" )() );
+                istringstream istr( hgtags );
+
+                while ( !istr.eof() )
+                {
+                    string id, name;
+                    istr >> id >> name;
+
+                    if ( id.empty() || name.empty() )
+                        continue;
+
+                    python::object node( mercurial_node( id ) );
+                    python::object ctx = repo[node];
+                    int tag_rev = python::extract< int >( ctx.attr( "rev" )() );
+
+                    Repositories::updateMercurialTag( name, tag_rev,
+                            Committers::getAuthor( author ), epoch, message );
+                }
+            }
         }
         else
             Repositories::deleteFile( path );
@@ -355,7 +375,7 @@ int crawl_revisions( const char *repos_path, const char* repos_config )
         //python::object changeset = changelog.attr( "read" )( node );
         python::object context = repo[rev];
 
-        export_changeset( context );
+        export_changeset( repo, context );
     }
 
     return 0;

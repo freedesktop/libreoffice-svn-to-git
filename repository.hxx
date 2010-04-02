@@ -76,8 +76,11 @@ class Repository
     /// Index - commit number, content - branch id.
     BranchId* commits;
 
-    /// Remember chain of parents
+    /// Remember the chain of parents
     std::string* parents;
+
+    /// Remember the tags we have already written.
+    std::map< std::string, int > written_tags;
 
     /// Max number of revisions.
     unsigned int max_revs;
@@ -106,6 +109,10 @@ public:
 
     /// Create a tag (based on the 'tag tracking' branch).
     void createTag( const Tag& tag_ );
+
+    /// Create a tag (just output)
+    void createTag(  const std::string& name_, int rev_, bool lookup_in_parents_,
+            const Committer& committer_, Time time_, const std::string& log_ );
 
     /// Setup the initial commit in the repo (from parenting point of view)
     void setFrom( int rev_, const std::string& git_commit_ );
@@ -143,7 +150,7 @@ namespace Repositories
             const Committer& committer_, const std::string& name_, unsigned int commit_id_, Time time_, const std::string& log_ );
 
     /// Update the tags according to the .hgtags file
-    void updateMercurialTags( const std::string& tag_file_,
+    void updateMercurialTag( const std::string& name_, int rev_,
             const Committer& committer_, Time time_, const std::string& log_ );
 
     /// Should the revision with this number be ignored?

@@ -274,7 +274,7 @@ void Repository::commit( const Committer& committer_, const std::string& name_, 
         bool first = true;
         for ( vector< int >::const_iterator it = merges_.begin(); it != merges_.end(); ++it )
         {
-            if ( parents[(*it)].length() != 0 )
+            if ( !parents[(*it)].empty() )
             {
                 out << ( first? "from ": "merge " ) << parents[(*it)] << "\n";
                 first = false;
@@ -296,7 +296,7 @@ void Repository::commit( const Committer& committer_, const std::string& name_, 
         // try to find & setup a parent chain
         for ( vector< int >::const_iterator it = merges_.begin(); it != merges_.end(); ++it )
         {
-            if ( parents[(*it)].length() != 0 )
+            if ( !parents[(*it)].empty() )
             {
                 // one of those, it is not necessary to be _exact_ here, but
                 // it _must_ exist
@@ -327,12 +327,37 @@ void Repository::createTag( const Tag& tag_ )
     unsigned int from = findCommit( max_revs, tag_.tag_branch );
     if ( from == 0 )
         return;
-    
-    out << "tag " << tag_.name
-        << "\nfrom :" << 100000 + from
-        << "\ntagger " << tag_.committer.name << " <" << tag_.committer.email << "> " << tag_.time
-        << "\ndata " << tag_.log.length() << "\n"
-        << tag_.log
+
+    createTag( tag_.name, from, false, tag_.committer, tag_.time, tag_.log );
+}
+
+void Repository::createTag(  const std::string& name_, int rev_, bool lookup_in_parents_,
+        const Committer& committer_, Time time_, const std::string& log_ )
+{
+    string from;
+    if ( lookup_in_parents_ )
+    {
+        if ( written_tags[name_] != rev_ )
+        {
+            from = parents[rev_];
+            written_tags[name_] = rev_;
+        }
+    }
+    else
+    {
+        ostringstream ostr;
+        ostr << ':' << rev_;
+        from = ostr.str();
+    }
+
+    if ( from.empty() )
+        return;
+
+    out << "tag " << name_
+        << "\nfrom " << from
+        << "\ntagger " << committer_.name << " <" << committer_.email << "> " << time_
+        << "\ndata " << log_.length() << "\n"
+        << log_
         << endl;
 }
 
@@ -345,7 +370,7 @@ bool Repository::hasParents( const std::vector< int >& parents_ )
 {
     for ( vector< int >::const_iterator it = parents_.begin(); it != parents_.end(); ++it )
     {
-        if ( (*it) < 0 || parents[(*it)].length() != 0 )
+        if ( (*it) < 0 || !parents[(*it)].empty() )
             return true;
     }
 
@@ -560,38 +585,11 @@ void Repositories::createBranchOrTag( bool is_branch_, unsigned int from_, const
         tags.push_back( new Tag( committer_, name_, time_, log_ ) );
 }
 
-void Repositories::updateMercurialTags( const std::string& tag_file_,
+void Repositories::updateMercurialTag( const std::string& name_, int rev_,
         const Committer& committer_, Time time_, const std::string& log_ )
 {
-    size_t line = 0;
-    while ( line != string::npos )
-    {
-        size_t tag_name = tag_file_.find( ' ', line );
-        if ( tag_name == string::npos )
-            break;
-
-        line = tag_file_.find( '\n', tag_name + 1 );
-
-        string tag;
-        if ( line == string::npos )
-            tag = TAG_TEMP_BRANCH + tag_file_.substr( tag_name + 1 );
-        else
-            tag = TAG_TEMP_BRANCH + tag_file_.substr( tag_name + 1, line - tag_name - 1 );
-
-        if ( branches.find( tag ) != branches.end() )
-        {
-            bool found = false;
-            for ( Tags::const_iterator t = tags.begin(); t != tags.end(); ++t )
-                if ( (*t)->name == tag )
-                {
-                    found = true;
-                    break;
-                }
-
-            if ( !found )
-                tags.push_back( new Tag( committer_, tag, time_, log_ ) );
-        }
-    }
+    for ( Repos::iterator it = repos.begin(); it != repos.end(); ++it )
+        (*it)->createTag( name_, rev_, true, committer_, time_, log_ );
 }
 
 bool Repositories::ignoreRevision( unsigned int commit_id_ )
