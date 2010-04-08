@@ -85,6 +85,9 @@ class Repository
     /// Max number of revisions.
     unsigned int max_revs;
 
+    /// Name of the repository.
+    std::string name;
+
 public:
     /// The regex_ is here to decide if the file belongs to this repository.
     Repository( const std::string& reponame_, const std::string& regex_, unsigned int max_revs_ );
@@ -114,11 +117,14 @@ public:
     void createTag(  const std::string& name_, int rev_, bool lookup_in_parents_,
             const Committer& committer_, Time time_, const std::string& log_ );
 
-    /// Setup the initial commit in the repo (from parenting point of view)
-    void setFrom( int rev_, const std::string& git_commit_ );
+    /// Map known commits betwenn Mercurial and Git
+    void mapCommit( int rev_, const std::string& git_commit_ );
 
     /// Has this commit at least one parent commit?
     bool hasParents( const std::vector< int >& parents_ );
+
+    /// Name of this repository
+    const std::string& getName() const { return name; }
 
 private:
     /// Find the most recent commit to the specified branch smaller than the reference one.
@@ -161,6 +167,9 @@ namespace Repositories
 
     /// Has this commit at least one parent commit?
     bool hasParents( const std::vector< int >& parents_ );
+
+    /// Find Repository according to the name of the repository.
+    Repository* find( const std::string& repo_name );
 }
 
 std::ostream& operator<<( std::ostream& ostream_, const Time& time_ );

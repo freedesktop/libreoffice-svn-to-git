@@ -210,7 +210,8 @@ Repository::Repository( const std::string& reponame_, const string& regex_, unsi
       out( ( reponame_ + ".dump" ).c_str() ),
       commits( new BranchId[max_revs_ + 10] ),
       parents( new string[max_revs_ + 10] ),
-      max_revs( max_revs_ )
+      max_revs( max_revs_ ),
+      name( reponame_ )
 {
     int status = regcomp( &regex_rule, regex_.c_str(), REG_EXTENDED | REG_NOSUB );
     if ( status != 0 )
@@ -361,7 +362,7 @@ void Repository::createTag(  const std::string& name_, int rev_, bool lookup_in_
         << endl;
 }
 
-void Repository::setFrom( int rev_, const std::string& git_commit_ )
+void Repository::mapCommit( int rev_, const std::string& git_commit_ )
 {
     parents[rev_] = git_commit_;
 }
@@ -490,6 +491,58 @@ bool Repositories::load( const char* fname_, unsigned int max_revs_, int& min_re
                 if ( line.substr( arg, colon - arg ) == "ignore" )
                     tag_ignore.insert( TAG_TEMP_BRANCH + line.substr( colon + 1 ) );
             }
+            else if ( command == "commit" )
+            {
+                size_t equals = line.find( '=', arg );
+                if ( line.substr( arg, equals - arg ) == "map" )
+                {
+                    size_t comma = line.find( ',', equals );
+                    if ( comma == string::npos )
+                    {
+                        Error::report( "Cannot find repo name '" + line + "'" );
+                        continue;
+                    }
+
+                    string repo_name = line.substr( equals + 1, comma - equals - 1 );
+                    Repository* repo = Repositories::find( repo_name );
+                    if ( !repo )
+                    {
+                        Error::report( "Repository '" + repo_name + "' not found, probably not defined yet?" );
+                        continue;
+                    }
+
+                    if ( comma + 1 >= line.length() )
+                        continue;
+
+                    size_t commit = comma + 1;
+                    while ( commit != string::npos )
+                    {
+                        size_t colon = line.find( ':', commit );
+                        if ( colon == string::npos )
+                            break;
+
+                        size_t end = line.find( ' ', colon );
+
+                        int hg_id = atoi( line.substr( commit, colon - commit ).c_str() );
+                        string git_id;
+                        if ( end == string::npos )
+                        {
+                            git_id = line.substr( colon + 1 );
+                            commit = string::npos;
+                        }
+                        else
+                        {
+                            git_id = line.substr( colon + 1, end - colon - 1 );
+                            if ( end + 1 < line.length() )
+                                commit = end + 1;
+                            else
+                                commit = string::npos;
+                        }
+
+                        repo->mapCommit( hg_id, git_id );
+                    }
+                }
+            }
 
             continue;
         }
@@ -518,7 +571,7 @@ bool Repositories::load( const char* fname_, unsigned int max_revs_, int& min_re
 
         Repository* rep = new Repository( line.substr( 0, min( equal, colon ) ), line.substr( equal + 1 ), max_revs_ );
         if ( sets_min_rev )
-            rep->setFrom( min_rev_, line.substr( colon + 1, equal - colon - 1 ) );
+            rep->mapCommit( min_rev_, line.substr( colon + 1, equal - colon - 1 ) );
 
         repos.push_back( rep );
 
@@ -616,6 +669,15 @@ bool Repositories::hasParents( const std::vector< int >& parents_ )
     }
 
     return false;
+}
+
+Repository* Repositories::find( const std::string& repo_name )
+{
+    for ( Repos::iterator it = repos.begin(); it != repos.end(); ++it )
+        if ( (*it)->getName() == repo_name )
+            return (*it);
+
+    return NULL;
 }
 
 std::ostream& operator<<( std::ostream& ostream_, const Time& time_ )
