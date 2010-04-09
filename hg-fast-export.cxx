@@ -16,6 +16,7 @@
 #include <time.h>
 
 #include <iomanip>
+#include <map>
 #include <ostream>
 #include <vector>
 
@@ -28,6 +29,7 @@
 #define PATH_MAX 4096
 #endif
 
+#include <boost/python/dict.hpp>
 #include <boost/python/extract.hpp>
 #include <boost/python/import.hpp>
 #include <boost/python/list.hpp>
@@ -238,6 +240,100 @@ static string mercurial_node( const string& nodestr )
     return node;
 }
 
+inline void dump_file( const python::object& file, const string& path,
+        const python::object& context, const python::object& repo,
+        const string& author, const Time& epoch,
+        const string& message, bool dbg_out )
+{
+    if ( dbg_out )
+        fprintf( stderr, "path: %s... ", path.c_str() );
+
+    // dump the file
+    python::object filectx;
+    try
+    {
+        filectx = context.attr( "filectx" )( file );
+    } catch ( python::error_already_set& )
+    {
+        PyErr_Clear();
+    }
+
+    if ( filectx )
+    {
+        if ( path != ".hgtags" )
+            dump_blob( filectx, path );
+        else
+        {
+            string hgtags = python::extract< string >( filectx.attr( "data" )() );
+            istringstream istr( hgtags );
+
+            while ( !istr.eof() )
+            {
+                string id, name;
+                istr >> id >> name;
+
+                if ( id.empty() || name.empty() )
+                    continue;
+
+                python::object node( mercurial_node( id ) );
+                python::object ctx = repo[node];
+                int tag_rev = python::extract< int >( ctx.attr( "rev" )() );
+
+                Repositories::updateMercurialTag( name, tag_rev,
+                        Committers::getAuthor( author ), epoch, message );
+            }
+        }
+    }
+    else
+        Repositories::deleteFile( path );
+}
+
+#if 0
+enum ChangeAction { DontTouch, Add, Delete };
+struct MergeFile {
+    python::object hash;
+    ChangeAction action;
+    MergeFile( const python::object& hash_, ChangeAction action_ ) : hash( hash_ ), action( action_ ) {}
+    MergeFile( const MergeFile& mf_ ) : hash( mf_.hash ), action( mf_.action ) {}
+};
+typedef map< string, MergeFile > MergeFiles;
+
+static void mark_files( MergeFiles& file_map, const python::object& context, bool is_parent )
+{
+    python::dict manifest = python::extract< python::dict >( context.attr( "manifest" )() ).copy();
+    python::object file_hash;
+    try
+    {
+        while ( file_hash = manifest.popitem() )
+        {
+            python::object file = file_hash[0];
+            python::object hash = file_hash[1];
+
+            string fname = python::extract< string >( file );
+
+            if ( is_parent )
+            {
+                MergeFile mf( hash, Delete );
+                file_map.insert( pair< string, MergeFile >( fname, mf ) );
+            }
+            else
+            {
+                MergeFiles::iterator it = file_map.find( fname );
+                if ( it == file_map.end() )
+                    file_map.insert( pair< string, MergeFile >( fname, MergeFile( hash, Add ) ) );
+                else if ( it->second.hash == hash )
+                    it->second.action = DontTouch;
+                else
+                    it->second.action = Add;
+            }
+        }
+    } catch ( python::error_already_set& )
+    {
+        PyErr_Clear();
+    }
+}
+#endif
+
 static int export_changeset( const python::object& repo, const python::object& context )
 {
     int rev = python::extract< int >( context.attr( "rev" )() );
@@ -264,9 +360,9 @@ static int export_changeset( const python::object& repo, const python::object& c
         merges.push_back( parent_rev );
     }
 
-    if ( !Repositories::hasParents( merges ) )
+    if ( merges.size() == 0 || !Repositories::hasParent( merges[0] ) )
     {
-        fprintf( stderr, "ignored, no parents.\n" );
+        Error::report( "FIXME: Commit '" + node + "' ignored, no parents." );
         return 0;
     }
 
@@ -281,60 +377,61 @@ static int export_changeset( const python::object& repo, const python::object& c
     string message = python::extract< string >( context.attr( "description" )() );
 
     // files
-    bool no_changes = true;
-    python::object files = context.attr( "files" )();
+    python::object files;
+    if ( python::len( parents ) == 1 )
+    {
+        files = context.attr( "files" )();
+    }
+    else if ( python::len( parents ) > 1 )
+    {
+        python::dict manifest = python::extract< python::dict >( context.attr( "manifest" )() );
+        python::dict context_man = manifest.copy();
+
+        manifest = python::extract< python::dict >( parents[0].attr( "manifest" )() );
+        python::dict parent_man = manifest.copy();
+
+        python::list files_list;
+
+        // find out what files have changed during the merge
+        do {
+            python::object file_hash;
+            try
+            {
+                file_hash = context_man.popitem();
+            } catch ( python::error_already_set& )
+            {
+                PyErr_Clear();
+            }
+
+            if ( !file_hash )
+                break;
+
+            python::object file = file_hash[0];
+            python::object hash = file_hash[1];
+
+            if ( parent_man.has_key( file ) )
+            {
+                if ( hash == parent_man[file] )
+                    parent_man[file].del();
+            }
+            else
+                files_list.append( file );
+        } while ( true );
+
+        // the rest in parent_man are those that were deleted during merge
+        files = files_list + parent_man.keys();
+    }
+    else
+        fprintf( stderr, "no parents, nothing to do. " );
+
+    // output
+    bool first = true;
     for ( int i = 0; i < python::len( files ); ++i )
     {
-        python::object file = files[i];
-        string path = python::extract< string >( file );
-
-        if ( no_changes )
-            fprintf( stderr, "path: %s... ", path.c_str() );
-
-        // dump the file
-        python::object filectx;
-        try
-        {
-            filectx = context.attr( "filectx" )( file );
-        } catch ( python::error_already_set& )
-        {
-            PyErr_Clear();
-        }
-
-        if ( filectx )
-        {
-            if ( path != ".hgtags" )
-                dump_blob( filectx, path );
-            else
-            {
-                string hgtags = python::extract< string >( filectx.attr( "data" )() );
-                istringstream istr( hgtags );
-
-                while ( !istr.eof() )
-                {
-                    string id, name;
-                    istr >> id >> name;
-
-                    if ( id.empty() || name.empty() )
-                        continue;
-
-                    python::object node( mercurial_node( id ) );
-                    python::object ctx = repo[node];
-                    int tag_rev = python::extract< int >( ctx.attr( "rev" )() );
-
-                    Repositories::updateMercurialTag( name, tag_rev,
-                            Committers::getAuthor( author ), epoch, message );
-                }
-            }
-        }
-        else
-            Repositories::deleteFile( path );
-
-        no_changes = false;
+        string fname = python::extract< string >( files[i] );
+        dump_file( files[i], fname, context, repo, author, epoch, message, first );
+        first = false;
     }
-
-    if ( no_changes )
-        fprintf( stderr, "no files changed, merge commit? " );
 
     Repositories::commit( Committers::getAuthor( author ),
             "master", rev,

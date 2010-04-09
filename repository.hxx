@@ -121,7 +121,7 @@ public:
     void mapCommit( int rev_, const std::string& git_commit_ );
 
     /// Has this commit at least one parent commit?
-    bool hasParents( const std::vector< int >& parents_ );
+    bool hasParent( int parent_ );
 
     /// Name of this repository
     const std::string& getName() const { return name; }
@@ -166,7 +166,7 @@ namespace Repositories
     bool ignoreTag( const std::string& name_ );
 
     /// Has this commit at least one parent commit?
-    bool hasParents( const std::vector< int >& parents_ );
+    bool hasParent( int parent_ );
 
     /// Find Repository according to the name of the repository.
     Repository* find( const std::string& repo_name );

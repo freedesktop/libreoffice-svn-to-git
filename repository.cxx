@@ -294,17 +294,10 @@ void Repository::commit( const Committer& committer_, const std::string& name_, 
     }
     else
     {
-        // try to find & setup a parent chain
-        for ( vector< int >::const_iterator it = merges_.begin(); it != merges_.end(); ++it )
-        {
-            if ( !parents[(*it)].empty() )
-            {
-                // one of those, it is not necessary to be _exact_ here, but
-                // it _must_ exist
-                parents[commit_id_] = parents[(*it)];
-                break;
-            }
-        }
+        // try to setup a parent chain (if we don't succeed, we have to
+        // completely initialize the missing pieces - more work)
+        if ( merges_.size() > 0 && !parents[merges_[0]].empty() )
+            parents[commit_id_] = parents[merges_[0]];
     }
 
     file_changes.clear();
@@ -367,15 +360,9 @@ void Repository::mapCommit( int rev_, const std::string& git_commit_ )
     parents[rev_] = git_commit_;
 }
 
-bool Repository::hasParents( const std::vector< int >& parents_ )
+bool Repository::hasParent( int parent_ )
 {
-    for ( vector< int >::const_iterator it = parents_.begin(); it != parents_.end(); ++it )
-    {
-        if ( (*it) < 0 || !parents[(*it)].empty() )
-            return true;
-    }
-
-    return false;
+    return !parents[parent_].empty();
 }
 
 unsigned int Repository::findCommit( unsigned int from_, const std::string& from_branch_ )
@@ -659,12 +646,12 @@ bool Repositories::ignoreTag( const string& name_ )
     return ( it != tag_ignore.end() );
 }
 
-bool Repositories::hasParents( const std::vector< int >& parents_ )
+bool Repositories::hasParent( int parent_ )
 {
     // at least one parent in at least one repository
     for ( Repos::iterator it = repos.begin(); it != repos.end(); ++it )
     {
-        if ( (*it)->hasParents( parents_ ) )
+        if ( (*it)->hasParent( parent_ ) )
             return true;
     }
 
