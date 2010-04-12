@@ -49,7 +49,8 @@ for I in `sed -e 's/^[#:].*//' -e 's/^ignore-.*//' -e 's/=.*//' "$LAYOUT" | grep
             ( cd "$TARGET/$NAME" ; git init ; git fast-import < "$WD"/$NAME.dump ) &
         else
             ( cd "$TARGET" ; git clone -n -l "$FROM/$NAME" "$NAME" ; \
-              cd "$NAME" ; git reset --hard "$COMMIT" ; git fast-import < "$WD"/$NAME.dump ) &
+              cd "$NAME" ; git reset --hard "$COMMIT" ; git fast-import < "$WD"/$NAME.dump ; \
+              git checkout -f ) &
         fi
     )
 done
