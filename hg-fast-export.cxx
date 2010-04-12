@@ -25,10 +25,6 @@
 #include "filter.hxx"
 #include "repository.hxx"
 
-#ifndef PATH_MAX
-#define PATH_MAX 4096
-#endif
-
 #include <boost/python/dict.hpp>
 #include <boost/python/extract.hpp>
 #include <boost/python/import.hpp>
@@ -36,21 +32,8 @@
 #include <boost/python/object.hpp>
 #include <boost/python/type_id.hpp>
 
-#if 0
-#undef SVN_ERR
-#define SVN_ERR(expr) SVN_INT_ERR(expr)
-#define apr_sane_push(arr, contents) *(char **)apr_array_push(arr) = contents
-#endif
-
 using namespace std;
 using namespace boost;
-
-static string trunk_base = "/trunk";
-static string trunk = trunk_base + "/";
-static string branches = "/branches/";
-static string tags = "/tags/";
-
-static bool split_into_branch_filename( const char* path_, string& branch_, string& fname_ );
 
 static int dump_blob( const python::object& filectx, const string &target_name )
 {
@@ -71,152 +54,6 @@ static int dump_blob( const python::object& filectx, const string &target_name )
     filter.write( out );
 
     return 0;
-}
-
-#if 0
-static int delete_hierarchy( svn_fs_root_t *fs_root, char *path, apr_pool_t *pool )
-{
-    // we have to crawl the hierarchy and delete the files one by one because
-    // the regexp deciding to what repository does the file belong can be just
-    // anything
-    svn_boolean_t is_dir;
-    SVN_ERR( svn_fs_is_dir( &is_dir, fs_root, path, pool ) );
-
-    if ( is_dir )
-    {
-        apr_hash_t *entries;
-        SVN_ERR( svn_fs_dir_entries( &entries, fs_root, path, pool ) );
-
-        for ( apr_hash_index_t *i = apr_hash_first( pool, entries ); i; i = apr_hash_next( i ) )
-        {
-            const void *key;
-            void       *val;
-            apr_hash_this( i, &key, NULL, &val );
-
-            delete_hierarchy( fs_root, (char *)( string( path ) + '/' + (char *)key ).c_str(), pool );
-        }
-    }
-    else
-    {
-        string this_branch, fname;
-
-        // we don't have to care about the branch name, it cannot change
-        if ( split_into_branch_filename( path, this_branch, fname ) )
-            Repositories::deleteFile( fname );
-    }
-}
-#endif
-
-#if 0
-static int delete_hierarchy_rev( svn_fs_t *fs, svn_revnum_t rev, char *path, apr_pool_t *pool )
-{
-    svn_fs_root_t *fs_root;
-
-    // rev - 1: the last rev where the deleted thing still existed
-    SVN_ERR( svn_fs_revision_root( &fs_root, fs, rev - 1, pool ) );
-
-    return delete_hierarchy( fs_root, path, pool );
-}
-#endif
-
-#if 0
-static int dump_hierarchy( svn_fs_root_t *fs_root, char *path, int skip,
-        const string &prefix, apr_pool_t *pool )
-{
-    svn_boolean_t is_dir;
-    SVN_ERR( svn_fs_is_dir( &is_dir, fs_root, path, pool ) );
-
-    if ( is_dir )
-    {
-        apr_hash_t *entries;
-        SVN_ERR( svn_fs_dir_entries( &entries, fs_root, path, pool ) );
-
-        for ( apr_hash_index_t *i = apr_hash_first( pool, entries ); i; i = apr_hash_next( i ) )
-        {
-            const void *key;
-            void       *val;
-            apr_hash_this( i, &key, NULL, &val );
-
-            dump_hierarchy( fs_root, (char *)( string( path ) + '/' + (char *)key ).c_str(), skip, prefix, pool );
-        }
-    }
-    else
-        dump_blob( fs_root, path, prefix + string( path + skip ), pool );
-
-    return 0;
-}
-#endif
-
-#if 0
-static int copy_hierarchy( svn_fs_t *fs, svn_revnum_t rev, char *path_from, const string &path_to, apr_pool_t *pool )
-{
-    svn_fs_root_t *fs_root;
-    SVN_ERR( svn_fs_revision_root( &fs_root, fs, rev, pool ) );
-
-    return dump_hierarchy( fs_root, path_from, strlen( path_from ), path_to, pool );
-}
-#endif
-
-static bool is_trunk( const char* path_ )
-{
-    const size_t len = trunk.length();
-    return trunk.compare( 0, len, path_, 0, len ) == 0;
-}
-
-static bool is_branch( const char* path_ )
-{
-    const size_t len = branches.length();
-    return branches.compare( 0, len, path_, 0, len ) == 0;
-}
-
-static bool is_tag( const char* path_ )
-{
-    const size_t len = tags.length();
-    return tags.compare( 0, len, path_, 0, len ) == 0;
-}
-
-static bool split_into_branch_filename( const char* path_, string& branch_, string& fname_ )
-{
-    if ( is_trunk( path_ ) )
-    {
-        branch_ = "master";
-        fname_  = path_ + trunk.length();
-    }
-    else if ( trunk_base == path_ )
-    {
-        branch_ = "master";
-        fname_  = string();
-    }
-    else
-    {
-        string tmp;
-        string prefix;
-        if ( is_branch( path_ ) )
-            tmp = path_ + branches.length();
-        else if ( is_tag( path_ ) )
-        {
-            tmp = path_ + tags.length();
-            prefix = TAG_TEMP_BRANCH;
-        }
-        else
-            return false;
-
-        size_t slash = tmp.find( '/' );
-        if ( slash == 0 )
-            return false;
-        else if ( slash == string::npos )
-        {
-            branch_ = prefix + tmp;
-            fname_  = string();
-        }
-        else
-        {
-            branch_ = prefix + tmp.substr( 0, slash );
-            fname_  = tmp.substr( slash + 1 );
-        }
-    }
-
-    return true;
 }
 
 static int to_hex( char c )
@@ -287,52 +124,6 @@ inline void dump_file( const python::object& file, const string& path,
     else
         Repositories::deleteFile( path );
 }
-
-#if 0
-enum ChangeAction { DontTouch, Add, Delete };
-struct MergeFile {
-    python::object hash;
-    ChangeAction action;
-    MergeFile( const python::object& hash_, ChangeAction action_ ) : hash( hash_ ), action( action_ ) {}
-    MergeFile( const MergeFile& mf_ ) : hash( mf_.hash ), action( mf_.action ) {}
-};
-typedef map< string, MergeFile > MergeFiles;
-
-static void mark_files( MergeFiles& file_map, const python::object& context, bool is_parent )
-{
-    python::dict manifest = python::extract< python::dict >( context.attr( "manifest" )() ).copy();
-    python::object file_hash;
-    try
-    {
-        while ( file_hash = manifest.popitem() )
-        {
-            python::object file = file_hash[0];
-            python::object hash = file_hash[1];
-
-            string fname = python::extract< string >( file );
-
-            if ( is_parent )
-            {
-                MergeFile mf( hash, Delete );
-                file_map.insert( pair< string, MergeFile >( fname, mf ) );
-            }
-            else
-            {
-                MergeFiles::iterator it = file_map.find( fname );
-                if ( it == file_map.end() )
-                    file_map.insert( pair< string, MergeFile >( fname, MergeFile( hash, Add ) ) );
-                else if ( it->second.hash == hash )
-                    it->second.action = DontTouch;
-                else
-                    it->second.action = Add;
-            }
-        }
-    } catch ( python::error_already_set& )
-    {
-        PyErr_Clear();
-    }
-}
-#endif
 
 struct ChangedFile {
     bool touched;
@@ -484,20 +275,16 @@ int crawl_revisions( const char *repos_path, const char* repos_config )
     int min_rev = 0;
     int max_rev = python::len( changelog );
 
-    if ( !Repositories::load( repos_config, max_rev, min_rev, trunk_base, trunk, branches, tags ) )
+    string dummy1, dummy2, dummy3, dummy4;
+    if ( !Repositories::load( repos_config, max_rev, min_rev, dummy1, dummy2, dummy3, dummy4 ) )
     {
         Error::report( "Must have at least one valid repository definition." );
         return 1;
     }
 
+    // dump all the data
     for ( int rev = min_rev; rev < max_rev; rev++ )
-    {
-        //python::object node = repo.attr( "lookup" )( rev );
-        //python::object changeset = changelog.attr( "read" )( node );
-        python::object context = repo[rev];
-
-        export_changeset( repo, context );
-    }
+        export_changeset( repo, repo[rev] );
 
     return 0;
 }
@@ -509,11 +296,12 @@ int main(int argc, char *argv[])
         return Error::returnValue();
     }
 
-    // Initialize Python
+    // initialize Python
     Py_Initialize();
 
     Committers::load( argv[2] );
 
+    // do the work
     crawl_revisions( argv[1], argv[3] );
 
     Py_Finalize();
