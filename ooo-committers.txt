@@ -201,6 +201,7 @@ mikeleib|Michael Leibowitz|mikeleib@openoffice.org
 mi|Michael Hönnig|mi@openoffice.org
 mindyliu|Mindy Liu|mindyliu@openoffice.org
 misha|misha|misha@openoffice.org
+misheto|Mihaela Kedikova|misheto@openoffice.org
 mkretzschmar|Martin Kretzschmar|mkretzschmar@openoffice.org
 mloiseleur|Michel Loiseleur|mloiseleur@openoffice.org
 mm|mm|mm@openoffice.org
