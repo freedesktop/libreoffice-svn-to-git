@@ -384,42 +384,40 @@ static int export_changeset( const python::object& repo, const python::object& c
     }
     else if ( python::len( parents ) > 1 )
     {
-        python::dict manifest = python::extract< python::dict >( context.attr( "manifest" )() );
-        python::dict context_man = manifest.copy();
+        // TODO FIXME can we directly convert dict to std::map?  That would be
+        // a win, I suppose...
 
-        manifest = python::extract< python::dict >( parents[0].attr( "manifest" )() );
-        python::dict parent_man = manifest.copy();
-
+        python::dict context_man = python::extract< python::dict >( context.attr( "manifest" )() );
+        python::dict parent_man = python::extract< python::dict >( parents[0].attr( "manifest" )() );
         python::list files_list;
 
         // find out what files have changed during the merge
-        do {
-            python::object file_hash;
-            try
-            {
-                file_hash = context_man.popitem();
-            } catch ( python::error_already_set& )
-            {
-                PyErr_Clear();
-            }
+        python::object iter_keys = context_man.iterkeys();
+        python::object iter_vals = context_man.itervalues();
+        int count = python::len( context_man );
+        for ( int i = 0; i < count; ++i )
+        {
+            python::object file = iter_keys.attr( "next" )();
+            python::object hash = iter_vals.attr( "next" )();
 
-            if ( !file_hash )
-                break;
-
-            python::object file = file_hash[0];
-            python::object hash = file_hash[1];
-
-            if ( parent_man.has_key( file ) )
-            {
-                if ( hash == parent_man[file] )
-                    parent_man[file].del();
-            }
-            else
+            if ( !parent_man.has_key( file ) || parent_man[file] != hash )
                 files_list.append( file );
-        } while ( true );
+        }
 
-        // the rest in parent_man are those that were deleted during merge
-        files = files_list + parent_man.keys();
+        // find out what files have changed during the merge
+        iter_keys = parent_man.iterkeys();
+        iter_vals = parent_man.itervalues();
+        count = python::len( parent_man );
+        for ( int i = 0; i < count; ++i )
+        {
+            python::object file = iter_keys.attr( "next" )();
+            python::object hash = iter_vals.attr( "next" )();
+
+            if ( !context_man.has_key( file ) )
+                files_list.append( file );
+        }
+
+        files = files_list;
     }
     else
         fprintf( stderr, "no parents, nothing to do. " );
