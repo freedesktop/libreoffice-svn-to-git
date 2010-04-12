@@ -83,7 +83,7 @@ void Filter::addData( const string& data_ )
     char *dest = tmp;
 
     // convert the leading tabs to N spaces (according to tabs.spaces)
-    for ( string::const_iterator it = data_.begin(); it != data_.end(); ++it )
+    for ( const char* it = data_.data(), *end = data_.data() + data_.size(); it < end; ++it )
         addDataLoop( dest, *it, tabs_to_spaces, tabs.spaces );
 
     data.append( tmp, dest - tmp );

@@ -334,6 +334,64 @@ static void mark_files( MergeFiles& file_map, const python::object& context, boo
 }
 #endif
 
+struct ChangedFile {
+    bool touched;
+    python::object file;
+    python::object hash;
+
+    ChangedFile( const python::object& file_, const python::object& hash_ )
+        : touched( false ), file( file_ ), hash( hash_ ) {}
+};
+
+typedef map< string, ChangedFile > ChangedFiles;
+
+void changed_during_merge( python::object& files,
+        const python::dict& context_man, const python::dict& parent_man )
+{
+    // copy the changed files map from parent to our map
+    ChangedFiles parent;
+    python::object iter = parent_man.iteritems();
+    for ( int i = 0, count = python::len( parent_man ); i < count; ++i )
+    {
+        python::object item = iter.attr( "next" )();
+        python::object file = item[0];
+        python::object hash = item[1];
+
+        ChangedFile chf( file, hash );
+        parent.insert( pair< string, ChangedFile >( python::extract< string >( file ), chf ) );
+    }
+
+    python::list files_list;
+
+    // find out what files have changed during the merge
+    iter = context_man.iteritems();
+    for ( int i = 0, count = python::len( context_man ); i < count; ++i )
+    {
+        python::object item = iter.attr( "next" )();
+        python::object file = item[0];
+        python::object hash = item[1];
+
+        ChangedFiles::iterator it = parent.find( python::extract< string >( file ) );
+        if ( it == parent.end() )
+            files_list.append( file );
+        else
+        {
+            it->second.touched = true;
+            if ( it->second.hash != hash )
+                files_list.append( file );
+        }
+    }
+
+    // find the files deleted (present only in the parent)
+    for ( ChangedFiles::const_iterator it = parent.begin(); it != parent.end(); ++it )
+    {
+        if ( !it->second.touched )
+            files_list.append( it->second.file );
+    }
+
+    files = files_list;
+}
+
 static int export_changeset( const python::object& repo, const python::object& context )
 {
     int rev = python::extract< int >( context.attr( "rev" )() );
@@ -362,7 +420,7 @@ static int export_changeset( const python::object& repo, const python::object& c
 
     if ( merges.size() == 0 || !Repositories::hasParent( merges[0] ) )
     {
-        Error::report( "FIXME: Commit '" + node + "' ignored, no parents." );
+        Error::report( "ignored, no parent." );
         return 0;
     }
 
@@ -384,43 +442,11 @@ static int export_changeset( const python::object& repo, const python::object& c
     }
     else if ( python::len( parents ) > 1 )
     {
-        // TODO FIXME can we directly convert dict to std::map?  That would be
-        // a win, I suppose...
+        changed_during_merge( files,
+                python::extract< python::dict >( context.attr( "manifest" )() ),
+                python::extract< python::dict >( parents[0].attr( "manifest" )() ) );
 
-        python::dict context_man = python::extract< python::dict >( context.attr( "manifest" )() );
-        python::dict parent_man = python::extract< python::dict >( parents[0].attr( "manifest" )() );
-        python::list files_list;
-
-        // find out what files have changed during the merge
-        python::object iter_keys = context_man.iterkeys();
-        python::object iter_vals = context_man.itervalues();
-        int count = python::len( context_man );
-        for ( int i = 0; i < count; ++i )
-        {
-            python::object file = iter_keys.attr( "next" )();
-            python::object hash = iter_vals.attr( "next" )();
-
-            if ( !parent_man.has_key( file ) || parent_man[file] != hash )
-                files_list.append( file );
-        }
-
-        // find out what files have changed during the merge
-        iter_keys = parent_man.iterkeys();
-        iter_vals = parent_man.itervalues();
-        count = python::len( parent_man );
-        for ( int i = 0; i < count; ++i )
-        {
-            python::object file = iter_keys.attr( "next" )();
-            python::object hash = iter_vals.attr( "next" )();
-
-            if ( !context_man.has_key( file ) )
-                files_list.append( file );
-        }
-
-        files = files_list;
     }
-    else
-        fprintf( stderr, "no parents, nothing to do. " );
 
     // output
     bool first = true;

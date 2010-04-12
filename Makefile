@@ -1,4 +1,5 @@
-CXXFLAGS += -pipe -O0 -g #-O2
+#CXXFLAGS += -pipe -O0 -g #-O2
+CXXFLAGS += -O2
 
 SVN ?= /usr
 APR_INCLUDES ?= /usr/include/apr-1
