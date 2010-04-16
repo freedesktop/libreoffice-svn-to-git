@@ -325,7 +325,7 @@ void Repository::createTag( const Tag& tag_ )
     createTag( tag_.name, from, false, tag_.committer, tag_.time, tag_.log );
 }
 
-void Repository::createTag(  const std::string& name_, int rev_, bool lookup_in_parents_,
+void Repository::createTag( const std::string& name_, int rev_, bool lookup_in_parents_,
         const Committer& committer_, Time time_, const std::string& log_ )
 {
     string from;
@@ -344,7 +344,7 @@ void Repository::createTag(  const std::string& name_, int rev_, bool lookup_in_
         from = ostr.str();
     }
 
-    if ( from.empty() )
+    if ( from.empty() || from == "ignore" )
         return;
 
     out << "tag " << name_
