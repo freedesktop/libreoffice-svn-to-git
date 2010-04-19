@@ -42,8 +42,10 @@ static int dump_blob( const python::object& filectx, const string &target_name )
     const char* mode = "644";
     if ( flags == "x" )
         mode = "755";
+    else if ( flags == "l" )
+        mode = "120000";
     else if ( flags != "" )
-        Error::report( "Got an unknown flag '" + flags + "'; we cannot handle eg. symlinks now." );
+        Error::report( "Got an unknown flag '" + flags + "'." );
 
     // prepare the stream
     ostream& out = Repositories::modifyFile( target_name, mode );
