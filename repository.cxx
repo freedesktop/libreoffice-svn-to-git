@@ -225,6 +225,7 @@ Repository::~Repository()
     regfree( &regex_rule );
     delete[] commits;
     delete[] parents;
+    out.close();
 }
 
 bool Repository::matches( const std::string& fname_ ) const
