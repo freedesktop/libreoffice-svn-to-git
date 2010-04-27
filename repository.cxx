@@ -628,6 +628,9 @@ void Repositories::createBranchOrTag( bool is_branch_, unsigned int from_, const
 void Repositories::updateMercurialTag( const std::string& name_, int rev_,
         const Committer& committer_, Time time_, const std::string& log_ )
 {
+    if ( rev_ < 0 )
+        return;
+
     for ( Repos::iterator it = repos.begin(); it != repos.end(); ++it )
         (*it)->createTag( name_, rev_, true, committer_, time_, log_ );
 }
