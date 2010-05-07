@@ -8,6 +8,7 @@ ab|Andreas Bregas|ab@openoffice.org
 abi|Andreas Bille|abi@openoffice.org
 ace_dent|Andrew Dent|ace_dent@openoffice.org
 af|Andre Fischer|af@openoffice.org
+af119097 <>|Andre Fischer|af@openoffice.org
 aidan|Aidan Butler|aidan@openoffice.org
 abutler|Aidan Butler|abutler@openoffice.org
 akhva|Artem Khvat|akhva@openoffice.org
