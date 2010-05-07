@@ -66,6 +66,10 @@ while [ -n "`jobs`" ] ; do
     sleep 1
 done
 
+# wait one more minute for everything to settle down
+# FIXME rather find a real solution...
+sleep 60
+
 for I in `sed -e 's/^[#:].*//' -e 's/^ignore-.*//' -e 's/=.*//' -e 's/:.*//' "$LAYOUT" | grep -v '^$'` ; do
     ( cd "$TARGET/$I" ; echo `pwd` ; git branch | sed 's/^\*/ /' | grep 'tag-branches/' | xargs git branch -D )
     rm $I.dump
