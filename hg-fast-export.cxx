@@ -106,6 +106,9 @@ inline void dump_file( const python::object& file, const string& path,
             string hgtags = python::extract< string >( filectx.attr( "data" )() );
             istringstream istr( hgtags );
 
+            typedef map< string, string > TagMap;
+            TagMap tags;
+
             while ( !istr.eof() )
             {
                 string id, name;
@@ -114,11 +117,18 @@ inline void dump_file( const python::object& file, const string& path,
                 if ( id.empty() || name.empty() )
                     continue;
 
-                python::object node( mercurial_node( id ) );
+                // Mercurial's handling of tags is soooo broken :-(
+                // We need to get rid of the duplicates - the last one wins
+                tags[name] = id;
+            }
+
+            for ( TagMap::const_iterator it = tags.begin(); it != tags.end(); ++it )
+            {
+                python::object node( mercurial_node( it->second ) );
                 python::object ctx = repo[node];
                 int tag_rev = python::extract< int >( ctx.attr( "rev" )() );
 
-                Repositories::updateMercurialTag( name, tag_rev,
+                Repositories::updateMercurialTag( it->first, tag_rev,
                         Committers::getAuthor( author ), epoch, message );
             }
         }
