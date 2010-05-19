@@ -12,8 +12,8 @@
 :revision from:263207
 
 # the actual layout of the repositories
-l10n:e9323842972db834ab47e24c8c85879f6c7c353c=(^l10n|[Ll][Oo][Cc][Aa][Ll][Ii][Zz][Ee]\.[Ss][Dd][Ff]$)
-ure:8c929c2dea4c2b62cbd8c892e0386bb3d7131466=^(bridges|cli_ure|codemaker|cppu|cppuhelper|cpputools|idlc|io|javaunohelper|jurt|jvmaccess|jvmfwk|offapi|offuh|pyuno|rdbmaker|registry|remotebridges|ridljar|sal|salhelper|stoc|store|udkapi|unoil|ure|xml2cmp|jut)\>
+l10n:e9323842972db834ab47e24c8c85879f6c7c353c=(^l10n\>|[Ll][Oo][Cc][Aa][Ll][Ii][Zz][Ee]\.[Ss][Dd][Ff]$)
+ure:8c929c2dea4c2b62cbd8c892e0386bb3d7131466=^(bridges|cli_ure|codemaker|cppu|cppuhelper|cpputools|idlc|io|javaunohelper|jurt|jvmaccess|jvmfwk|offapi|offuh|pyuno|rdbmaker|registry|remotebridges|ridljar|sal|salhelper|stoc|store|udkapi|unoil|ure|ure_top|xml2cmp|jut)\>
 sdk:92dd7b1629992cc193bc80f7689970dc1d36967a=^(autodoc|cosv|odk|udm|unodevtools)\>
 base:f7adfce6730dacc29f89e06a47f2e270956ca532=^(dbaccess|reportdesign)\>
 calc:17afeb05f38050f8e93b59279e67a0860b2b760b=^(sc|scaddins|sccomp|chart2)\>
@@ -22,16 +22,16 @@ help:bc5cb3872b1f6e3f58acd45b60242b035d0551d1=^(helpcontent2)\>
 writer:d21c39abb8529540853982e657a7464a439c9b29=^(sw|starmath)\>
 impress:cee2ef478d3059403002c7c60ea8905e50215abe=^(sd|animations|slideshow)\>
 artwork:f99900269a0ad1b190ef5c81ccfb56c42c484fb7=^(default_images|external_images|ooo_custom_images)\>
-filters:0ea196d98556a75e28ea14ad91168c8aa4a8885a=^(binfilter|filter|hwpfilter|unoxml|writerfilter|writerperfect|xmerge|oox|writer2latex)\>
+filters:0ea196d98556a75e28ea14ad91168c8aa4a8885a=^(binfilter|filter|hwpfilter|unoxml|writerfilter|writerperfect|xmerge|oox|vbahelper|writer2latex)\>
 testing:3113cfefc2f1f66f49bfadbc932157774426e77f=^(qadevOOo|smoketestoo_native|testshl2|testtools|testautomation)\>
-bootstrap:7da70d8cbc65daf27f0e43937c046e0ec63a506e=^(guw|dmake|instsetoo_native|scp2|solenv|soltools|stlport|soldep|aclocal.m4|oowintool|configure.in|configure.cmd|Makefile|Makefile.in|install-sh|set_soenv.in|config.guess|configure|acinclude.m4|config.sub|makefile.rc|bootstrap.1|config_office)\>
-libs-gui:d4889356a8bf7834837163cab2859fe7ae2837d1=^(basebmp|basegfx|canvas|comphelper|cppcanvas|dtrans|goodies|i18npool|i18nutil|o3tl|padmin|psprint|psprint_config|regexp|rsc|sax|sot|svtools|toolkit|tools|transex3|ucbhelper|unotools|vcl|vos)\>
-libs-core:7ac3cbc92e93eabfbbbf65b8ac429afc28f84b2e=^(avmedia|basic|configmgr|connectivity|desktop|drawinglayer|embeddedobj|eventattacher|fileaccess|formula|fpicker|framework|idl|linguistic|officecfg|oovbaapi|sandbox|scripting|sfx2|shell|sj2|svx|sysui|ucb|uui|xmlhelp|xmloff|xmlscript|readlicense_oo)\>
-libs-extern:32d6e8b773bcea68a7f9c9e5c56c00276297a761=^(afms|agg|beanshell|epm|external|fondu|hsqldb|libegg|libtextcat|libxmlsec|msfontextract|np_sdk|rhino|sane|twain|lpsolve|icc|openssl|unixODBC|vigra|x11_extensions|hyphen|libwpd|lucene|redland|cppunit|apple_remote|xsltml)\>
-components:7bf1381f02e277dea45e08aed8b2d28bf8360f31=^(accessibility|automation|basctl|bean|crashrep|embedserv|extensions|forms|javainstaller2|lingucomponent|MathMLDTD|package|setup_native|UnoControls|wizards|xmlsecurity)\>
+bootstrap:7da70d8cbc65daf27f0e43937c046e0ec63a506e=^(guw|dmake|instsetoo_native|scp2|solenv|soltools|splitbuild|stlport|soldep|aclocal.m4|oowintool|configure.in|configure.cmd|Makefile|Makefile.in|install-sh|set_soenv.in|config.guess|configure|acinclude.m4|config.sub|makefile.rc|bootstrap.1|config_office)\>
+libs-gui:d4889356a8bf7834837163cab2859fe7ae2837d1=^(basebmp|basegfx|canvas|comphelper|cppcanvas|dtrans|goodies|i18npool|i18nutil|l10ntools|o3tl|padmin|psprint|psprint_config|regexp|rsc|sax|sot|svl|svtools|toolkit|tools|transex3|ucbhelper|unotools|vcl|vos)\>
+libs-core:7ac3cbc92e93eabfbbbf65b8ac429afc28f84b2e=^(avmedia|basic|configmgr|configmgr2|connectivity|desktop|drawinglayer|editeng|embeddedobj|eventattacher|fileaccess|formula|fpicker|framework|idl|linguistic|officecfg|oovbaapi|sandbox|scripting|sfx2|shell|sj2|svx|sysui|ucb|uui|xmlhelp|xmloff|xmlscript|readlicense_oo)\>
+libs-extern:32d6e8b773bcea68a7f9c9e5c56c00276297a761=^(afms|agg|beanshell|epm|external|fondu|hsqldb|libegg|libtextcat|libxmlsec|msfontextract|np_sdk|rhino|sane|twain|lpsolve|icc|openssl|unixODBC|vigra|x11_extensions|hyphen|libwpd|lucene|redland|cppunit|apple_remote|xsltml|mysqlcppconn)\>
+components:7bf1381f02e277dea45e08aed8b2d28bf8360f31=^(accessibility|automation|basctl|bean|crashrep|cui|embedserv|extensions|forms|javainstaller2|lingucomponent|MathMLDTD|package|setup_native|UnoControls|wizards|xmlsecurity)\>
 postprocess:d8e19c2ae73999eb3cbb6e9d32e5b12fb0e524a3=^(postprocess|packimages)\>
 libs-extern-sys:0bb3f2b6572ca504f1fe1a9348e4fddaa2c21a6b=^(berkeleydb|bitstream_vera_fonts|expat|graphite|icu|jpeg|libxml2|libxslt|moz|neon|nss|python|zlib|saxon|stax|boost|curl|dictionaries|cairo|hunspell)\>
-extensions:83fa08dda07020c80dc3eada8d056890f31e3f22=^(sdext|swext|tomcat|apache-commons|jfreereport|reportbuilder|xpdf|migrationanalysis)\>
+extensions:83fa08dda07020c80dc3eada8d056890f31e3f22=^(sdext|swext|tomcat|apache-commons|jfreereport|reportbuilder|xpdf|migrationanalysis|mysqlc)\>
 
 # mapping of tags
 :commit map=artwork,261884:bceb0cbb663450246fdd39d4881dcf26d32cc540 261889:402f96c1d745343d9a73c9fd8aee20836256fe7d 261969:03f68a35746657fce141a9666c9e33a4172bb303 261997:586c04888860764f482b91f77241dde462dc7bc5 262022:7f40920e43ae3013d9e53981d32598cd7796bbec 262078:d1703aa02ca2d19e61a8372a1e531c8361bc3454 262109:3c2530942512e56ee131d1df44bd49e9948733d8 262206:8d10065585edb0b0920788c302f344cd9287a22c 262292:1aae42f65cb4243805b6242907c0e8b8bf310e8d 262343:3adc86a6067c5cf2a1fcef8521109b97e0162cd1 262353:560e78b35397f54eb1b7e5d32da3735d067434a2 262427:7a27afd2e4bab826f24d5e53fda9c7e69200a6ed 262504:4f19bd6f467b8247ed058efa0eb7e3a2d03e467c 262550:7b88aa530706e020df0a3f01ff35a9defd4e93c0 262571:e5d0564ae2c9e32975f0eff4103c620348a2b355 262607:99ff33b6fd87a21aa3c1bb57c8fa803cc6872110 262671:1ff108ddd55f6e5dd8f9bb640aa125b673655235 262702:d334b0582e19bd9a9071cfbcbdbe914d5f5f2a6b 262703:d334b0582e19bd9a9071cfbcbdbe914d5f5f2a6b 262735:1e4e496a167571140177fd10f0e376b6c90baade 262762:e70ad8b16c9580db7721d8e4fdb17fe4d7acec72 262807:d604ee10a1ad9748ffa2ba6c28e30599c265c88e 262855:b4af80ba544920b9a66d8ac4374a9b117f5a93d4 262884:67d522b481ec5086fcbd5b0c85cc959b241bbb0d 262929:227d580e72c4c6b3ad672ce97ae44c0cfb47bfe5 262953:3bbe9ce1487b31bcbd1fa72f3a6eb844b935d532 262966:9ff2f19211c948bda979f7abea3813ce356a3e23 263018:dc17df6b8a5c9b9005afa42467aa7001483c8d50 263050:93fdcd5a7762d7ae256eb5e16c0c4c6f102e3c89 263087:1224548768828b08ceca59a2ba9f52ca57eb212e 263150:6f9a12d68a658cceca7b883d69feb8072dec71b9 263165:44bd603260711d3a6c79b9c4b7997864e7ad76d5 263168:2ccc32e15abecc65a325d551e2ecfebcc6c62050 263199:b9e8b60ce64f056fd5702cddea0c9757d6a5203d 263205:f99900269a0ad1b190ef5c81ccfb56c42c484fb7 263206:f99900269a0ad1b190ef5c81ccfb56c42c484fb7 
