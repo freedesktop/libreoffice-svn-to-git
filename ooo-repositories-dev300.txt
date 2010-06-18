@@ -23,14 +23,14 @@ writer:d21c39abb8529540853982e657a7464a439c9b29=^(sw|starmath)\>
 impress:cee2ef478d3059403002c7c60ea8905e50215abe=^(sd|animations|slideshow)\>
 artwork:f99900269a0ad1b190ef5c81ccfb56c42c484fb7=^(default_images|external_images|ooo_custom_images)\>
 filters:0ea196d98556a75e28ea14ad91168c8aa4a8885a=^(binfilter|filter|hwpfilter|unoxml|writerfilter|writerperfect|xmerge|oox|vbahelper|writer2latex)\>
-testing:3113cfefc2f1f66f49bfadbc932157774426e77f=^(qadevOOo|smoketestoo_native|testshl2|testtools|testautomation|test)\>
+testing:3113cfefc2f1f66f49bfadbc932157774426e77f=^(qadevOOo|smoketestoo_native|testgraphical|testshl2|testtools|testautomation|test)\>
 bootstrap:7da70d8cbc65daf27f0e43937c046e0ec63a506e=^(guw|dmake|instsetoo_native|scp2|solenv|soltools|splitbuild|stlport|soldep|aclocal.m4|oowintool|configure.in|configure.cmd|Makefile|Makefile.in|install-sh|set_soenv.in|config.guess|configure|acinclude.m4|config.sub|makefile.rc|bootstrap.1|config_office|fetch_tarballs.sh|ooo.lst)\>
 libs-gui:d4889356a8bf7834837163cab2859fe7ae2837d1=^(basebmp|basegfx|canvas|comphelper|cppcanvas|dtrans|goodies|i18npool|i18nutil|l10ntools|o3tl|padmin|psprint|psprint_config|regexp|rsc|sax|sot|svl|svtools|toolkit|tools|transex3|ucbhelper|unotools|vcl|vos)\>
 libs-core:7ac3cbc92e93eabfbbbf65b8ac429afc28f84b2e=^(avmedia|basic|configmgr|configmgr2|connectivity|desktop|drawinglayer|editeng|embeddedobj|eventattacher|fileaccess|formula|fpicker|framework|idl|linguistic|officecfg|oovbaapi|sandbox|scripting|sfx2|shell|sj2|svx|sysui|ucb|uui|xmlhelp|xmloff|xmlscript|readlicense_oo)\>
 libs-extern:32d6e8b773bcea68a7f9c9e5c56c00276297a761=^(afms|agg|beanshell|epm|external|fondu|hsqldb|libegg|libtextcat|libxmlsec|msfontextract|np_sdk|rhino|sane|twain|lpsolve|icc|openssl|unixODBC|vigra|x11_extensions|hyphen|libwpd|lucene|redland|cppunit|apple_remote|xsltml|mysqlcppconn)\>
 components:7bf1381f02e277dea45e08aed8b2d28bf8360f31=^(accessibility|automation|basctl|bean|crashrep|cui|embedserv|extensions|forms|javainstaller2|lingucomponent|MathMLDTD|package|setup_native|UnoControls|wizards|xmlsecurity)\>
 postprocess:d8e19c2ae73999eb3cbb6e9d32e5b12fb0e524a3=^(postprocess|packimages)\>
-libs-extern-sys:0bb3f2b6572ca504f1fe1a9348e4fddaa2c21a6b=^(berkeleydb|bitstream_vera_fonts|expat|graphite|icu|jpeg|libxml2|libxslt|moz|neon|nss|python|zlib|saxon|stax|boost|curl|dictionaries|cairo|hunspell)\>
+libs-extern-sys:0bb3f2b6572ca504f1fe1a9348e4fddaa2c21a6b=^(berkeleydb|bitstream_vera_fonts|expat|graphite|icu|jpeg|libxml2|libxslt|more_fonts|moz|neon|nss|python|zlib|saxon|stax|boost|curl|dictionaries|cairo|hunspell)\>
 extensions:83fa08dda07020c80dc3eada8d056890f31e3f22=^(sdext|swext|tomcat|apache-commons|jfreereport|reportbuilder|xpdf|migrationanalysis|mysqlc)\>
 
 # mapping of tags
