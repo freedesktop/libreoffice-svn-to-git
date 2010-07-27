@@ -43,6 +43,7 @@ chainchen|Jinhong Chen|chainchen@openoffice.org
 christophnoack|Christoph Noack|christophnoack@openoffice.org
 ch2000liuy|YU Liu|ch2000liuy@openoffice.org
 cj|Christian Jansen|cj@openoffice.org
+Christian <>|Christian Lippka|cl@openoffice.org
 cl|Christian Lippka|cl@openoffice.org
 cloph|Christian Lohmaier|cloph@openoffice.org
 clu|Chris Lukasiak|clu@openoffice.org
