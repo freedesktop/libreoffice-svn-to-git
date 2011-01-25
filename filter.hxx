@@ -34,6 +34,7 @@ public:
     void write( std::ostream& out_ );
 
     static void setTabsToSpaces( int how_many_spaces_, const std::string& files_regex_ );
+    static void setExclusions( const std::string& exclusion_regex_ );
 };
 
 #endif // _FILTER_HXX_

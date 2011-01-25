@@ -420,6 +420,11 @@ bool Repositories::load( const char* fname_, unsigned int max_revs_, int& min_re
                                     line.substr( comma + 1 ) );
                     }
                 }
+                else if ( equals != string::npos && line.substr( arg, equals - arg ) == "exclude_tabs" )
+                {
+                    string tmp = line.substr( equals + 1 );
+                    Filter::setExclusions(line.substr( equals + 1 ).c_str() );
+                }
                 else if ( line.substr( arg, equals - arg ) == "convert_commit_messages" )
                 {
                     commit_messages.convert = true;

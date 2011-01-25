@@ -17,9 +17,11 @@ using namespace std;
 
 struct Tabs {
     int spaces;
+    bool has_exclusion;
     regex_t regex;
+    regex_t exclusion_regex;
 
-    Tabs() : spaces( 0 ) {}
+    Tabs() : spaces( 0 ), has_exclusion(false) {}
     ~Tabs() { regfree( &regex ); }
 };
 
@@ -31,8 +33,15 @@ Filter::Filter( const string& fname_ )
 {
     data.reserve( 16384 );
 
-    if ( tabs.spaces > 0 && regexec( &tabs.regex, fname_.c_str(), 0, NULL, 0 ) == 0 )
+    if ( tabs.spaces > 0 && regexec( &tabs.regex, fname_.c_str(), 0, NULL, 0 ) == 0 && !(tabs.has_exclusion && (regexec( &tabs.exclusion_regex, fname_.c_str(), 0, NULL, 0) == 0)))
+    {
         type = FILTER_TABS;
+//        fprintf( stderr, "Filter : %s\n", fname_.c_str() );
+    }
+    else
+    {
+//        fprintf( stderr, "Do Not filter : %s\n", fname_.c_str() );
+    }
 }
 
 inline void addDataLoop( char*& dest, char what, bool& tabs_to_spaces, int no_spaces )
@@ -107,4 +116,19 @@ void Filter::setTabsToSpaces( int how_many_spaces_, const std::string& files_reg
         Error::report( "Cannot create regex '" + files_regex_ + "' (for tabs_to_spaces_files)." );
         tabs.spaces = 0;
     }
+}
+
+void Filter::setExclusions( const std::string& exclusion_regex_ )
+{
+    int status = regcomp( &tabs.exclusion_regex, exclusion_regex_.c_str(), REG_EXTENDED | REG_NOSUB );
+    if ( status != 0 )
+    {
+        Error::report( "Cannot create regex '" + exclusion_regex_ + "' (for exclude_tabs)." );
+    }
+    else
+    {
+       fprintf( stderr, "Setup exclusion filter : %s\n", exclusion_regex_.c_str() );
+       tabs. has_exclusion = true;
+    }
+
 }
