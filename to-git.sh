@@ -17,7 +17,7 @@ WD=`pwd`
 
 COMMAND=false
 case "$TYPE" in
-    hg)  COMMAND='./hg-fast-export' ;;
+    hg)  COMMAND="./hg-fast-export" ;;
     svn) COMMAND='./svn-fast-export' ;;
 esac
 
@@ -49,14 +49,14 @@ for I in `sed -e 's/^[#:].*//' -e 's/^ignore-.*//' -e 's/=.*//' "$LAYOUT" | grep
             ( cd "$TARGET/$NAME" ; git init ; git fast-import < "$WD"/$NAME.dump ) &
         else
             ( cd "$TARGET" ; git clone -n -l "$FROM/$NAME" "$NAME" ; \
-              cd "$NAME" ; git reset --hard "$COMMIT" ; git fast-import < "$WD"/$NAME.dump ; \
+              cd "$NAME" ; git reset -q --hard "$COMMIT" ; git fast-import < "$WD"/$NAME.dump ; \
               git checkout -f ) &
         fi
     )
 done
 
 # execute hg-fast-export, or svn-fast-export
-"$COMMAND" "$SOURCE" "$COMMITTERS" "$LAYOUT"
+$COMMAND "$SOURCE" "$COMMITTERS" "$LAYOUT"
 RETURN_VALUE=$?
 
 # wait until everything's finished
