@@ -1,6 +1,6 @@
 # rewrite tabs to spaces
 :set tabs_to_spaces=4,\.(c|cpp|cxx|h|hrc|hxx|idl|inl|java|map|mk|MK|pmk|pl|pm|sdi|sh|src|tab|xcu|xml)$
-:set exclude_tabs=(.*/gbuild/.*|.*/gbuild.mk|[^/]*/[^/]*\.mk)$
+:set exclude_tabs=^(.*/gbuild/.*|.*/gbuild.mk|[^/]*/[^/]*\.mk)$
 # ignore some revisions completely (broken ones, mostly deletions of entire
 # defunct CWSes)
 #:revision ignore:XYZ
