@@ -11,6 +11,7 @@
 #include <regex.h>
 
 #include <cstring>
+#include <cstdio>
 #include <iostream>
 
 using namespace std;
