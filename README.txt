@@ -33,6 +33,12 @@ for nightly imports from the OOo SVN [4].
 Maybe you'll need to tweak it for your needs a bit, but hopefully it will
 generally work for you well :-)
 
+Compilation
+===========
+
+sudo zypper install subversion-devel
+make
+
 How to import your SVN tree to git
 ==================================
 
