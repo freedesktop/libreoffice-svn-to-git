@@ -7,6 +7,14 @@ COMMITTERS="ooo-committers.txt"
 LAYOUT=
 BRANCH="master"
 
+loc=$(locale -a | grep -i "en_US\.utf" | grep "8$" | head -n 1)
+if [ -z "$loc" ] ; then
+    echo "cannot set the utf8 locale" 1>&2
+    exit 1
+else
+    export LANG="$loc"
+fi
+
 while [ "${1:-}" != "" ] ; do
     case $1 in
 	-g|--git-base) shift

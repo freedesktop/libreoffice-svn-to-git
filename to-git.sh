@@ -15,6 +15,15 @@ FROM="$6"
 
 WD=`pwd`
 
+loc=$(locale -a | grep -i "en_US\.utf" | grep "8$" | head -n 1)
+if [ -z "$loc" ] ; then
+    echo "cannot set the utf8 locale" 1>&2
+    exit 1
+else
+    export LANG="$loc"
+fi
+
+
 COMMAND=false
 case "$TYPE" in
     hg)  COMMAND="./hg-fast-export" ;;
