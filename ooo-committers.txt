@@ -233,6 +233,7 @@ np|Nikolai Pretzell|np@openoffice.org
 npower|Noel Power|npower@openoffice.org
 obo|Oliver Bolte|obo@openoffice.org
 obr|Oliver Braun|obr@openoffice.org
+Ocke|Ocke Janssen|oj@openoffice.org
 oc|Oliver Craemer|oc@openoffice.org
 od|Oliver Düsterhoff|od@openoffice.org
 of|Olaf Felka|of@openoffice.org
