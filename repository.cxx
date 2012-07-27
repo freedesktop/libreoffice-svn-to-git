@@ -205,13 +205,14 @@ Tag::Tag( const Committer& committer_, const std::string& name_, Time time_, con
         Error::report( "Cannot guess the branch name for '" + name_ + "'" );
 }
 
-Repository::Repository( const std::string& reponame_, const string& regex_, unsigned int max_revs_ )
+Repository::Repository( const std::string& reponame_, const string& regex_, unsigned int max_revs_, bool cleanup_first_ )
     : mark( 1 ),
       out( ( reponame_ + ".dump" ).c_str() ),
       commits( new BranchId[max_revs_ + 10] ),
       parents( new string[max_revs_ + 10] ),
       max_revs( max_revs_ ),
-      name( reponame_ )
+      name( reponame_ ),
+      cleanup_first( cleanup_first_ )
 {
     int status = regcomp( &regex_rule, regex_.c_str(), REG_EXTENDED | REG_NOSUB );
     if ( status != 0 )
@@ -281,6 +282,12 @@ void Repository::commit( const Committer& committer_, const std::string& name_, 
                 out << ( first? "from ": "merge " ) << parents[(*it)] << "\n";
                 first = false;
             }
+        }
+
+        if ( cleanup_first )
+        {
+            out << "deleteall" << endl;
+            cleanup_first = false;
         }
 
         out << file_changes
@@ -382,6 +389,7 @@ bool Repositories::load( const char* fname_, unsigned int max_revs_, int& min_re
     ifstream input( fname_, ifstream::in );
     string line;
     bool sets_min_rev = false;
+    bool cleanup_first = false;
     bool result = false;
 
     while ( !input.eof() )
@@ -424,6 +432,10 @@ bool Repositories::load( const char* fname_, unsigned int max_revs_, int& min_re
                 {
                     string tmp = line.substr( equals + 1 );
                     Filter::setExclusions(line.substr( equals + 1 ).c_str() );
+                }
+                else if ( line.substr( arg, equals - arg ) == "cleanup_first" )
+                {
+                    cleanup_first = true;
                 }
                 else if ( line.substr( arg, equals - arg ) == "convert_commit_messages" )
                 {
@@ -562,7 +574,7 @@ bool Repositories::load( const char* fname_, unsigned int max_revs_, int& min_re
             continue;
         }
 
-        Repository* rep = new Repository( line.substr( 0, min( equal, colon ) ), line.substr( equal + 1 ), max_revs_ );
+        Repository* rep = new Repository( line.substr( 0, min( equal, colon ) ), line.substr( equal + 1 ), max_revs_, cleanup_first );
         if ( sets_min_rev )
             rep->mapCommit( min_rev_, line.substr( colon + 1, equal - colon - 1 ) );
 

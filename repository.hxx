@@ -88,9 +88,13 @@ class Repository
     /// Name of the repository.
     std::string name;
 
+    /// When committing for the first time, should we remove everything else?
+    /// Makes sense for repository that is an incomplete continuation of another one.
+    bool cleanup_first;
+
 public:
     /// The regex_ is here to decide if the file belongs to this repository.
-    Repository( const std::string& reponame_, const std::string& regex_, unsigned int max_revs_ );
+    Repository( const std::string& reponame_, const std::string& regex_, unsigned int max_revs_, bool cleanup_first_ );
 
     ~Repository();
 
