@@ -48,12 +48,16 @@ static string tags = "/tags/";
 
 static bool split_into_branch_filename( const char* path_, string& branch_, string& fname_ );
 
-static Time get_epoch( const char *svn_date )
+static Time get_epoch( const svn_string_t* svndate )
 {
     struct tm tm = {0};
-    char date[(strlen(svn_date) * sizeof(char *))];
-    strncpy(date, svn_date, strlen(svn_date) - 8);
-    strptime(date, "%Y-%m-%dT%H:%M:%S", &tm);
+    if ( svndate )
+    {
+        const char* svn_date = static_cast<const char *>( svndate->data );
+        char date[(strlen(svn_date) * sizeof(char *))];
+        strncpy(date, svn_date, strlen(svn_date) - 8);
+        strptime(date, "%Y-%m-%dT%H:%M:%S", &tm);
+    }
     return Time( mktime(&tm) );
 }
 
@@ -266,7 +270,7 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
     if ( !author || svn_string_isempty( author ) )
         author = svn_string_create( "nobody", pool );
     svndate = static_cast<svn_string_t*>( apr_hash_get(props, "svn:date", APR_HASH_KEY_STRING) );
-    Time epoch = get_epoch( static_cast<const char *>( svndate->data ) );
+    Time epoch = get_epoch( svndate );
 
     svnlog = static_cast<svn_string_t*>( apr_hash_get(props, "svn:log", APR_HASH_KEY_STRING) );
 
