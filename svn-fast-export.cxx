@@ -419,7 +419,7 @@ int crawl_revisions( char *repos_path, const char* repos_config )
         return 1;
     }
     if ( dummy != -1 )
-        fprintf( stderr, "Warning: svn-fast-export ignores :revision from:%d.\n", dummy );
+        min_rev = dummy;
 
     subpool = svn_pool_create(pool);
     for (rev = min_rev; rev <= max_rev; rev++) {
