@@ -29,7 +29,8 @@ struct Tabs {
 static Tabs tabs;
 
 Filter::Filter( const string& fname_ )
-    : tabs_to_spaces( true ),
+    : column( 0 ),
+      spaces_to_write( 0 ),
       type( NO_FILTER )
 {
     data.reserve( 16384 );
@@ -45,20 +46,35 @@ Filter::Filter( const string& fname_ )
     }
 }
 
-inline void addDataLoop( char*& dest, char what, bool& tabs_to_spaces, int no_spaces )
+inline void addDataLoop( char*& dest, char what, int& column, int& spaces_to_write, int no_spaces )
 {
-    if ( what == '\t' && tabs_to_spaces )
+    if ( what == '\t' )
     {
-        for ( int i = 0; i < no_spaces; ++i )
-            *dest++ = ' ';
-        return;
+        const int tab_size = no_spaces - ( column % no_spaces );
+        column += tab_size;
+        spaces_to_write += tab_size;
     }
     else if ( what == '\n' )
-        tabs_to_spaces = true;
-    else if ( what != ' ' )
-        tabs_to_spaces = false;
+    {
+        *dest++ = what;
+        column = 0;
+        spaces_to_write = 0;
+    }
+    else if ( what == ' ' )
+    {
+        ++column;
+        ++spaces_to_write;
+    }
+    else
+    {
+        // write out any spaces that we need
+        for ( int i = 0; i < spaces_to_write; ++i )
+            *dest++ = ' ';
 
-    *dest++ = what;
+        *dest++ = what;
+        ++column;
+        spaces_to_write = 0;
+    }
 }
 
 void Filter::addData( const char* data_, size_t len_ )
@@ -70,12 +86,12 @@ void Filter::addData( const char* data_, size_t len_ )
     }
 
     // type == FILTER_TABS
-    char tmp[4*len_];
+    char tmp[tabs.spaces*len_];
     char *dest = tmp;
 
-    // convert the leading tabs to N spaces (according to tabs.spaces)
+    // convert the tabs to spaces (according to tabs.spaces)
     for ( const char* it = data_; it < data_ + len_; ++it )
-        addDataLoop( dest, *it, tabs_to_spaces, tabs.spaces );
+        addDataLoop( dest, *it, column, spaces_to_write, tabs.spaces );
 
     data.append( tmp, dest - tmp );
 }
@@ -89,12 +105,12 @@ void Filter::addData( const string& data_ )
     }
 
     // type == FILTER_TABS
-    char *tmp = new char[4*data_.size()];
+    char *tmp = new char[tabs.spaces*data_.size()];
     char *dest = tmp;
 
     // convert the leading tabs to N spaces (according to tabs.spaces)
     for ( const char* it = data_.data(), *end = data_.data() + data_.size(); it < end; ++it )
-        addDataLoop( dest, *it, tabs_to_spaces, tabs.spaces );
+        addDataLoop( dest, *it, column, spaces_to_write, tabs.spaces );
 
     data.append( tmp, dest - tmp );
 

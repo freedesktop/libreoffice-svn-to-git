@@ -15,10 +15,11 @@ class Filter
 {
     std::string data;
 
-    /// Should we convert?
-    ///
-    /// We have to remember it between addData() calls.
-    bool tabs_to_spaces;
+    /// Current column in the output (resets with every \n).
+    int column;
+
+    /// In order to strip trailing spaces, we do not write them immediately.
+    int spaces_to_write;
 
     enum FilterType { NO_FILTER, FILTER_TABS };
 
