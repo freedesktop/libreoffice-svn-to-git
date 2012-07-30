@@ -11,9 +11,19 @@
 #include <string>
 #include <ostream>
 
+enum FilterType {
+    NO_FILTER,       ///< No filtering at all
+    FILTER_OLD,      ///< Old way of filtering - each tab is exactly <n> spaces, no filtering after 1st non-tab, non-space character
+    FILTER_COMBINED, ///< Combined way of filtering - for the tabs before 1st non-tab, non-space character, behave like _OLD, for the rest as _TABS
+    FILTER_ALL       ///< New way of filtering - each tab is converted as if it was a real tab + strip trailing whitespace
+};
+
 class Filter
 {
     std::string data;
+
+    /// This filter adds considers a tab this amount of spaces.
+    int spaces;
 
     /// Current column in the output (resets with every \n).
     int column;
@@ -21,7 +31,8 @@ class Filter
     /// In order to strip trailing spaces, we do not write them immediately.
     int spaces_to_write;
 
-    enum FilterType { NO_FILTER, FILTER_TABS };
+    /// Needed for the 'old' and 'combined' types
+    bool nonspace_appeared;
 
     FilterType type;
 
@@ -34,8 +45,7 @@ public:
 
     void write( std::ostream& out_ );
 
-    static void setTabsToSpaces( int how_many_spaces_, const std::string& files_regex_ );
-    static void setExclusions( const std::string& exclusion_regex_ );
+    static void addTabsToSpaces( int how_many_spaces_, FilterType type_, const std::string& files_regex_ );
 };
 
 #endif // _FILTER_HXX_

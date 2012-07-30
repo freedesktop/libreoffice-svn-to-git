@@ -13,40 +13,125 @@
 #include <cstring>
 #include <cstdio>
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
 struct Tabs {
     int spaces;
-    bool has_exclusion;
+    FilterType type;
     regex_t regex;
-    regex_t exclusion_regex;
 
-    Tabs() : spaces( 0 ), has_exclusion(false) {}
+    Tabs( int spaces_, FilterType type_ ) : spaces( spaces_ ), type( type_ ) {}
     ~Tabs() { regfree( &regex ); }
+
+    bool matches( const string& fname_ ) { return regexec( &regex, fname_.c_str(), 0, NULL, 0 ) == 0; }
 };
 
-static Tabs tabs;
+static std::vector< Tabs* > tabs_vector;
 
 Filter::Filter( const string& fname_ )
-    : column( 0 ),
+    : spaces( 0 ),
+      column( 0 ),
       spaces_to_write( 0 ),
+      nonspace_appeared( false ),
       type( NO_FILTER )
 {
     data.reserve( 16384 );
 
-    if ( tabs.spaces > 0 && regexec( &tabs.regex, fname_.c_str(), 0, NULL, 0 ) == 0 && !(tabs.has_exclusion && (regexec( &tabs.exclusion_regex, fname_.c_str(), 0, NULL, 0) == 0)))
+    for ( std::vector< Tabs* >::const_iterator it = tabs_vector.begin(); it != tabs_vector.end(); ++it )
     {
-        type = FILTER_TABS;
-//        fprintf( stderr, "Filter : %s\n", fname_.c_str() );
-    }
-    else
-    {
-//        fprintf( stderr, "Do Not filter : %s\n", fname_.c_str() );
+        if ( (*it)->matches( fname_.c_str() ) )
+        {
+            spaces = (*it)->spaces;
+            type = (*it)->type;
+            break; // 1st wins
+        }
     }
 }
 
-inline void addDataLoop( char*& dest, char what, int& column, int& spaces_to_write, int no_spaces )
+inline void addDataLoopOld( char*& dest, char what, int& column, int& spaces_to_write, bool& nonspace_appeared, int no_spaces )
+{
+    if ( what == '\t' && !nonspace_appeared )
+    {
+        column += no_spaces;
+        spaces_to_write += no_spaces;
+    }
+    else if ( what == ' ' )
+    {
+        ++column;
+        ++spaces_to_write;
+    }
+    else if ( what == '\n' )
+    {
+        // write out any spaces that we need
+        for ( int i = 0; i < spaces_to_write; ++i )
+            *dest++ = ' ';
+
+        *dest++ = what;
+        column = 0;
+        spaces_to_write = 0;
+        nonspace_appeared = false;
+    }
+    else
+    {
+        nonspace_appeared = true;
+
+        // write out any spaces that we need
+        for ( int i = 0; i < spaces_to_write; ++i )
+            *dest++ = ' ';
+
+        *dest++ = what;
+        ++column;
+        spaces_to_write = 0;
+    }
+}
+
+inline void addDataLoopCombined( char*& dest, char what, int& column, int& spaces_to_write, bool& nonspace_appeared, int no_spaces )
+{
+    if ( what == '\t' )
+    {
+        if ( nonspace_appeared )
+        {
+            // new behavior
+            const int tab_size = no_spaces - ( column % no_spaces );
+            column += tab_size;
+            spaces_to_write += tab_size;
+        }
+        else
+        {
+            // old one
+            column += no_spaces;
+            spaces_to_write += no_spaces;
+        }
+    }
+    else if ( what == ' ' )
+    {
+        ++column;
+        ++spaces_to_write;
+    }
+    else if ( what == '\n' )
+    {
+        *dest++ = what;
+        column = 0;
+        spaces_to_write = 0;
+        nonspace_appeared = false;
+    }
+    else
+    {
+        nonspace_appeared = true;
+
+        // write out any spaces that we need
+        for ( int i = 0; i < spaces_to_write; ++i )
+            *dest++ = ' ';
+
+        *dest++ = what;
+        ++column;
+        spaces_to_write = 0;
+    }
+}
+
+inline void addDataLoopAll( char*& dest, char what, int& column, int& spaces_to_write, bool& nonspace_appeared, int no_spaces )
 {
     if ( what == '\t' )
     {
@@ -54,16 +139,16 @@ inline void addDataLoop( char*& dest, char what, int& column, int& spaces_to_wri
         column += tab_size;
         spaces_to_write += tab_size;
     }
+    else if ( what == ' ' )
+    {
+        ++column;
+        ++spaces_to_write;
+    }
     else if ( what == '\n' )
     {
         *dest++ = what;
         column = 0;
         spaces_to_write = 0;
-    }
-    else if ( what == ' ' )
-    {
-        ++column;
-        ++spaces_to_write;
     }
     else
     {
@@ -79,42 +164,44 @@ inline void addDataLoop( char*& dest, char what, int& column, int& spaces_to_wri
 
 void Filter::addData( const char* data_, size_t len_ )
 {
-    if ( type == NO_FILTER || tabs.spaces <= 0 )
+    if ( type == NO_FILTER || spaces <= 0 )
     {
         data.append( data_, len_ );
         return;
     }
 
-    // type == FILTER_TABS
-    char tmp[tabs.spaces*len_];
+    // type == FILTER_ALL
+    char *tmp = new char[spaces*len_];
     char *dest = tmp;
 
-    // convert the tabs to spaces (according to tabs.spaces)
-    for ( const char* it = data_; it < data_ + len_; ++it )
-        addDataLoop( dest, *it, column, spaces_to_write, tabs.spaces );
-
-    data.append( tmp, dest - tmp );
-}
-
-void Filter::addData( const string& data_ )
-{
-    if ( type == NO_FILTER || tabs.spaces <= 0 )
+    // convert the tabs to spaces (according to spaces)
+    switch ( type )
     {
-        data.append( data_ );
-        return;
+        case FILTER_OLD:
+            for ( const char* it = data_; it < data_ + len_; ++it )
+                addDataLoopOld( dest, *it, column, spaces_to_write, nonspace_appeared, spaces );
+            break;
+        case FILTER_COMBINED:
+            for ( const char* it = data_; it < data_ + len_; ++it )
+                addDataLoopCombined( dest, *it, column, spaces_to_write, nonspace_appeared, spaces );
+            break;
+        case FILTER_ALL:
+            for ( const char* it = data_; it < data_ + len_; ++it )
+                addDataLoopAll( dest, *it, column, spaces_to_write, nonspace_appeared, spaces );
+            break;
+        case NO_FILTER:
+            // NO_FILTER already handled
+            break;
     }
-
-    // type == FILTER_TABS
-    char *tmp = new char[tabs.spaces*data_.size()];
-    char *dest = tmp;
-
-    // convert the leading tabs to N spaces (according to tabs.spaces)
-    for ( const char* it = data_.data(), *end = data_.data() + data_.size(); it < end; ++it )
-        addDataLoop( dest, *it, column, spaces_to_write, tabs.spaces );
 
     data.append( tmp, dest - tmp );
 
     delete[] tmp;
+}
+
+void Filter::addData( const string& data_ )
+{
+    addData( data_.data(), data_.size() );
 }
 
 void Filter::write( std::ostream& out_ )
@@ -123,29 +210,16 @@ void Filter::write( std::ostream& out_ )
          << data << endl;
 }
 
-void Filter::setTabsToSpaces( int how_many_spaces_, const std::string& files_regex_ )
+void Filter::addTabsToSpaces( int how_many_spaces_, FilterType type_, const std::string& files_regex_ )
 {
-    tabs.spaces = how_many_spaces_;
+    Tabs* tabs = new Tabs( how_many_spaces_, type_ );
 
-    int status = regcomp( &tabs.regex, files_regex_.c_str(), REG_EXTENDED | REG_NOSUB );
-    if ( status != 0 )
-    {
-        Error::report( "Cannot create regex '" + files_regex_ + "' (for tabs_to_spaces_files)." );
-        tabs.spaces = 0;
-    }
-}
-
-void Filter::setExclusions( const std::string& exclusion_regex_ )
-{
-    int status = regcomp( &tabs.exclusion_regex, exclusion_regex_.c_str(), REG_EXTENDED | REG_NOSUB );
-    if ( status != 0 )
-    {
-        Error::report( "Cannot create regex '" + exclusion_regex_ + "' (for exclude_tabs)." );
-    }
+    int status = regcomp( &tabs->regex, files_regex_.c_str(), REG_EXTENDED | REG_NOSUB );
+    if ( status == 0 )
+        tabs_vector.push_back( tabs );
     else
     {
-       fprintf( stderr, "Setup exclusion filter : %s\n", exclusion_regex_.c_str() );
-       tabs. has_exclusion = true;
+        Error::report( "Cannot create regex '" + files_regex_ + "' (for tabs_to_spaces_files)." );
+        delete tabs;
     }
-
 }

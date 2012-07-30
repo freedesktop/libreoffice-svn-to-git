@@ -417,21 +417,43 @@ bool Repositories::load( const char* fname_, unsigned int max_revs_, int& min_re
                      ( equals != string::npos && line.substr( arg, equals - arg ) == "tabs_to_spaces" ) )
                 {
                     if ( equals == string::npos )
-                        Filter::setTabsToSpaces( 8, string( ".*" ) );
+                        Filter::addTabsToSpaces( 8, FILTER_ALL, string( ".*" ) );
                     else
                     {
                         size_t comma = line.find( ',', equals + 1 );
                         if ( comma == string::npos )
-                            Filter::setTabsToSpaces( atoi( line.substr( equals + 1 ).c_str() ), string( ".*" ) );
+                            Filter::addTabsToSpaces( atoi( line.substr( equals + 1 ).c_str() ), FILTER_ALL, string( ".*" ) );
                         else
-                            Filter::setTabsToSpaces( atoi( line.substr( equals + 1, comma - equals - 1 ).c_str() ),
-                                    line.substr( comma + 1 ) );
+                        {
+                            size_t regex = line.find( ',', comma + 1 );
+
+                            if ( comma == string::npos )
+                            {
+                                Error::report( "Please update your configuration file, ':set tabs_to_spaces' now needs 3 params - amount, type, regex" );
+                                Filter::addTabsToSpaces( atoi( line.substr( equals + 1, comma - equals - 1 ).c_str() ),
+                                        FILTER_ALL,
+                                        line.substr( comma + 1 ) );
+                            }
+                            else
+                            {
+                                FilterType filter_type = FILTER_ALL;
+                                if ( line.substr( comma + 1, regex - comma - 1 ) == "none" )
+                                    filter_type = NO_FILTER;
+                                else if ( line.substr( comma + 1, regex - comma - 1 ) == "old" )
+                                    filter_type = FILTER_OLD;
+                                else if ( line.substr( comma + 1, regex - comma - 1 ) == "combined" )
+                                    filter_type = FILTER_COMBINED;
+                                else if ( line.substr( comma + 1, regex - comma - 1 ) == "all" )
+                                    filter_type = FILTER_ALL;
+                                else
+                                    Error::report( "Unknown type of tabs_to_spaces substitution '" + line.substr( comma + 1, regex - comma - 1 ) + "'." );
+
+                                Filter::addTabsToSpaces( atoi( line.substr( equals + 1, comma - equals - 1 ).c_str() ),
+                                        filter_type,
+                                        line.substr( regex + 1 ) );
+                            }
+                        }
                     }
-                }
-                else if ( equals != string::npos && line.substr( arg, equals - arg ) == "exclude_tabs" )
-                {
-                    string tmp = line.substr( equals + 1 );
-                    Filter::setExclusions(line.substr( equals + 1 ).c_str() );
                 }
                 else if ( line.substr( arg, equals - arg ) == "cleanup_first" )
                 {
