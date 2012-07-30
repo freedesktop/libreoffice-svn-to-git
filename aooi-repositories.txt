@@ -1,0 +1,34 @@
+# rewrite tabs to spaces
+:set tabs_to_spaces=4,combined,\.(c|cpp|cxx|h|hrc|hxx|idl|inl|java|map|pl|pm|sdi|sh|src|tab|xcu|xml)$
+:set tabs_to_spaces=4,old,\<makefile.mk\>$
+:set tabs_to_spaces=-1,none,^(.*/gbuild/.*|.*/gbuild.mk|[^/]*/[^/]*\.mk)$
+:set tabs_to_spaces=4,old,\.(mk|MK|pmk)$
+
+# ignore some revisions completely (broken ones, mostly deletions of entire
+# defunct CWSes)
+#:revision ignore:XYZ
+
+# ignore some tags completely (broken ones)
+#:tag ignore:DEV300_m99
+
+# import of OOo into the Apache SVN
+:revision from:1162288
+
+# trunk is somewhere deep in the path
+:set trunk=incubator/ooo/trunk/main
+
+# remove everything before starting the import
+:set cleanup_first
+
+# the actual layout of the repositories (we care only about 'core')
+core:e97f122464adca8d2face11be647666b9441af0c=^(buildbot_linux.sh|GNUmakefile|LICENSE|Makefile.in|MathMLDTD|Module_ooo.mk|NOTICE|ooo.lst|Repository.mk|RepositoryFixes.mk|UnoControls|accessibility|acinclude.m4|afms|agg|animations|apache-commons|apple_remote|autodoc|automation|avmedia|basctl|basebmp|basegfx|basic|bean|beanshell|berkeleydb|binaryurp|boost|bootstrap.1|bridges|buildscript.sh|cairo|canvas|chart2|cli_ure|codemaker|comphelper|config.sub|configmgr|configure.cmd|configure.in|connectivity|cosv|cppcanvas|cppu|cppuhelper|cppunit|cpputools|crashrep|cui|curl|dbaccess|default_images|desktop|dmake|drawinglayer|dtrans|editeng|embeddedobj|embedserv|epm|eventattacher|expat|extensions|external|extras|fetch_tarballs.sh|fileaccess|filter|forms|formula|fpicker|framework|gdk-pixbuf|gettext|glib|graphite|guw|hsqldb|hunspell|hwpfilter|hyphen|i18npool|i18nutil|icc|icu|idl|idlc|install-sh|instsetoo_native|io|javainstaller2|javaunohelper|jfreereport|jpeg|jurt|jvmaccess|jvmfwk|l10ntools|libcroco|libegg|libgsf|libpng|librsvg|libtextcat|libwpd|libxml2|libxmlsec|libxslt|lingucomponent|linguistic|lpsolve|lucene|makefile.rc|mdds|migrationanalysis|more_fonts|moz|mysqlc|mysqlcppconn|mythes|neon|np_sdk|nss|o3tl|odk|offapi|officecfg|offuh|ooo_custom_images|oovbaapi|oowintool|oox|openssl|package|packimages|padmin|pango|postprocess|psprint_config|python|pyuno|qadevOOo|rdbmaker|readlicense_oo|redland|regexp|registry|remotebridges|reportbuilder|reportdesign|rhino|ridljar|rsc|sal|salhelper|sane|sax|saxon|sc|scaddins|sccomp|scp2|scripting|sd|sdext|set_soenv.in|setup_native|sfx2|shell|slideshow|smoketestdoc|smoketestoo_native|soldep|solenv|soltools|sot|splitbuild|starmath|stax|stlport|stoc|store|svl|svtools|svx|sw|swext|sysui|test|testautomation|testgraphical|testtools|tomcat|toolkit|tools|twain|ucb|ucbhelper|udkapi|udm|unixODBC|unodevtools|unoil|unotools|unoxml|ure|uui|vbahelper|vcl|vigra|vos|wizards|writerfilter|writerperfect|x11_extensions|xmerge|xml2cmp|xmlhelp|xmloff|xmlreader|xmlscript|xmlsecurity|xpdf|xsltml|zlib)\>
+
+# mapping of the start of the history (ooo/OOO340_m1 git tag)
+:commit map=core,1162287:e97f122464adca8d2face11be647666b9441af0c
+
+# parts of the svn tree that are going to be just dumped, not imported
+ignore-binfilter:ignore=^binfilter\>
+ignore-dictionaries:ignore=^dictionaries\>
+ignore-helpcontent2:ignore=^(helpauthoring|helpcontent2)\>
+ignore-we-do-not-want:ignore=^(.gitattributes|.gitignore|aclocal.m4|configure)\>
+ignore-did-not-fit-anywhere:ignore=.*
