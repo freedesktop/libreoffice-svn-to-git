@@ -382,10 +382,17 @@ int export_revision(svn_revnum_t rev, svn_fs_t *fs, apr_pool_t *pool)
         return 0;
     }
 
+    // setup the 'from' information, so that we can start with an arbitrary
+    // commit (provided that ':commit map=' is setup correcty)
+    std::vector< int > parents;
+    if ( rev != 1 )
+        parents.push_back( rev - 1 );
+
     Repositories::commit( Committers::getAuthor( author->data ),
             branch, rev,
             epoch,
-            string( svnlog->data, svnlog->len ) );
+            string( svnlog->data, svnlog->len ),
+            parents );
 
     svn_pool_destroy( revpool );
 
