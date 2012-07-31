@@ -439,12 +439,43 @@ bool Repositories::load( const char* fname_, unsigned int max_revs_, int& min_re
                             else
                             {
                                 FilterType filter_type = FILTER_TABS;
+                                FilePermission file_perm = PERMISSION_NO_CHANGE;
                                 if ( line.substr( comma + 1, regex - comma - 1 ) == "none" )
                                     filter_type = NO_FILTER;
+                                else if ( line.substr( comma + 1, regex - comma - 1 ) == "none644" )
+                                {
+                                    filter_type = NO_FILTER;
+                                    file_perm = PERMISSION_NOEXEC;
+                                }
+                                else if ( line.substr( comma + 1, regex - comma - 1 ) == "none755" )
+                                {
+                                    filter_type = NO_FILTER;
+                                    file_perm = PERMISSION_EXEC;
+                                }
                                 else if ( line.substr( comma + 1, regex - comma - 1 ) == "old" )
                                     filter_type = FILTER_OLD;
+                                else if ( line.substr( comma + 1, regex - comma - 1 ) == "old644" )
+                                {
+                                    filter_type = FILTER_OLD;
+                                    file_perm = PERMISSION_NOEXEC;
+                                }
+                                else if ( line.substr( comma + 1, regex - comma - 1 ) == "old755" )
+                                {
+                                    filter_type = FILTER_OLD;
+                                    file_perm = PERMISSION_EXEC;
+                                }
                                 else if ( line.substr( comma + 1, regex - comma - 1 ) == "combined" )
                                     filter_type = FILTER_COMBINED;
+                                else if ( line.substr( comma + 1, regex - comma - 1 ) == "combined644" )
+                                {
+                                    filter_type = FILTER_COMBINED;
+                                    file_perm = PERMISSION_NOEXEC;
+                                }
+                                else if ( line.substr( comma + 1, regex - comma - 1 ) == "combined755" )
+                                {
+                                    filter_type = FILTER_COMBINED;
+                                    file_perm = PERMISSION_EXEC;
+                                }
                                 else if ( line.substr( comma + 1, regex - comma - 1 ) == "tabs" )
                                     filter_type = FILTER_TABS;
                                 else if ( line.substr( comma + 1, regex - comma - 1 ) == "dos" )
@@ -456,7 +487,8 @@ bool Repositories::load( const char* fname_, unsigned int max_revs_, int& min_re
 
                                 Filter::addTabsToSpaces( atoi( line.substr( equals + 1, comma - equals - 1 ).c_str() ),
                                         filter_type,
-                                        line.substr( regex + 1 ) );
+                                        line.substr( regex + 1 ),
+                                        file_perm );
                             }
                         }
                     }

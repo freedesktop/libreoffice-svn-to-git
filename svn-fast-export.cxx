@@ -77,6 +77,15 @@ static int dump_blob( svn_fs_root_t *root, char *full_path, const string &target
     if ( propvalue )
         Error::report( "Got a symlink; we cannot handle symlinks now." );
 
+    Filter filter( target_name );
+    FilePermission perm = filter.getPermission();
+    switch ( perm )
+    {
+        case PERMISSION_EXEC:   mode = "755"; break;
+        case PERMISSION_NOEXEC: mode = "644"; break;
+        default:                break;
+    }
+
     ostream& out = Repositories::modifyFile( target_name, mode );
 
     // dump the content of the file
@@ -86,7 +95,6 @@ static int dump_blob( svn_fs_root_t *root, char *full_path, const string &target
     const size_t buffer_size = 8192;
     char buffer[buffer_size];
 
-    Filter filter( target_name );
     apr_size_t len;
     do {
         len = buffer_size;

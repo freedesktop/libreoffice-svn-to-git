@@ -20,9 +20,10 @@ using namespace std;
 struct Tabs {
     int spaces;
     FilterType type;
+    FilePermission perm;
     regex_t regex;
 
-    Tabs( int spaces_, FilterType type_ ) : spaces( spaces_ ), type( type_ ) {}
+    Tabs( int spaces_, FilterType type_, FilePermission perm_ ) : spaces( spaces_ ), type( type_ ), perm( perm_ ) {}
     ~Tabs() { regfree( &regex ); }
 
     bool matches( const string& fname_ ) { return regexec( &regex, fname_.c_str(), 0, NULL, 0 ) == 0; }
@@ -45,6 +46,7 @@ Filter::Filter( const string& fname_ )
         {
             spaces = (*it)->spaces;
             type = (*it)->type;
+            perm = (*it)->perm;
             break; // 1st wins
         }
     }
@@ -240,9 +242,9 @@ void Filter::write( std::ostream& out_ )
          << data << endl;
 }
 
-void Filter::addTabsToSpaces( int how_many_spaces_, FilterType type_, const std::string& files_regex_ )
+void Filter::addTabsToSpaces( int how_many_spaces_, FilterType type_, const std::string& files_regex_, FilePermission perm_ )
 {
-    Tabs* tabs = new Tabs( how_many_spaces_, type_ );
+    Tabs* tabs = new Tabs( how_many_spaces_, type_, perm_ );
 
     int status = regcomp( &tabs->regex, files_regex_.c_str(), REG_EXTENDED | REG_NOSUB );
     if ( status == 0 )

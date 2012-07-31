@@ -20,6 +20,12 @@ enum FilterType {
     FILTER_UNX,      ///< Convert to the Unx line ends
 };
 
+enum FilePermission {
+    PERMISSION_NO_CHANGE, ///< Do not change the permissions, use as stated in the original repo
+    PERMISSION_EXEC,      ///< Add the executable bit
+    PERMISSION_NOEXEC,    ///< Remove the executable bit
+};
+
 class Filter
 {
     std::string data;
@@ -38,6 +44,8 @@ class Filter
 
     FilterType type;
 
+    FilePermission perm;
+
 public:
     Filter( const std::string& fname_ );
 
@@ -47,7 +55,9 @@ public:
 
     void write( std::ostream& out_ );
 
-    static void addTabsToSpaces( int how_many_spaces_, FilterType type_, const std::string& files_regex_ );
+    FilePermission getPermission() { return perm; }
+
+    static void addTabsToSpaces( int how_many_spaces_, FilterType type_, const std::string& files_regex_, FilePermission perm_ = PERMISSION_NO_CHANGE );
 };
 
 #endif // _FILTER_HXX_
