@@ -1,8 +1,11 @@
 # rewrite tabs to spaces
-:set tabs_to_spaces=4,combined,\.(c|cpp|cxx|h|hrc|hxx|idl|inl|java|map|pl|pm|sdi|sh|src|tab|xcu|xml)$
-:set tabs_to_spaces=4,old,\<makefile.mk\>$
-:set tabs_to_spaces=-1,none,^(.*/gbuild/.*|.*/gbuild.mk|[^/]*/[^/]*\.mk)$
-:set tabs_to_spaces=4,old,\.(mk|MK|pmk)$
+:set filter=4,combined,\.(c|cpp|cxx|h|hrc|hxx|idl|inl|java|map|pl|pm|sdi|sh|src|tab|xcu|xml)$
+:set filter=4,old,\<makefile.mk\>$
+:set filter=-1,none,^(.*/gbuild/.*|.*/gbuild.mk|[^/]*/[^/]*\.mk)$
+:set filter=4,old,\.(mk|MK|pmk)$
+:set filter=-1,dos,\<(description/readme\.txt|defect/readme\.txt|web6/readme\.txt|web7/readme\.txt|WriterDemo/readme\.txt|OleClient/readme\.txt|OleConverterVar1/readme\.txt|StarBasic_OleClient/readme\.txt|VisualBasic/readme\.txt|ole/unloading/readme\.txt|unoTocomCalls/readme\.txt|wizard/rcfooter\.txt|wizard/rcheader\.txt|wizard/rctmpl\.txt|moz/README|moz/patches/index\.txt|import/dostext\.txt|import/swdos\.txt)$
+:set filter=-1,dos,\<(update/web1_en-US-region1\.html|update/web1_en-US\.html|util/hh\.html|tableimport/HTML_Doc_Numberformats_in_table\.html|doctok/escher\.html)$
+:set filter=-1,unx,\<(AxTestComponents/AxTestComponents\.dsp|MfcControl/MfcControl\.dsp|unoTocomCalls/Test/Test\.dsp|XCallback_Impl/XCallback_Impl\.dsp)$
 
 # ignore some revisions completely (broken ones, mostly deletions of entire
 # defunct CWSes)

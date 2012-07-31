@@ -413,8 +413,10 @@ bool Repositories::load( const char* fname_, unsigned int max_revs_, int& min_re
             if ( command == "set" )
             {
                 size_t equals = line.find( '=', arg );
-                if ( ( equals == string::npos && line.substr( arg ) == "tabs_to_spaces" ) ||
-                     ( equals != string::npos && line.substr( arg, equals - arg ) == "tabs_to_spaces" ) )
+                if ( ( equals == string::npos && line.substr( arg ) == "filter" ) ||
+                     ( equals != string::npos && line.substr( arg, equals - arg ) == "filter" ) ||
+                     ( equals == string::npos && line.substr( arg ) == "tabs_to_spaces" ) ||              // former name of this
+                     ( equals != string::npos && line.substr( arg, equals - arg ) == "tabs_to_spaces" ) ) // former name of this
                 {
                     if ( equals == string::npos )
                         Filter::addTabsToSpaces( 8, FILTER_ALL, string( ".*" ) );
@@ -443,10 +445,14 @@ bool Repositories::load( const char* fname_, unsigned int max_revs_, int& min_re
                                     filter_type = FILTER_OLD;
                                 else if ( line.substr( comma + 1, regex - comma - 1 ) == "combined" )
                                     filter_type = FILTER_COMBINED;
+                                else if ( line.substr( comma + 1, regex - comma - 1 ) == "dos" )
+                                    filter_type = FILTER_DOS;
+                                else if ( line.substr( comma + 1, regex - comma - 1 ) == "unx" )
+                                    filter_type = FILTER_UNX;
                                 else if ( line.substr( comma + 1, regex - comma - 1 ) == "all" )
                                     filter_type = FILTER_ALL;
                                 else
-                                    Error::report( "Unknown type of tabs_to_spaces substitution '" + line.substr( comma + 1, regex - comma - 1 ) + "'." );
+                                    Error::report( "Unknown type of filter substitution '" + line.substr( comma + 1, regex - comma - 1 ) + "'." );
 
                                 Filter::addTabsToSpaces( atoi( line.substr( equals + 1, comma - equals - 1 ).c_str() ),
                                         filter_type,

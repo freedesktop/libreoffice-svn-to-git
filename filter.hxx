@@ -15,6 +15,8 @@ enum FilterType {
     NO_FILTER,       ///< No filtering at all
     FILTER_OLD,      ///< Old way of filtering - each tab is exactly <n> spaces, no filtering after 1st non-tab, non-space character
     FILTER_COMBINED, ///< Combined way of filtering - for the tabs before 1st non-tab, non-space character, behave like _OLD, for the rest as _TABS
+    FILTER_DOS,      ///< Convert to the DOS line ends
+    FILTER_UNX,      ///< Convert to the Unx line ends
     FILTER_ALL       ///< New way of filtering - each tab is converted as if it was a real tab + strip trailing whitespace
 };
 

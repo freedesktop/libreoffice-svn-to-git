@@ -50,6 +50,7 @@ Filter::Filter( const string& fname_ )
     }
 }
 
+/// The old way of tabs -> spaces: Just the leading whitespace, tab stop is always the same, regardless of the position
 inline void addDataLoopOld( char*& dest, char what, int& column, int& spaces_to_write, bool& nonspace_appeared, int no_spaces )
 {
     if ( what == '\t' && !nonspace_appeared )
@@ -87,6 +88,7 @@ inline void addDataLoopOld( char*& dest, char what, int& column, int& spaces_to_
     }
 }
 
+/// Combine the 'old' way of tabs -> spaces with all (as if the old is applied first, and then the new one on top of that)
 inline void addDataLoopCombined( char*& dest, char what, int& column, int& spaces_to_write, bool& nonspace_appeared, int no_spaces )
 {
     if ( what == '\t' )
@@ -131,6 +133,25 @@ inline void addDataLoopCombined( char*& dest, char what, int& column, int& space
     }
 }
 
+/// Just convert Unx line ends to DOS ones
+inline void addDataLoopDos( char*& dest, char what, int& column, int& spaces_to_write, bool& nonspace_appeared, int no_spaces )
+{
+    if ( what == '\n' )
+        *dest++ = '\r';
+
+    *dest++ = what;
+}
+
+/// Just convert DOS line ends to Unx ones
+inline void addDataLoopUnx( char*& dest, char what, int& column, int& spaces_to_write, bool& nonspace_appeared, int no_spaces )
+{
+    if ( what == '\r' )
+        return;
+
+    *dest++ = what;
+}
+
+/// The best tabs -> spaces: converts all, strips trailing whitespace
 inline void addDataLoopAll( char*& dest, char what, int& column, int& spaces_to_write, bool& nonspace_appeared, int no_spaces )
 {
     if ( what == '\t' )
@@ -164,14 +185,15 @@ inline void addDataLoopAll( char*& dest, char what, int& column, int& spaces_to_
 
 void Filter::addData( const char* data_, size_t len_ )
 {
-    if ( type == NO_FILTER || spaces <= 0 )
+    if ( type == NO_FILTER )
     {
         data.append( data_, len_ );
         return;
     }
 
-    // type == FILTER_ALL
-    char *tmp = new char[spaces*len_];
+    // create big enough buffer
+    const int size = ( spaces < 2 )? 2*len_: spaces*len_;
+    char *tmp = new char[size];
     char *dest = tmp;
 
     // convert the tabs to spaces (according to spaces)
@@ -184,6 +206,14 @@ void Filter::addData( const char* data_, size_t len_ )
         case FILTER_COMBINED:
             for ( const char* it = data_; it < data_ + len_; ++it )
                 addDataLoopCombined( dest, *it, column, spaces_to_write, nonspace_appeared, spaces );
+            break;
+        case FILTER_DOS:
+            for ( const char* it = data_; it < data_ + len_; ++it )
+                addDataLoopDos( dest, *it, column, spaces_to_write, nonspace_appeared, spaces );
+            break;
+        case FILTER_UNX:
+            for ( const char* it = data_; it < data_ + len_; ++it )
+                addDataLoopUnx( dest, *it, column, spaces_to_write, nonspace_appeared, spaces );
             break;
         case FILTER_ALL:
             for ( const char* it = data_; it < data_ + len_; ++it )
