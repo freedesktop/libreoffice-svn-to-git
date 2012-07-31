@@ -133,26 +133,8 @@ inline void addDataLoopCombined( char*& dest, char what, int& column, int& space
     }
 }
 
-/// Just convert Unx line ends to DOS ones
-inline void addDataLoopDos( char*& dest, char what, int& column, int& spaces_to_write, bool& nonspace_appeared, int no_spaces )
-{
-    if ( what == '\n' )
-        *dest++ = '\r';
-
-    *dest++ = what;
-}
-
-/// Just convert DOS line ends to Unx ones
-inline void addDataLoopUnx( char*& dest, char what, int& column, int& spaces_to_write, bool& nonspace_appeared, int no_spaces )
-{
-    if ( what == '\r' )
-        return;
-
-    *dest++ = what;
-}
-
 /// The best tabs -> spaces: converts all, strips trailing whitespace
-inline void addDataLoopAll( char*& dest, char what, int& column, int& spaces_to_write, bool& nonspace_appeared, int no_spaces )
+inline void addDataLoopTabs( char*& dest, char what, int& column, int& spaces_to_write, bool& nonspace_appeared, int no_spaces )
 {
     if ( what == '\t' )
     {
@@ -183,6 +165,24 @@ inline void addDataLoopAll( char*& dest, char what, int& column, int& spaces_to_
     }
 }
 
+/// Just convert Unx line ends to DOS ones
+inline void addDataLoopDos( char*& dest, char what, int& column, int& spaces_to_write, bool& nonspace_appeared, int no_spaces )
+{
+    if ( what == '\n' )
+        *dest++ = '\r';
+
+    *dest++ = what;
+}
+
+/// Just convert DOS line ends to Unx ones
+inline void addDataLoopUnx( char*& dest, char what, int& column, int& spaces_to_write, bool& nonspace_appeared, int no_spaces )
+{
+    if ( what == '\r' )
+        return;
+
+    *dest++ = what;
+}
+
 void Filter::addData( const char* data_, size_t len_ )
 {
     if ( type == NO_FILTER )
@@ -207,6 +207,10 @@ void Filter::addData( const char* data_, size_t len_ )
             for ( const char* it = data_; it < data_ + len_; ++it )
                 addDataLoopCombined( dest, *it, column, spaces_to_write, nonspace_appeared, spaces );
             break;
+        case FILTER_TABS:
+            for ( const char* it = data_; it < data_ + len_; ++it )
+                addDataLoopTabs( dest, *it, column, spaces_to_write, nonspace_appeared, spaces );
+            break;
         case FILTER_DOS:
             for ( const char* it = data_; it < data_ + len_; ++it )
                 addDataLoopDos( dest, *it, column, spaces_to_write, nonspace_appeared, spaces );
@@ -214,10 +218,6 @@ void Filter::addData( const char* data_, size_t len_ )
         case FILTER_UNX:
             for ( const char* it = data_; it < data_ + len_; ++it )
                 addDataLoopUnx( dest, *it, column, spaces_to_write, nonspace_appeared, spaces );
-            break;
-        case FILTER_ALL:
-            for ( const char* it = data_; it < data_ + len_; ++it )
-                addDataLoopAll( dest, *it, column, spaces_to_write, nonspace_appeared, spaces );
             break;
         case NO_FILTER:
             // NO_FILTER already handled

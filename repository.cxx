@@ -419,12 +419,12 @@ bool Repositories::load( const char* fname_, unsigned int max_revs_, int& min_re
                      ( equals != string::npos && line.substr( arg, equals - arg ) == "tabs_to_spaces" ) ) // former name of this
                 {
                     if ( equals == string::npos )
-                        Filter::addTabsToSpaces( 8, FILTER_ALL, string( ".*" ) );
+                        Filter::addTabsToSpaces( 8, FILTER_TABS, string( ".*" ) );
                     else
                     {
                         size_t comma = line.find( ',', equals + 1 );
                         if ( comma == string::npos )
-                            Filter::addTabsToSpaces( atoi( line.substr( equals + 1 ).c_str() ), FILTER_ALL, string( ".*" ) );
+                            Filter::addTabsToSpaces( atoi( line.substr( equals + 1 ).c_str() ), FILTER_TABS, string( ".*" ) );
                         else
                         {
                             size_t regex = line.find( ',', comma + 1 );
@@ -433,24 +433,24 @@ bool Repositories::load( const char* fname_, unsigned int max_revs_, int& min_re
                             {
                                 Error::report( "Please update your configuration file, ':set tabs_to_spaces' now needs 3 params - amount, type, regex" );
                                 Filter::addTabsToSpaces( atoi( line.substr( equals + 1, comma - equals - 1 ).c_str() ),
-                                        FILTER_ALL,
+                                        FILTER_TABS,
                                         line.substr( comma + 1 ) );
                             }
                             else
                             {
-                                FilterType filter_type = FILTER_ALL;
+                                FilterType filter_type = FILTER_TABS;
                                 if ( line.substr( comma + 1, regex - comma - 1 ) == "none" )
                                     filter_type = NO_FILTER;
                                 else if ( line.substr( comma + 1, regex - comma - 1 ) == "old" )
                                     filter_type = FILTER_OLD;
                                 else if ( line.substr( comma + 1, regex - comma - 1 ) == "combined" )
                                     filter_type = FILTER_COMBINED;
+                                else if ( line.substr( comma + 1, regex - comma - 1 ) == "tabs" )
+                                    filter_type = FILTER_TABS;
                                 else if ( line.substr( comma + 1, regex - comma - 1 ) == "dos" )
                                     filter_type = FILTER_DOS;
                                 else if ( line.substr( comma + 1, regex - comma - 1 ) == "unx" )
                                     filter_type = FILTER_UNX;
-                                else if ( line.substr( comma + 1, regex - comma - 1 ) == "all" )
-                                    filter_type = FILTER_ALL;
                                 else
                                     Error::report( "Unknown type of filter substitution '" + line.substr( comma + 1, regex - comma - 1 ) + "'." );
 
