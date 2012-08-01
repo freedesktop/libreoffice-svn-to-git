@@ -476,10 +476,34 @@ bool Repositories::load( const char* fname_, unsigned int max_revs_, int& min_re
                                     filter_type = FILTER_COMBINED;
                                     file_perm = PERMISSION_EXEC;
                                 }
+                                else if ( line.substr( comma + 1, regex - comma - 1 ) == "combineddos" )
+                                    filter_type = FILTER_COMBINED_DOS;
+                                else if ( line.substr( comma + 1, regex - comma - 1 ) == "combinedhack" )
+                                    filter_type = FILTER_COMBINED_HACK;
+                                else if ( line.substr( comma + 1, regex - comma - 1 ) == "combinedhack644" )
+                                {
+                                    filter_type = FILTER_COMBINED_HACK;
+                                    file_perm = PERMISSION_NOEXEC;
+                                }
+                                else if ( line.substr( comma + 1, regex - comma - 1 ) == "combinedhack755" )
+                                {
+                                    filter_type = FILTER_COMBINED_HACK;
+                                    file_perm = PERMISSION_EXEC;
+                                }
                                 else if ( line.substr( comma + 1, regex - comma - 1 ) == "tabs" )
                                     filter_type = FILTER_TABS;
                                 else if ( line.substr( comma + 1, regex - comma - 1 ) == "dos" )
                                     filter_type = FILTER_DOS;
+                                else if ( line.substr( comma + 1, regex - comma - 1 ) == "dos644" )
+                                {
+                                    filter_type = FILTER_DOS;
+                                    file_perm = PERMISSION_NOEXEC;
+                                }
+                                else if ( line.substr( comma + 1, regex - comma - 1 ) == "dos755" )
+                                {
+                                    filter_type = FILTER_DOS;
+                                    file_perm = PERMISSION_EXEC;
+                                }
                                 else if ( line.substr( comma + 1, regex - comma - 1 ) == "unx" )
                                     filter_type = FILTER_UNX;
                                 else

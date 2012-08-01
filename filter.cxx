@@ -135,6 +135,56 @@ inline void addDataLoopCombined( char*& dest, char what, int& column, int& space
     }
 }
 
+/// Combine the 'old' way of tabs -> spaces with all + convert to DOS line ends
+inline void addDataLoopCombinedDos( char*& dest, char what, int& column, int& spaces_to_write, bool& nonspace_appeared, int no_spaces )
+{
+    if ( what == '\t' )
+    {
+        if ( nonspace_appeared )
+        {
+            // new behavior
+            const int tab_size = no_spaces - ( column % no_spaces );
+            column += tab_size;
+            spaces_to_write += tab_size;
+        }
+        else
+        {
+            // old one
+            column += no_spaces;
+            spaces_to_write += no_spaces;
+        }
+    }
+    else if ( what == ' ' )
+    {
+        ++column;
+        ++spaces_to_write;
+    }
+    else if ( what == '\n' )
+    {
+        // write out any spaces that we need
+        for ( int i = 0; i < spaces_to_write; ++i )
+            *dest++ = ' ';
+
+        *dest++ = '\r';
+        *dest++ = what;
+        column = 0;
+        spaces_to_write = 0;
+        nonspace_appeared = false;
+    }
+    else
+    {
+        nonspace_appeared = true;
+
+        // write out any spaces that we need
+        for ( int i = 0; i < spaces_to_write; ++i )
+            *dest++ = ' ';
+
+        *dest++ = what;
+        ++column;
+        spaces_to_write = 0;
+    }
+}
+
 /// The best tabs -> spaces: converts all, strips trailing whitespace
 inline void addDataLoopTabs( char*& dest, char what, int& column, int& spaces_to_write, bool& nonspace_appeared, int no_spaces )
 {
@@ -206,8 +256,13 @@ void Filter::addData( const char* data_, size_t len_ )
                 addDataLoopOld( dest, *it, column, spaces_to_write, nonspace_appeared, spaces );
             break;
         case FILTER_COMBINED:
+        case FILTER_COMBINED_HACK:
             for ( const char* it = data_; it < data_ + len_; ++it )
                 addDataLoopCombined( dest, *it, column, spaces_to_write, nonspace_appeared, spaces );
+            break;
+        case FILTER_COMBINED_DOS:
+            for ( const char* it = data_; it < data_ + len_; ++it )
+                addDataLoopCombinedDos( dest, *it, column, spaces_to_write, nonspace_appeared, spaces );
             break;
         case FILTER_TABS:
             for ( const char* it = data_; it < data_ + len_; ++it )
@@ -238,6 +293,13 @@ void Filter::addData( const string& data_ )
 
 void Filter::write( std::ostream& out_ )
 {
+    if ( type == FILTER_COMBINED_HACK )
+    {
+        // write out any spaces that we need
+        for ( int i = 0; i < spaces_to_write; ++i )
+            data += ' ';
+    }
+
     out_ << "data " << data.size() << endl
          << data << endl;
 }
