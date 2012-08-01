@@ -185,7 +185,7 @@ inline void addDataLoopCombinedDos( char*& dest, char what, int& column, int& sp
     }
 }
 
-/// The best tabs -> spaces: converts all, strips trailing whitespace
+/// The best tabs -> spaces: converts all, strips trailing whitespace, strips \r
 inline void addDataLoopTabs( char*& dest, char what, int& column, int& spaces_to_write, bool& nonspace_appeared, int no_spaces )
 {
     if ( what == '\t' )
@@ -204,6 +204,10 @@ inline void addDataLoopTabs( char*& dest, char what, int& column, int& spaces_to
         *dest++ = what;
         column = 0;
         spaces_to_write = 0;
+    }
+    else if ( what == '\r' )
+    {
+        // just ignore
     }
     else
     {

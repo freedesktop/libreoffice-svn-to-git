@@ -431,14 +431,14 @@ bool Repositories::load( const char* fname_, unsigned int max_revs_, int& min_re
 
                             if ( comma == string::npos )
                             {
-                                Error::report( "Please update your configuration file, ':set tabs_to_spaces' now needs 3 params - amount, type, regex" );
+                                Error::report( "Please update your configuration file, ':set filter' now needs 3 params - amount, type, regex" );
                                 Filter::addTabsToSpaces( atoi( line.substr( equals + 1, comma - equals - 1 ).c_str() ),
-                                        FILTER_TABS,
+                                        FILTER_COMBINED,
                                         line.substr( comma + 1 ) );
                             }
                             else
                             {
-                                FilterType filter_type = FILTER_TABS;
+                                FilterType filter_type = NO_FILTER;
                                 FilePermission file_perm = PERMISSION_NO_CHANGE;
                                 if ( line.substr( comma + 1, regex - comma - 1 ) == "none" )
                                     filter_type = NO_FILTER;
