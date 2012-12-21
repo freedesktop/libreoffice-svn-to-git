@@ -81,7 +81,11 @@ static BranchId branchId( const string& branch_ )
     return id;
 }
 
-static string eatWhitespace( const string& text_, bool uppercase_first_letter = false, bool eat_eol = false )
+/** Eat whitespace to make the commit logs nicer.
+
+  @param empty_2nd_line Make the 2nd line empty, to satisfy git way of commit logs.
+*/
+static string eatWhitespace( const string& text_, bool uppercase_first_letter = false, bool eat_eol = false, bool empty_2nd_line = false )
 {
     char result[text_.length()];
     char* it = result;
@@ -89,11 +93,15 @@ static string eatWhitespace( const string& text_, bool uppercase_first_letter = 
     bool eat = true;
     bool first_eol = true;
     bool first_letter = true;
+    bool first_letter_on_line = true;
+    int line_no = 0;
     for ( string::const_iterator i = text_.begin(); i != text_.end(); ++i )
     {
         if ( *i == '\n' )
         {
             eat = true;
+            ++line_no;
+            first_letter_on_line = true;
             if ( !first_eol && !eat_eol )
                 *it++ = *i;
             else if ( !first_eol && eat_eol )
@@ -103,6 +111,12 @@ static string eatWhitespace( const string& text_, bool uppercase_first_letter = 
         {
             eat = false;
             first_eol = false;
+
+            if ( empty_2nd_line && first_letter_on_line && ( line_no == 1 ) )
+                *it++ = '\n';
+
+            first_letter_on_line = false;
+
             if ( uppercase_first_letter && first_letter )
             {
                 first_letter = false;
@@ -121,12 +135,20 @@ static string eatWhitespace( const string& text_, bool uppercase_first_letter = 
 
 static string commitMessage( const string& log_ )
 {
+    // nothing to do - not converting messages
     if ( !commit_messages.convert )
         return log_;
 
+    // HACK: kill an unusable commit message in AOOi repo - I'm too lazy to do
+    // a special configuration setting for this
+    const char really_broken_message[] = "119168 - updated LICENSE and NOTICE files for binary packag119168 - updated LICENSE and NOTICE files for binary packag119168";
+    const int really_broken_message_len = sizeof( really_broken_message ) - 1;
+    if ( log_.substr( 0, really_broken_message_len ) == really_broken_message )
+        return "119168 - updated LICENSE file and NOTICE file for binary package";
+
     // It's not a ChangeLog-like entry, do just some cosmetic changes.
     if ( !commit_messages.match( log_ ) )
-        return eatWhitespace( log_, true );
+        return eatWhitespace( log_, false, false, true );
 
     // It's a ChangeLog-like entry, try to find a sentence and use it as the
     // first line description of the commit, eg.

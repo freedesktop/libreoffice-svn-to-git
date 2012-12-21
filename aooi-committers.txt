@@ -39,3 +39,4 @@ wangzcdl|Zhe Wang|wangzcdl@apache.org
 wave|David Fisher|wave@apache.org
 ydario|Yuri Dario|ydario@apache.org
 zhangjf|Jian Fang Zhang|zhangjf@apache.org
+zjchen|Chen ZuoJun|zjchen@apache.org
