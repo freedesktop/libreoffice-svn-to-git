@@ -20,6 +20,7 @@ jsc|Jürgen Schmidt|jsc@apache.org
 jza|Alexandro Colorado|jza@apache.org
 leidb|Lei De Bin|leidb@apache.org
 leiw|Wang Lei|leiw@apache.org
+lijiany|Jianyuan Li|lijiany@apache.org
 liuzhe|Liu Zhe|liuzhe@apache.org
 maho|Maho NAKATA|maho@apache.org
 mayongl|Yong Lin Ma|mayongl@apache.org
@@ -33,6 +34,8 @@ rbircher|Raphael Bircher|rbircher@apache.org
 rcweir|Rob Weir|robweir@apache.org
 regina|Regina Henschel|regina@apache.org
 robweir|Rob Weir|robweir@apache.org
+sunying|Sun Ying|sunying@apache.org
 wangzcdl|Zhe Wang|wangzcdl@apache.org
+wave|David Fisher|wave@apache.org
 ydario|Yuri Dario|ydario@apache.org
 zhangjf|Jian Fang Zhang|zhangjf@apache.org
