@@ -1,0 +1,45 @@
+# The committers to the AOO repository
+
+# default address when the committer is not known
+@apache.org
+
+# mapping taken from http://git.apache.org/authors.txt
+# grep '\<name\>' authors.txt | sed -e 's/ = /|/' -e 's/ </|/' -e 's/>$//'
+af|Andre Fischer|af@apache.org
+alg|Armin Le Grand|alg@apache.org
+arielch|Ariel Constenla-Haile|arielch@apache.org
+arist|Andrew Rist|arist@apache.org
+damjan|Damjan Jovanovic|damjan@apache.org
+erack|Eike Rathke|erack@apache.org
+ericb2|Eric Bachard|ericb2@apache.org
+hdu|Herbert Dürr|hdu@apache.org
+hyan|Hongyun An|hyan@apache.org
+chengjh|Jian Hong Cheng|chengjh@apache.org
+imacat|Yang Shih-Ching|imacat@apache.org
+jani|Jan Iversen|jani@apache.org
+joes|Joe Schaefer|joes@apache.org
+jsc|Jürgen Schmidt|jsc@apache.org
+jza|Alexandro Colorado|jza@apache.org
+leidb|Lei De Bin|leidb@apache.org
+leiw|Wang Lei|leiw@apache.org
+lijiany|Jianyuan Li|lijiany@apache.org
+liuzhe|Liu Zhe|liuzhe@apache.org
+maho|Maho NAKATA|maho@apache.org
+mayongl|Yong Lin Ma|mayongl@apache.org
+mbauer|Mathias Bauer|mbauer@apache.org
+mst|Michael Stahl|mst@apache.org
+orcmid|Dennis E. Hamilton|orcmid@apache.org
+orw|Oliver-Rainer Wittmann|orw@apache.org
+paveljanik|Pavel Janík|paveljanik@apache.org
+pescetti|Andrea Pescetti|pescetti@apache.org
+pfg|Pedro Giffuni|pfg@apache.org
+rbircher|Raphael Bircher|rbircher@apache.org
+rcweir|Rob Weir|robweir@apache.org
+regina|Regina Henschel|regina@apache.org
+robweir|Rob Weir|robweir@apache.org
+sunying|Sun Ying|sunying@apache.org
+wangzcdl|Zhe Wang|wangzcdl@apache.org
+wave|David Fisher|wave@apache.org
+ydario|Yuri Dario|ydario@apache.org
+zhangjf|Jian Fang Zhang|zhangjf@apache.org
+zjchen|Chen ZuoJun|zjchen@apache.org
