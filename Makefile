@@ -2,14 +2,14 @@
 CXXFLAGS += -O2
 
 SVN ?= /usr
-APR_INCLUDES ?= /usr/include/apr-1
+APR_INCLUDES ?= /usr/include/apr-1.0
 SVN_CXXFLAGS += ${CXXFLAGS} -I${APR_INCLUDES} -I${SVN}/include/subversion-1
-SVN_LDFLAGS = ${LDFLAGS} -L${SVN}/lib64 -lsvn_fs-1 -lsvn_repos-1
+SVN_LDFLAGS = ${LDFLAGS} -L${SVN}/lib64 -lapr-1 -lsvn_fs-1 -lsvn_repos-1 -lsvn_subr-1
 
 HG_CXXFLAGS += ${CXXFLAGS} `python-config --includes`
 HG_LDFLAGS = ${LDFLAGS} `python-config --libs` -lboost_python
 
-all: svn-fast-export hg-fast-export
+all: svn-fast-export #hg-fast-export
 
 svn-fast-export: committers.o error.o filter.o repository.o svn-fast-export.o
 	${CXX} $^ -o $@ ${SVN_LDFLAGS}
