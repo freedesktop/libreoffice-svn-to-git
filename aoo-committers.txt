@@ -37,6 +37,7 @@ rbircher|Raphael Bircher|rbircher@apache.org
 rcweir|Rob Weir|robweir@apache.org
 regina|Regina Henschel|regina@apache.org
 robweir|Rob Weir|robweir@apache.org
+steve_y|Steve Yin|steve_y@apache.org
 sunying|Sun Ying|sunying@apache.org
 wangzcdl|Zhe Wang|wangzcdl@apache.org
 wave|David Fisher|wave@apache.org
