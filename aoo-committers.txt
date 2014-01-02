@@ -3,8 +3,10 @@
 # default address when the committer is not known
 @apache.org
 
-# mapping taken from http://git.apache.org/authors.txt
-# grep '\<name\>' authors.txt | sed -e 's/ = /|/' -e 's/ </|/' -e 's/>$//'
+# when you need to add a new entry:
+#
+# wget -O - http://git.apache.org/authors.txt | grep '\<USERNAME\>' | sed -e 's/ = /|/' -e 's/ </|/' -e 's/>$//'
+#
 af|Andre Fischer|af@apache.org
 alg|Armin Le Grand|alg@apache.org
 arielch|Ariel Constenla-Haile|arielch@apache.org
@@ -12,6 +14,7 @@ arist|Andrew Rist|arist@apache.org
 damjan|Damjan Jovanovic|damjan@apache.org
 erack|Eike Rathke|erack@apache.org
 ericb2|Eric Bachard|ericb2@apache.org
+hanya|Tsutomu Uchino|hanya@apache.org
 hdu|Herbert Dürr|hdu@apache.org
 hyan|Hongyun An|hyan@apache.org
 chengjh|Jian Hong Cheng|chengjh@apache.org
