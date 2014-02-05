@@ -23,6 +23,7 @@ jani|Jan Iversen|jani@apache.org
 joes|Joe Schaefer|joes@apache.org
 jsc|Jürgen Schmidt|jsc@apache.org
 jza|Alexandro Colorado|jza@apache.org
+kschenk|Kay Schenk|kschenk@apache.org
 leidb|Lei De Bin|leidb@apache.org
 leiw|Wang Lei|leiw@apache.org
 lijiany|Jianyuan Li|lijiany@apache.org
