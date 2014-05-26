@@ -11,6 +11,7 @@ af|Andre Fischer|af@apache.org
 alg|Armin Le Grand|alg@apache.org
 arielch|Ariel Constenla-Haile|arielch@apache.org
 arist|Andrew Rist|arist@apache.org
+clarence_guo|Clarence Guo|clarence_guo@apache.org
 damjan|Damjan Jovanovic|damjan@apache.org
 erack|Eike Rathke|erack@apache.org
 ericb2|Eric Bachard|ericb2@apache.org
