@@ -36,7 +36,8 @@ Filter::Filter( const string& fname_ )
       column( 0 ),
       spaces_to_write( 0 ),
       nonspace_appeared( false ),
-      type( NO_FILTER )
+      type( NO_FILTER ),
+      perm( PERMISSION_NO_CHANGE )
 {
     data.reserve( 16384 );
 
