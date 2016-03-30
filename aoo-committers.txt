@@ -5,7 +5,7 @@
 
 # when you need to add a new entry:
 #
-# wget -O - http://git.apache.org/authors.txt | grep '\<USERNAME\>' | sed -e 's/ = /|/' -e 's/ </|/' -e 's/>$//'
+# wget -O - https://git-wip-us.apache.org/authors.txt | grep '\<USERNAME\>' | sed -e 's/ = /|/' -e 's/ </|/' -e 's/>$//'
 #
 af|Andre Fischer|af@apache.org
 alg|Armin Le Grand|alg@apache.org
@@ -45,6 +45,7 @@ robweir|Rob Weir|robweir@apache.org
 steve_y|Steve Yin|steve_y@apache.org
 sunying|Sun Ying|sunying@apache.org
 tal|Tal Daniel|tal@apache.org
+truckman|Don Lewis|truckman@apache.org
 wangzcdl|Zhe Wang|wangzcdl@apache.org
 wave|David Fisher|wave@apache.org
 ydario|Yuri Dario|ydario@apache.org
