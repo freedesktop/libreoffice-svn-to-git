@@ -57,7 +57,7 @@ for I in `sed -e 's/^[#:].*//' -e 's/^ignore-.*//' -e 's/=.*//' "$LAYOUT" | grep
         if [ -z "$COMMIT" -o -z "$FROM" ] ; then
             ( cd "$TARGET/$NAME" ; git init ; git fast-import < "$WD"/$NAME.dump ) &
         else
-            ( cd "$TARGET" ; git clone -n -l "$FROM/$NAME" "$NAME" ; \
+            ( cd "$TARGET" ; git clone -n "$FROM/$NAME" "$NAME" ; \
               cd "$NAME" ; git reset -q --hard "$COMMIT" ; git fast-import < "$WD"/$NAME.dump ; \
               git checkout -f ) &
         fi
