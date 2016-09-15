@@ -21,6 +21,7 @@ hyan|Hongyun An|hyan@apache.org
 chengjh|Jian Hong Cheng|chengjh@apache.org
 imacat|Yang Shih-Ching|imacat@apache.org
 jani|Jan Iversen|jani@apache.org
+jim|Jim Jagielski|jim@apache.org
 joes|Joe Schaefer|joes@apache.org
 jsc|Jürgen Schmidt|jsc@apache.org
 jza|Alexandro Colorado|jza@apache.org
