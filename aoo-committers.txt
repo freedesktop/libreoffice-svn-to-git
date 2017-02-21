@@ -34,6 +34,7 @@ maho|Maho NAKATA|maho@apache.org
 marcus|Marcus Lange|marcus@apache.org
 mayongl|Yong Lin Ma|mayongl@apache.org
 mbauer|Mathias Bauer|mbauer@apache.org
+mseidel|Matthias Seidel|mseidel@apache.org
 mst|Michael Stahl|mst@apache.org
 orcmid|Dennis E. Hamilton|orcmid@apache.org
 orw|Oliver-Rainer Wittmann|orw@apache.org
