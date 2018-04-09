@@ -28,6 +28,7 @@ mbauer|Mathias Bauer|mbauer@apache.org
 mst|Michael Stahl|mst@apache.org
 orw|Oliver-Rainer Wittmann|orw@apache.org
 paveljanik|Pavel Janík|paveljanik@apache.org
+pats|pats|pats@apache.org
 pescetti|Andrea Pescetti|pescetti@apache.org
 pfg|Pedro Giffuni|pfg@apache.org
 rbircher|Raphael Bircher|rbircher@apache.org
